@@ -244,69 +244,67 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- TradingView 위젯 스크립트 -->
-<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-{
-  "autosize": true,
-  "symbol": "BYBIT:BTCUSDT",
-  "interval": "15",
-  "timezone": "Asia/Seoul",
-  "theme": "dark",
-  "style": "1",
-  "locale": "kr",
-  "toolbar_bg": "#f1f3f6",
-  "enable_publishing": false,
-  "allow_symbol_change": true,
-  "container_id": "tradingview_chart",
-  "studies": [
-    "RSI@tv-basicstudies",
-    "MACD@tv-basicstudies"
-  ],
-  "show_popup_button": true,
-  "popup_width": "1000",
-  "popup_height": "650"
-}
-</script>
+<!-- TradingView 라이브러리만 로드 -->
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
     let tradingViewWidget = null;
     
     // TradingView 위젯 초기화
     function initTradingView(symbol = "BYBIT:BTCUSDT") {
-        // 기존 위젯 제거
+        // 컨테이너 확인
         const container = document.getElementById('tradingview_chart');
+        if (!container) {
+            console.error('TradingView 컨테이너를 찾을 수 없습니다.');
+            return;
+        }
+        
+        // 기존 위젯 내용 초기화
         container.innerHTML = '';
         
-        // 새 위젯 생성
-        new TradingView.widget({
-            autosize: true,
-            symbol: symbol,
-            interval: "15",
-            timezone: "Asia/Seoul",
-            theme: "dark",
-            style: "1",
-            locale: "kr",
-            toolbar_bg: "#1e1e1e",
-            enable_publishing: false,
-            allow_symbol_change: true,
-            container_id: "tradingview_chart",
-            studies: [
-                "RSI@tv-basicstudies",
-                "MACD@tv-basicstudies",
-                "BB@tv-basicstudies"
-            ],
-            show_popup_button: true,
-            popup_width: "1000",
-            popup_height: "650",
-            hide_side_toolbar: false,
-            details: true,
-            hotlist: true,
-            calendar: true,
-            studies_overrides: {
-                "volume.volume.color.0": "#ff4757",
-                "volume.volume.color.1": "#2ed573"
-            }
-        });
+        // TradingView 위젯 생성 (라이브러리가 로드된 후)
+        if (typeof TradingView !== 'undefined') {
+            new TradingView.widget({
+                width: "100%",
+                height: 400,
+                symbol: symbol,
+                interval: "15",
+                timezone: "Asia/Seoul",
+                theme: "dark",
+                style: "1",
+                locale: "kr",
+                toolbar_bg: "#1e1e1e",
+                enable_publishing: false,
+                allow_symbol_change: true,
+                container_id: "tradingview_chart",
+                studies: [
+                    "RSI@tv-basicstudies",
+                    "MACD@tv-basicstudies",
+                    "BB@tv-basicstudies"
+                ],
+                hide_side_toolbar: false,
+                details: true,
+                hotlist: true,
+                calendar: true,
+                studies_overrides: {
+                    "volume.volume.color.0": "#ff4757",
+                    "volume.volume.color.1": "#2ed573"
+                }
+            });
+        } else {
+            // TradingView가 로드되지 않은 경우 대체 메시지
+            container.innerHTML = `
+                <div class="d-flex justify-content-center align-items-center h-100 chart-placeholder">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h5 class="mt-3">차트 로딩 중...</h5>
+                        <p>TradingView 차트를 불러오고 있습니다</p>
+                    </div>
+                </div>
+            `;
+        }
     }
     
     // 심볼 변경 함수
@@ -364,26 +362,45 @@
             }, index * 100);
         });
         
-        // TradingView 위젯 초기화 (약간의 지연 후)
+        // TradingView 위젯 초기화 (DOM 로드 후 실행)
         setTimeout(() => {
-            if (typeof TradingView !== 'undefined') {
-                initTradingView();
-            }
-        }, 1000);
+            initTradingView();
+        }, 2000); // 2초 지연 후 실행
     });
     
     // TradingView 라이브러리 로드 확인
     window.addEventListener('load', function() {
-        if (typeof TradingView === 'undefined') {
-            console.log('TradingView 라이브러리 로딩 중...');
-            // 라이브러리가 로드될 때까지 대기
-            const checkTradingView = setInterval(() => {
-                if (typeof TradingView !== 'undefined') {
-                    clearInterval(checkTradingView);
+        // 라이브러리 로드 상태 확인
+        const checkTradingView = setInterval(() => {
+            if (typeof TradingView !== 'undefined') {
+                clearInterval(checkTradingView);
+                console.log('TradingView 라이브러리 로드 완료');
+                // DOM이 준비되었는지 확인 후 초기화
+                if (document.getElementById('tradingview_chart')) {
                     initTradingView();
                 }
-            }, 500);
-        }
+            }
+        }, 100); // 100ms마다 확인
+        
+        // 10초 후에도 로드되지 않으면 타임아웃
+        setTimeout(() => {
+            clearInterval(checkTradingView);
+            if (typeof TradingView === 'undefined') {
+                const container = document.getElementById('tradingview_chart');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="d-flex justify-content-center align-items-center h-100 chart-placeholder">
+                            <div class="text-center">
+                                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3">차트 로딩 실패</h5>
+                                <p>인터넷 연결을 확인해주세요</p>
+                                <button class="btn btn-outline-primary btn-sm" onclick="location.reload()">다시 시도</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }, 10000);
     });
 </script>
 {% endblock %}
