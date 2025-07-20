@@ -1,11 +1,26 @@
+# 파일 경로: requirements.txt
+# 코드명: Python 패키지 의존성 목록
+
+# Flask 관련
 flask==2.3.3
-gunicorn==21.2.0
-pandas==2.0.3
-numpy==1.24.3
-tensorflow==2.13.0
-requests==2.31.0
-pybit==5.11.0
-python-dotenv==1.0.0
 flask-sqlalchemy==3.0.5
 flask-login==0.6.3
 flask-cors==4.0.0
+gunicorn==21.2.0
+
+# 데이터 처리
+pandas==2.0.3
+numpy==1.24.3
+
+# AI/ML
+tensorflow==2.13.0
+
+# API 통신
+requests==2.31.0
+pybit==5.11.0
+
+# 환경 설정
+python-dotenv==1.0.0
+
+# 보안 (추가)
+werkzeug==2.3.7

@@ -1,3 +1,6 @@
+<!-- 파일 경로: web/templates/base.html -->
+<!-- 코드명: Flask 기본 템플릿 (로그인 시스템 포함) -->
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -6,6 +9,8 @@
     <title>{% block title %}암호화폐 자동매매{% endblock %}</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -13,9 +18,21 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="/">🤖 자동매매 시스템</a>
-            <div class="navbar-nav">
+            
+            <div class="navbar-nav me-auto">
                 <a class="nav-link" href="/">대시보드</a>
                 <a class="nav-link" href="/settings">설정</a>
+            </div>
+            
+            <div class="navbar-nav">
+                {% if current_user.logged_in %}
+                    <span class="navbar-text text-light me-3">
+                        <i class="bi bi-person-circle"></i> {{ current_user.username }}님
+                    </span>
+                    <a class="nav-link" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> 로그아웃
+                    </a>
+                {% endif %}
             </div>
         </div>
     </nav>
