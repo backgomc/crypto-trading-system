@@ -160,7 +160,7 @@ def main():
     print("   비밀번호: admin123")
     print("="*60)
     
-    app.run(host='0.0.0.0', port=8888, debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=8888, debug=True, threaded=True)
 
 if __name__ == "__main__":
     main()
