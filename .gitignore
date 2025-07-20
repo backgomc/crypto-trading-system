@@ -42,13 +42,3 @@ pip-delete-this-directory.txt
 Thumbs.db
 *.tmp
 *.temp
-
-# 데이터 파일들
-*.csv
-*.xlsx
-data/
-backups/
-
-# 테스트 파일들
-test_*.py
-debug_*.py
