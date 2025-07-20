@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}대시보드 - 자동매매{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 좌측: 차트 영역 -->
+    <div class="col-lg-8">
+        <div class="card bg-secondary">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> 비트코인 차트</h5>
+            </div>
+            <div class="card-body">
+                <div id="tradingview_chart" style="height: 500px;">
+                    <div class="d-flex justify-content-center align-items-center h-100">
+                        <div class="text-center">
+                            <i class="fas fa-chart-line fa-3x mb-3"></i>
+                            <h4>차트 영역</h4>
+                            <p class="text-muted">TradingView 차트가 여기에 표시됩니다</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 우측: 제어판 -->
+    <div class="col-lg-4">
+        <!-- 시스템 상태 -->
+        <div class="card bg-secondary mb-3">
+            <div class="card-header">
+                <h6><i class="fas fa-power-off"></i> 시스템 상태</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>자동매매</span>
+                    <span class="badge bg-danger">중지됨</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>AI 모델</span>
+                    <span class="badge bg-warning">대기중</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>모드</span>
+                    <span class="badge bg-info">데모</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 제어 버튼 -->
+        <div class="card bg-secondary mb-3">
+            <div class="card-header">
+                <h6><i class="fas fa-cog"></i> 제어판</h6>
+            </div>
+            <div class="card-body">
+                <button class="btn btn-success w-100 mb-2">
+                    <i class="fas fa-play"></i> 자동매매 시작
+                </button>
+                <button class="btn btn-danger w-100 mb-2">
+                    <i class="fas fa-stop"></i> 자동매매 중단
+                </button>
+                <button class="btn btn-warning w-100 mb-2">
+                    <i class="fas fa-brain"></i> AI 학습 시작
+                </button>
+                <button class="btn btn-secondary w-100">
+                    <i class="fas fa-times-circle"></i> 긴급 청산
+                </button>
+            </div>
+        </div>
+        
+        <!-- 포지션 현황 -->
+        <div class="card bg-secondary">
+            <div class="card-header">
+                <h6><i class="fas fa-wallet"></i> 포지션 현황</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h6 class="text-success">롱 포지션</h6>
+                        <p class="mb-1">0.05 BTC</p>
+                        <small class="text-muted">@ 95,000</small>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-danger">숏 포지션</h6>
+                        <p class="mb-1">0.05 BTC</p>
+                        <small class="text-muted">@ 95,000</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <h6>총 수익</h6>
+                    <h4 class="text-success">+150,000 원</h4>
+                    <small class="text-muted">+1.5%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

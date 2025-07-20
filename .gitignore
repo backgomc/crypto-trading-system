@@ -1,0 +1,54 @@
+# 🔐 보안 파일들 (절대 업로드 금지!)
+.env
+*.env
+.env.local
+.env.production
+
+# API 키가 포함된 파일들
+config.py
+secrets.json
+keys.txt
+*.key
+*.pem
+
+# 로그 파일들
+*.log
+logs/
+temp_logs/
+
+# AI 모델 파일들 (용량이 크므로)
+*.h5
+*.pkl
+crypto_model_*.h5
+crypto_scaler_*.pkl
+
+# Python 관련
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 운영체제 파일
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+
+# 데이터 파일들
+*.csv
+*.xlsx
+data/
+backups/
+
+# 테스트 파일들
+test_*.py
+debug_*.py
