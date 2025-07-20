@@ -46,3 +46,5 @@ Thumbs.db
 # db파일
 data/*.db
 data/*.sqlite
+
+deploy.sh
