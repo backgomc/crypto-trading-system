@@ -279,10 +279,14 @@
                 container_id: "tradingview_chart",
                 studies: [],
                 hide_side_toolbar: false,
-                disabled_features: ["right_toolbar"],
-                details: true,
-                hotlist: true,
-                calendar: true
+                disabled_features: [
+                    "header_symbol_search",
+                    "symbol_info",
+                    "header_widget"
+                ],
+                details: false,
+                hotlist: false,
+                calendar: false
             });
         } else {
             // TradingView가 로드되지 않은 경우 대체 메시지
