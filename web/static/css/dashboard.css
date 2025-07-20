@@ -349,6 +349,10 @@
         padding: 16px;
         margin-bottom: 12px;
     }
+
+    .tradingview-widget-container {
+        height: 350px !important; /* 모바일에서는 350px */
+    }    
 }
 
 /* 애니메이션 */
