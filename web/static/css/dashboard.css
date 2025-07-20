@@ -318,16 +318,31 @@
 
 /* 반응형 */
 @media (max-width: 768px) {
+    /* 페이지 헤더 개선 */
     .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        flex-direction: row !important;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px !important;
+        padding: 0 4px;
+    }
+    
+    .page-header h2 {
+        font-size: 1.4rem !important;
+        margin-bottom: 0 !important;
     }
     
     .current-time {
-        align-self: flex-end;
+        font-size: 0.85rem;
+        align-self: center !important;
     }
-    
+
+    /* 컨테이너 패딩 조정 */
+    .container-fluid {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
     .status-card .card-body {
         padding: 16px;
     }
