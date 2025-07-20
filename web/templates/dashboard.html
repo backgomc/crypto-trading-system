@@ -106,7 +106,7 @@
                 </div>
                 <div class="card-body p-0">
                     <!-- TradingView 위젯 -->
-                    <div class="tradingview-widget-container" style="height: 400px; width: 100%;">
+                    <div class="tradingview-widget-container" style="height: 500px; width: 100%;">
                         <div id="tradingview_chart"></div>
                     </div>
                 </div>
@@ -266,7 +266,7 @@
         if (typeof TradingView !== 'undefined') {
             new TradingView.widget({
                 width: "100%",
-                height: 400,
+                height: 500,
                 symbol: symbol,
                 interval: "15",
                 timezone: "Asia/Seoul",
@@ -277,19 +277,35 @@
                 enable_publishing: false,
                 allow_symbol_change: true,
                 container_id: "tradingview_chart",
-                studies: [
-                    "RSI@tv-basicstudies",
-                    "MACD@tv-basicstudies",
-                    "BB@tv-basicstudies"
+                // 하단 지표들 숨기기
+                studies: [],
+                // 레이아웃 설정 - 메인 차트만 표시
+                charts_storage_url: "",
+                charts_storage_api_version: "1.1",
+                client_id: "",
+                user_id: "",
+                fullscreen: false,
+                autosize: false,
+                // 차트 하단 패널 숨기기
+                hide_volume: true,
+                // 사이드바 숨기기 (더 넓은 차트)
+                hide_side_toolbar: true,
+                // 상단 툴바 간소화
+                hide_top_toolbar: false,
+                // 기본 지표들 비활성화
+                disabled_features: [
+                    "volume_force_overlay",
+                    "left_toolbar",
+                    "header_widget",
+                    "timeframes_toolbar",
+                    "edit_buttons_in_legend",
+                    "context_menus",
+                    "control_bar",
+                    "border_around_the_chart"
                 ],
-                hide_side_toolbar: false,
-                details: true,
-                hotlist: true,
-                calendar: true,
-                studies_overrides: {
-                    "volume.volume.color.0": "#ff4757",
-                    "volume.volume.color.1": "#2ed573"
-                }
+                enabled_features: [
+                    "study_templates"
+                ]
             });
         } else {
             // TradingView가 로드되지 않은 경우 대체 메시지
