@@ -1,5 +1,5 @@
 # 파일 경로: main.py
-# 코드명: Flask 메인 애플리케이션 및 로그인 시스템 통합
+# 코드명: Flask 메인 애플리케이션 및 로그인 시스템 통합 (보안 개선)
 
 import threading
 import time
@@ -59,33 +59,38 @@ def create_app():
             db.create_all()
             print("✅ 데이터베이스 테이블 생성 완료")
             
+            # 환경변수에서 관리자 계정 정보 가져오기
+            admin_username = os.getenv('ADMIN_USERNAME', 'admin')
+            admin_password = os.getenv('ADMIN_PASSWORD', 'admin123!')
+            admin_email = os.getenv('ADMIN_EMAIL', 'admin@localhost')
+            
             # 기본 admin 사용자 생성 (없을 경우)
-            admin_user = User.query.filter_by(username='admin').first()
+            admin_user = User.query.filter_by(username=admin_username).first()
             if not admin_user:
                 admin_user = User(
-                    username='admin',
-                    email='admin@localhost',
+                    username=admin_username,
+                    email=admin_email,
                     is_admin=True,
                     is_active=True
                 )
-                admin_user.set_password('admin123')  # 기본 비밀번호
+                admin_user.set_password(admin_password)
                 db.session.add(admin_user)
                 
                 # 시스템 로그 생성
                 system_log = SystemLog(
                     level='INFO',
                     category='SYSTEM',
-                    message='기본 admin 계정 생성됨',
+                    message=f'관리자 계정 생성됨: {admin_username}',
                     ip_address='127.0.0.1',
                     user_agent='System'
                 )
                 db.session.add(system_log)
                 
                 db.session.commit()
-                print("✅ 기본 admin 계정 생성 완료")
-                print("📝 로그인 정보: admin / admin123")
+                print("✅ 관리자 계정 생성 완료")
+                print("📝 .env 파일에서 ADMIN_USERNAME, ADMIN_PASSWORD 설정 가능")
             else:
-                print("ℹ️ admin 계정이 이미 존재합니다")
+                print("ℹ️ 관리자 계정이 이미 존재합니다")
                 
         except Exception as e:
             print(f"❌ 데이터베이스 초기화 오류: {e}")
@@ -155,9 +160,7 @@ def main():
     print("🌐 웹서버 접속 정보:")
     print("   로컬: http://127.0.0.1:8888")
     print("   네트워크: http://14.47.172.143:5000")
-    print("📝 기본 로그인:")
-    print("   사용자명: admin")
-    print("   비밀번호: admin123")
+    print("📝 로그인 계정: .env 파일에서 설정 가능")
     print("="*60)
     
     app.run(host='0.0.0.0', port=8888, debug=True, threaded=True)
