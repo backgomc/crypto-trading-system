@@ -132,7 +132,7 @@ def start_trading_system():
         # trader = AutoTrader(config)
         # trading_thread = threading.Thread(target=trader.run, daemon=True)
         # trading_thread.start()
-        # print("🚀 자동매매 시스템 백그라운드 시작")
+        # print("🚀 자동매매 시스템 백그라운드 시작!")
         
     except Exception as e:
         print(f"❌ 자동매매 시스템 시작 실패: {e}")
