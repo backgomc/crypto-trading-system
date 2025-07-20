@@ -1,0 +1,24 @@
+/* 파일 경로: web/static/css/settings.css */
+/* 코드명: 설정 페이지 전용 스타일 (다크 테마 보정) */
+
+/* 알림 설정 카드 다크 테마 적용 */
+.notification-card {
+    background-color: #1e1e1e !important;
+    border: 1px solid #404040 !important;
+}
+
+.notification-card .card-header {
+    background-color: #2a2a2a !important;
+    border-bottom: 1px solid #404040 !important;
+}
+
+/* 도움말 카드 다크 테마 적용 */
+.help-card {
+    background-color: #1e1e1e !important;
+    border: 1px solid #404040 !important;
+}
+
+.help-card .card-header {
+    background-color: #2a2a2a !important;
+    border-bottom: 1px solid #404040 !important;
+}

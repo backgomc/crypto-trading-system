@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/base.html -->
-<!-- 코드명: Flask 기본 템플릿 (깔끔한 사이드바 디자인) -->
+<!-- 코드명: Flask 기본 템플릿 (CSS 분리, 가독성 개선) -->
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -7,208 +7,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}암호화폐 자동매매{% endblock %}</title>
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
-    <style>
-        /* 전체 레이아웃 - 다크 테마 */
-        body {
-            background-color: #1a1a1a;
-            color: #e9ecef;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        /* 헤더 */
-        .top-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 12px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .logo {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        
-        .logo:hover {
-            color: #f8f9fa;
-            text-decoration: none;
-        }
-        
-        .user-info {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.9rem;
-        }
-        
-        .logout-btn {
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-        
-        .logout-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-        }
-        
-        /* 사이드바 - 다크 테마 */
-        .sidebar {
-            background-color: #212529;
-            min-height: calc(100vh - 64px);
-            box-shadow: 2px 0 4px rgba(0,0,0,0.3);
-            padding: 0;
-        }
-        
-        .sidebar-menu {
-            list-style: none;
-            padding: 20px 0;
-            margin: 0;
-        }
-        
-        .sidebar-menu li {
-            margin: 0;
-        }
-        
-        .sidebar-menu a {
-            display: block;
-            padding: 12px 24px;
-            color: #adb5bd;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-        }
-        
-        .sidebar-menu a:hover {
-            background-color: #2c3034;
-            color: #f8f9fa;
-            border-left-color: #667eea;
-        }
-        
-        .sidebar-menu a.active {
-            background-color: #1e3a5f;
-            color: #66a3ff;
-            border-left-color: #66a3ff;
-            font-weight: 500;
-        }
-        
-        .sidebar-menu i {
-            width: 20px;
-            margin-right: 12px;
-            text-align: center;
-        }
-        
-        /* 메인 컨텐츠 - 다크 테마 */
-        .main-content {
-            background-color: #1a1a1a;
-            min-height: calc(100vh - 64px);
-            padding: 24px;
-        }
-        
-        /* 다크 테마 폼 요소 */
-        .form-control, .form-select {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #e9ecef;
-        }
-        
-        .form-control:focus, .form-select:focus {
-            background-color: #2b3035;
-            border-color: #667eea;
-            color: #e9ecef;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        
-        .input-group-text {
-            background-color: #495057;
-            border-color: #495057;
-            color: #e9ecef;
-        }
-        
-        .form-text {
-            color: #9ca3af;
-        }
-        
-        .form-check-input:checked {
-            background-color: #667eea;
-            border-color: #667eea;
-        }
-        
-        .form-check-input:focus {
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-        
-        /* 아코디언 다크 테마 */
-        .accordion-button {
-            background-color: #2b3035;
-            color: #e9ecef;
-            border-color: #495057;
-        }
-        
-        .accordion-button:not(.collapsed) {
-            background-color: #495057;
-            color: #e9ecef;
-        }
-        
-        .accordion-body {
-            background-color: #343a40;
-            color: #e9ecef;
-        }
-        
-        /* 모바일 반응형 */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -250px;
-                width: 250px;
-                z-index: 1000;
-                transition: left 0.3s ease;
-            }
-            
-            .sidebar.show {
-                left: 0;
-            }
-            
-            .sidebar-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0,0,0,0.7);
-                z-index: 999;
-                display: none;
-            }
-            
-            .sidebar-overlay.show {
-                display: block;
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-                color: white;
-                font-size: 1.2rem;
-                background: none;
-                border: none;
-            }
-        }
-        
-        @media (min-width: 769px) {
-            .mobile-menu-btn {
-                display: none;
-            }
-        }
-    </style>
+    <!-- 커스텀 CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    
+    <!-- 페이지별 CSS -->
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- 헤더 -->
@@ -216,7 +25,7 @@
         <div class="container-fluid">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <button class="mobile-menu-btn me-3" onclick="toggleSidebar()">
+                    <button class="mobile-menu-btn me-3" onclick="toggleSidebar()" aria-label="메뉴 토글">
                         <i class="bi bi-list"></i>
                     </button>
                     <a href="/" class="logo">
@@ -240,30 +49,30 @@
 
     <div class="d-flex">
         <!-- 사이드바 -->
-        <nav class="sidebar col-md-2 d-md-block" id="sidebar">
+        <nav class="sidebar col-md-2 d-md-block" id="sidebar" role="navigation" aria-label="주 메뉴">
             <ul class="sidebar-menu">
                 <li>
-                    <a href="/" class="{% if request.endpoint == 'web.dashboard' %}active{% endif %}">
+                    <a href="/" class="{% if request.endpoint == 'web.dashboard' %}active{% endif %}" aria-current="{% if request.endpoint == 'web.dashboard' %}page{% endif %}">
                         <i class="bi bi-speedometer2"></i>대시보드
                     </a>
                 </li>
                 <li>
-                    <a href="/settings" class="{% if request.endpoint == 'web.settings' %}active{% endif %}">
+                    <a href="/settings" class="{% if request.endpoint == 'web.settings' %}active{% endif %}" aria-current="{% if request.endpoint == 'web.settings' %}page{% endif %}">
                         <i class="bi bi-gear"></i>설정
                     </a>
                 </li>
                 <li>
-                    <a href="#" onclick="alert('준비 중입니다')">
+                    <a href="#" onclick="showComingSoon('거래 내역')" aria-disabled="true">
                         <i class="bi bi-graph-up"></i>거래 내역
                     </a>
                 </li>
                 <li>
-                    <a href="#" onclick="alert('준비 중입니다')">
+                    <a href="#" onclick="showComingSoon('통계')" aria-disabled="true">
                         <i class="bi bi-bar-chart"></i>통계
                     </a>
                 </li>
                 <li>
-                    <a href="#" onclick="alert('준비 중입니다')">
+                    <a href="#" onclick="showComingSoon('알림')" aria-disabled="true">
                         <i class="bi bi-bell"></i>알림
                     </a>
                 </li>
@@ -271,17 +80,18 @@
         </nav>
 
         <!-- 메인 컨텐츠 -->
-        <main class="main-content col-md-10">
+        <main class="main-content col-md-10" role="main">
             {% block content %}{% endblock %}
         </main>
     </div>
 
     <!-- 모바일 오버레이 -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()" aria-hidden="true"></div>
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- 기본 JavaScript -->
     <script>
         // 모바일 사이드바 토글
         function toggleSidebar() {
@@ -290,19 +100,49 @@
             
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
+            
+            // 접근성 개선
+            const isOpen = sidebar.classList.contains('show');
+            sidebar.setAttribute('aria-hidden', !isOpen);
+            overlay.setAttribute('aria-hidden', !isOpen);
         }
         
-        // 현재 페이지 활성화 표시
+        // 준비 중 기능 알림
+        function showComingSoon(feature) {
+            alert(`${feature} 기능은 준비 중입니다.`);
+        }
+        
+        // 현재 페이지 활성화 표시 (백업용)
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;
             const menuLinks = document.querySelectorAll('.sidebar-menu a');
             
             menuLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
+                // 이미 서버에서 처리되지만, 클라이언트에서도 백업 처리
+                if (link.getAttribute('href') === currentPath && !link.classList.contains('active')) {
                     link.classList.add('active');
+                    link.setAttribute('aria-current', 'page');
+                }
+            });
+            
+            // ESC 키로 사이드바 닫기
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.getElementById('sidebarOverlay');
+                    
+                    if (sidebar.classList.contains('show')) {
+                        sidebar.classList.remove('show');
+                        overlay.classList.remove('show');
+                        sidebar.setAttribute('aria-hidden', 'true');
+                        overlay.setAttribute('aria-hidden', 'true');
+                    }
                 }
             });
         });
     </script>
+    
+    <!-- 페이지별 JavaScript -->
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

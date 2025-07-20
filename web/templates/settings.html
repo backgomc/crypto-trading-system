@@ -2,6 +2,10 @@
 
 {% block title %}설정 - 자동매매{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <!-- 페이지 헤더 -->
@@ -163,8 +167,8 @@
             </div>
 
             <!-- 알림 설정 -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
+            <div class="card notification-card shadow-sm">
+                <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-bell me-2"></i>알림 설정
                     </h5>
@@ -257,8 +261,8 @@
             </div>
 
             <!-- 설정 도움말 -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
+            <div class="card help-card shadow-sm">
+                <div class="card-header">
                     <h5 class="mb-0">
                         <i class="bi bi-question-circle me-2"></i>설정 도움말
                     </h5>
@@ -296,7 +300,9 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
     // 설정 저장
     function saveSettings() {

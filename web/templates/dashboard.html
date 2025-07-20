@@ -2,14 +2,18 @@
 
 {% block title %}대시보드 - 자동매매{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
     <!-- 페이지 헤더 -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 page-header">
         <h2 class="mb-0">
             <i class="bi bi-speedometer2 me-2"></i>대시보드
         </h2>
-        <div class="text-muted">
+        <div class="current-time">
             <i class="bi bi-clock me-1"></i>
             <span id="currentTime"></span>
         </div>
@@ -18,14 +22,14 @@
     <!-- 상태 카드들 -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card status-card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">시스템 상태</h6>
-                            <h4 class="mb-0 text-danger">중지됨</h4>
+                            <h6>시스템 상태</h6>
+                            <h4 class="text-danger">중지됨</h4>
                         </div>
-                        <div class="text-danger">
+                        <div class="card-icon text-danger">
                             <i class="bi bi-power" style="font-size: 2rem;"></i>
                         </div>
                     </div>
@@ -34,14 +38,14 @@
         </div>
         
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card status-card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">총 잔고</h6>
-                            <h4 class="mb-0 text-primary">10,000,000원</h4>
+                            <h6>총 잔고</h6>
+                            <h4 class="text-primary">10,000,000원</h4>
                         </div>
-                        <div class="text-primary">
+                        <div class="card-icon text-primary">
                             <i class="bi bi-wallet2" style="font-size: 2rem;"></i>
                         </div>
                     </div>
@@ -50,14 +54,14 @@
         </div>
         
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card status-card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">오늘 수익</h6>
-                            <h4 class="mb-0 text-success">+150,000원</h4>
+                            <h6>오늘 수익</h6>
+                            <h4 class="text-success">+150,000원</h4>
                         </div>
-                        <div class="text-success">
+                        <div class="card-icon text-success">
                             <i class="bi bi-graph-up-arrow" style="font-size: 2rem;"></i>
                         </div>
                     </div>
@@ -66,14 +70,14 @@
         </div>
         
         <div class="col-xl-3 col-md-6 mb-3">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card status-card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-muted mb-1">수익률</h6>
-                            <h4 class="mb-0 text-success">+1.5%</h4>
+                            <h6>수익률</h6>
+                            <h4 class="text-success">+1.5%</h4>
                         </div>
-                        <div class="text-success">
+                        <div class="card-icon text-success">
                             <i class="bi bi-percent" style="font-size: 2rem;"></i>
                         </div>
                     </div>
@@ -86,19 +90,19 @@
         <!-- 좌측: 차트 + 제어판 -->
         <div class="col-lg-8 mb-4">
             <!-- 차트 영역 -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
+            <div class="card main-card mb-4">
+                <div class="card-header">
+                    <h5>
                         <i class="bi bi-graph-up me-2"></i>비트코인 차트
                     </h5>
                 </div>
                 <div class="card-body">
                     <div id="tradingview_chart" style="height: 400px;">
-                        <div class="d-flex justify-content-center align-items-center h-100 bg-light rounded">
+                        <div class="d-flex justify-content-center align-items-center h-100 chart-placeholder">
                             <div class="text-center">
-                                <i class="bi bi-graph-up text-muted" style="font-size: 3rem;"></i>
-                                <h5 class="mt-3 text-muted">차트 영역</h5>
-                                <p class="text-muted">TradingView 차트가 여기에 표시됩니다</p>
+                                <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3">차트 영역</h5>
+                                <p>TradingView 차트가 여기에 표시됩니다</p>
                             </div>
                         </div>
                     </div>
@@ -106,14 +110,14 @@
             </div>
 
             <!-- 제어 버튼들 -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h5>
                         <i class="bi bi-gear me-2"></i>제어판
                     </h5>
                 </div>
-                <div class="card-body">
-                    <div class="row g-2">
+                <div class="card-body control-buttons">
+                    <div class="row g-3">
                         <div class="col-6 col-md-3">
                             <button class="btn btn-success w-100" onclick="startTrading()">
                                 <i class="bi bi-play-fill me-1"></i>시작
@@ -142,99 +146,101 @@
         <!-- 우측: 포지션 및 정보 -->
         <div class="col-lg-4">
             <!-- 포지션 현황 -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
+            <div class="card main-card mb-4">
+                <div class="card-header">
+                    <h5>
                         <i class="bi bi-pie-chart me-2"></i>포지션 현황
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row text-center mb-3">
                         <div class="col-6">
-                            <div class="p-3 bg-success bg-opacity-10 rounded">
+                            <div class="position-box long-position">
                                 <h6 class="text-success mb-1">롱 포지션</h6>
-                                <p class="mb-1 fw-bold">0.05 BTC</p>
-                                <small class="text-muted">@ 95,000,000원</small>
+                                <p class="mb-1">0.05 BTC</p>
+                                <small>@ 95,000,000원</small>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 bg-danger bg-opacity-10 rounded">
+                            <div class="position-box short-position">
                                 <h6 class="text-danger mb-1">숏 포지션</h6>
-                                <p class="mb-1 fw-bold">0.05 BTC</p>
-                                <small class="text-muted">@ 95,000,000원</small>
+                                <p class="mb-1">0.05 BTC</p>
+                                <small>@ 95,000,000원</small>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="text-center p-3 bg-light rounded">
-                        <h6 class="text-muted mb-1">총 미실현 손익</h6>
-                        <h4 class="text-success mb-0">+150,000원</h4>
-                        <small class="text-success">+1.5%</small>
+                    <div class="total-pnl">
+                        <h6>총 미실현 손익</h6>
+                        <h4>+150,000원</h4>
+                        <small>+1.5%</small>
                     </div>
                 </div>
             </div>
 
             <!-- AI 상태 -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
+            <div class="card main-card mb-4">
+                <div class="card-header">
+                    <h5>
                         <i class="bi bi-brain me-2"></i>AI 모델 상태
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="ai-status-item d-flex justify-content-between align-items-center">
                         <span>모델 상태</span>
                         <span class="badge bg-warning">대기중</span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="ai-status-item d-flex justify-content-between align-items-center">
                         <span>마지막 학습</span>
                         <span class="text-muted">2시간 전</span>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="ai-status-item d-flex justify-content-between align-items-center">
                         <span>정확도</span>
                         <span class="text-success">85.3%</span>
                     </div>
-                    <div class="progress" style="height: 6px;">
-                        <div class="progress-bar bg-success" style="width: 85.3%"></div>
+                    <div class="ai-progress mt-2">
+                        <div class="progress-bar" style="width: 85.3%"></div>
                     </div>
                 </div>
             </div>
 
             <!-- 최근 거래 -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
+            <div class="card main-card">
+                <div class="card-header">
+                    <h5>
                         <i class="bi bi-clock-history me-2"></i>최근 거래
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="recent-trade d-flex justify-content-between align-items-center">
                         <div>
                             <span class="badge bg-success">매수</span>
                             <span class="ms-2">0.01 BTC</span>
                         </div>
-                        <small class="text-muted">10분 전</small>
+                        <small>10분 전</small>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="recent-trade d-flex justify-content-between align-items-center">
                         <div>
                             <span class="badge bg-danger">매도</span>
                             <span class="ms-2">0.01 BTC</span>
                         </div>
-                        <small class="text-muted">1시간 전</small>
+                        <small>1시간 전</small>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="recent-trade d-flex justify-content-between align-items-center">
                         <div>
                             <span class="badge bg-success">매수</span>
                             <span class="ms-2">0.02 BTC</span>
                         </div>
-                        <small class="text-muted">3시간 전</small>
+                        <small>3시간 전</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
     // 현재 시간 업데이트
     function updateTime() {
@@ -272,5 +278,16 @@
             alert('긴급 청산을 실행합니다.');
         }
     }
+    
+    // 페이지 로드 애니메이션
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.status-card, .main-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
 </script>
 {% endblock %}

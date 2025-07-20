@@ -1,0 +1,162 @@
+/* 파일 경로: web/static/css/dark-theme.css */
+/* 코드명: 다크테마 색상 변수 및 전역 스타일 */
+
+/* CSS 변수 정의 */
+:root {
+    /* 기본 색상 */
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #2a2a2a;
+    
+    /* 텍스트 색상 */
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #aaaaaa;
+    --text-disabled: #666666;
+    
+    /* 테두리 색상 */
+    --border-primary: #404040;
+    --border-secondary: #333333;
+    --border-light: #555555;
+    
+    /* 강조 색상 */
+    --accent-primary: #667eea;
+    --accent-secondary: #764ba2;
+    --accent-hover: #5a6fd8;
+    
+    /* 상태 색상 */
+    --success: #28a745;
+    --success-bg: #155724;
+    --danger: #dc3545;
+    --danger-bg: #721c24;
+    --warning: #ffc107;
+    --warning-bg: #856404;
+    --info: #17a2b8;
+    --info-bg: #0c5460;
+    
+    /* 그림자 */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 8px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 16px rgba(0,0,0,0.5);
+    
+    /* 전환 효과 */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+}
+
+/* 전역 다크 테마 적용 */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Bootstrap 컴포넌트 다크 테마 오버라이드 */
+.bg-dark {
+    background-color: var(--bg-secondary) !important;
+}
+
+.border-secondary {
+    border-color: var(--border-primary) !important;
+}
+
+.bg-secondary {
+    background-color: var(--bg-tertiary) !important;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-light {
+    color: var(--text-secondary) !important;
+}
+
+/* 카드 컴포넌트 */
+.card {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+    background-color: var(--bg-tertiary);
+    border-bottom-color: var(--border-primary);
+}
+
+/* 버튼 호버 효과 개선 */
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
+}
+
+/* 폼 요소 */
+.form-control,
+.form-select {
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--bg-tertiary);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.input-group-text {
+    background-color: var(--border-primary);
+    border-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.form-text {
+    color: var(--text-muted);
+}
+
+/* 스위치 */
+.form-check-input:checked {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+}
+
+/* 아코디언 */
+.accordion-button {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--border-primary);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--border-primary);
+    color: var(--text-primary);
+}
+
+.accordion-body {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+/* 유틸리티 클래스 */
+.shadow-dark {
+    box-shadow: var(--shadow-md) !important;
+}
+
+.border-dark-custom {
+    border-color: var(--border-primary) !important;
+}
+
+.bg-dark-custom {
+    background-color: var(--bg-secondary) !important;
+}
+
+/* 반응형 개선 */
+@media (max-width: 768px) {
+    :root {
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+        --shadow-md: 0 2px 6px rgba(0,0,0,0.4);
+    }
+}

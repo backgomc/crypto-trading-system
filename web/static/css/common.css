@@ -1,0 +1,223 @@
+/* 파일 경로: web/static/css/common.css */
+/* 코드명: 공통 컴포넌트 스타일 (다크 테마) */
+
+/* Bootstrap 다크 테마 오버라이드 */
+.card {
+    background-color: #1e1e1e !important;
+    border: 1px solid #404040 !important;
+    color: #ffffff !important;
+}
+
+.card-header {
+    background-color: #2a2a2a !important;
+    border-bottom: 1px solid #404040 !important;
+    color: #ffffff !important;
+}
+
+.card-body {
+    background-color: #1e1e1e !important;
+    color: #ffffff !important;
+}
+
+/* 텍스트 색상 개선 */
+.text-muted {
+    color: #aaaaaa !important;
+}
+
+.text-light {
+    color: #f0f0f0 !important;
+}
+
+/* 배지 다크 테마 */
+.badge {
+    font-weight: 600;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+}
+
+/* 버튼 호버 효과 */
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* 폼 요소 다크 테마 (base.css에서 이미 정의했지만 보강) */
+.form-label {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.fw-medium {
+    font-weight: 500 !important;
+}
+
+/* 진행률 바 */
+.progress {
+    background-color: #333333 !important;
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* 수평선 */
+hr {
+    border-color: #404040 !important;
+}
+
+/* 링크 색상 */
+a {
+    color: #66a3ff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #99c5ff;
+    text-decoration: underline;
+}
+
+/* 알림창 스타일 */
+.alert {
+    border: none;
+    border-radius: 8px;
+}
+
+.alert-success {
+    background-color: #155724 !important;
+    color: #d4edda !important;
+    border-left: 4px solid #28a745;
+}
+
+.alert-danger {
+    background-color: #721c24 !important;
+    color: #f8d7da !important;
+    border-left: 4px solid #dc3545;
+}
+
+.alert-warning {
+    background-color: #856404 !important;
+    color: #fff3cd !important;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-info {
+    background-color: #0c5460 !important;
+    color: #d1ecf1 !important;
+    border-left: 4px solid #17a2b8;
+}
+
+/* 테이블 다크 테마 */
+.table {
+    color: #ffffff !important;
+}
+
+.table-dark {
+    --bs-table-bg: #1e1e1e;
+    --bs-table-border-color: #404040;
+}
+
+/* 모달 다크 테마 */
+.modal-content {
+    background-color: #1e1e1e !important;
+    border: 1px solid #404040;
+}
+
+.modal-header {
+    border-bottom: 1px solid #404040;
+}
+
+.modal-footer {
+    border-top: 1px solid #404040;
+}
+
+/* 드롭다운 다크 테마 */
+.dropdown-menu {
+    background-color: #2a2a2a !important;
+    border: 1px solid #404040;
+}
+
+.dropdown-item {
+    color: #ffffff !important;
+}
+
+.dropdown-item:hover {
+    background-color: #404040 !important;
+    color: #ffffff !important;
+}
+
+/* 툴팁 다크 테마 */
+.tooltip .tooltip-inner {
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+
+/* 스피너 */
+.spinner-border {
+    color: #667eea;
+}
+
+/* 페이지네이션 */
+.pagination .page-link {
+    background-color: #2a2a2a;
+    border-color: #404040;
+    color: #ffffff;
+}
+
+.pagination .page-link:hover {
+    background-color: #404040;
+    border-color: #555555;
+    color: #ffffff;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+/* 커스텀 유틸리티 클래스 */
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.bg-dark-2 {
+    background-color: #2a2a2a !important;
+}
+
+.bg-dark-3 {
+    background-color: #333333 !important;
+}
+
+.border-dark-2 {
+    border-color: #404040 !important;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from { 
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.slide-in-up {
+    animation: slideInUp 0.4s ease-out;
+}

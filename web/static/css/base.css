@@ -1,0 +1,284 @@
+/* 파일 경로: web/static/css/base.css */
+/* 코드명: 기본 레이아웃 및 사이드바 스타일 (다크 테마) */
+
+/* 전체 레이아웃 - 다크 테마 */
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* 헤더 스타일 */
+.top-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 12px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    position: relative;
+    z-index: 1001;
+}
+
+.logo {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.logo:hover {
+    color: #f8f9fa;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.user-info {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.logout-btn {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logout-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* 사이드바 - 다크 테마 */
+.sidebar {
+    background-color: #1e1e1e;
+    min-height: calc(100vh - 64px);
+    box-shadow: 4px 0 8px rgba(0,0,0,0.3);
+    padding: 0;
+    border-right: 1px solid #333333;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 24px 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin: 0;
+}
+
+.sidebar-menu a {
+    display: block;
+    padding: 16px 24px;
+    color: #cccccc;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    font-weight: 500;
+}
+
+.sidebar-menu a:hover {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border-left-color: #667eea;
+    padding-left: 28px;
+}
+
+.sidebar-menu a.active {
+    background-color: #1a3a5c;
+    color: #ffffff;
+    border-left-color: #66a3ff;
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px rgba(102, 163, 255, 0.2);
+}
+
+.sidebar-menu i {
+    width: 20px;
+    margin-right: 12px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+/* 메인 콘텐츠 영역 */
+.main-content {
+    background-color: #121212;
+    min-height: calc(100vh - 64px);
+    padding: 24px;
+    color: #ffffff;
+}
+
+/* 텍스트 색상 개선 */
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+p, span, div {
+    color: #e0e0e0;
+}
+
+.text-muted {
+    color: #aaaaaa !important;
+}
+
+.text-light {
+    color: #f0f0f0 !important;
+}
+
+/* 폼 요소 다크 테마 */
+.form-control, .form-select {
+    background-color: #2d2d2d;
+    border: 1px solid #444444;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #2d2d2d;
+    border-color: #667eea;
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-control::placeholder {
+    color: #aaaaaa;
+}
+
+.input-group-text {
+    background-color: #444444;
+    border: 1px solid #444444;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.form-text {
+    color: #bbbbbb;
+    font-size: 0.875rem;
+}
+
+.form-check-input {
+    background-color: #2d2d2d;
+    border-color: #444444;
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-check-label {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+/* 아코디언 다크 테마 */
+.accordion-button {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border: 1px solid #444444;
+    font-weight: 500;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #444444;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.accordion-body {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #444444;
+    border-top: none;
+}
+
+/* 버튼 스타일 개선 */
+.btn {
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* 모바일 반응형 */
+.mobile-menu-btn {
+    color: #ffffff;
+    font-size: 1.2rem;
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        width: 280px;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        height: 100vh;
+        top: 64px;
+    }
+    
+    .sidebar.show {
+        left: 0;
+    }
+    
+    .sidebar-overlay {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 64px);
+        background-color: rgba(0,0,0,0.7);
+        z-index: 999;
+        display: none;
+        transition: opacity 0.3s ease;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 16px;
+    }
+    
+    .mobile-menu-btn {
+        display: block;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-menu-btn {
+        display: none;
+    }
+}
