@@ -237,69 +237,70 @@ p, span, div {
 }
 
 @media (max-width: 768px) {
-    /* 헤더 간소화 */
-    .header {
-        padding: 8px 16px !important;
-        height: 56px !important;
-    }
-    
-    .navbar-brand {
-        font-size: 1.1rem !important;
-        font-weight: 600 !important;
-    }
-    
-    .navbar-brand .brand-icon {
-        font-size: 1.3rem;
-        margin-right: 6px;
-    }
-    
-    .navbar-brand .brand-text {
-        display: none !important; /* "비트코인 자동매매 시스템" 숨김 */
-    }
-    
-    .navbar-nav {
-        font-size: 0.9rem;
-    }
+   /* 헤더 간소화 */
+   .top-header {
+       padding: 8px 16px !important;
+       height: 56px !important;
+   }
+   
+   .logo {
+       font-size: 1.1rem !important;
+       font-weight: 600 !important;
+       text-decoration: none;
+   }
+   
+   .logo .brand-icon {
+       font-size: 1.3rem;
+       margin-right: 6px;
+   }
+   
+   .logo .brand-text {
+       display: none !important; /* "비트코인 자동매매 시스템" 숨김 */
+   }
+   
+   .user-info {
+       font-size: 0.9rem;
+   }
 
-    /* 사이드바 (헤더 높이 64px → 56px로 수정) */
-    .sidebar {
-        position: fixed;
-        left: -280px;
-        width: 280px;
-        z-index: 1000;
-        transition: left 0.3s ease;
-        height: calc(100vh - 56px); /* 56px로 변경 */
-        top: 56px; /* 56px로 변경 */
-    }
-    
-    .sidebar.show {
-        left: 0;
-    }
-    
-    .sidebar-overlay {
-        position: fixed;
-        top: 56px; /* 56px로 변경 */
-        left: 0;
-        width: 100%;
-        height: calc(100vh - 56px); /* 56px로 변경 */
-        background-color: rgba(0,0,0,0.7);
-        z-index: 999;
-        display: none;
-        transition: opacity 0.3s ease;
-    }
-    
-    .sidebar-overlay.show {
-        display: block;
-    }
-    
-    .main-content {
-        margin-left: 0;
-        padding: 16px;
-    }
-    
-    .mobile-menu-btn {
-        display: block;
-    }
+   /* 사이드바 (헤더 높이 64px → 56px로 수정) */
+   .sidebar {
+       position: fixed;
+       left: -280px;
+       width: 280px;
+       z-index: 1000;
+       transition: left 0.3s ease;
+       height: calc(100vh - 56px); /* 56px로 변경 */
+       top: 56px; /* 56px로 변경 */
+   }
+   
+   .sidebar.show {
+       left: 0;
+   }
+   
+   .sidebar-overlay {
+       position: fixed;
+       top: 56px; /* 56px로 변경 */
+       left: 0;
+       width: 100%;
+       height: calc(100vh - 56px); /* 56px로 변경 */
+       background-color: rgba(0,0,0,0.7);
+       z-index: 999;
+       display: none;
+       transition: opacity 0.3s ease;
+   }
+   
+   .sidebar-overlay.show {
+       display: block;
+   }
+   
+   .main-content {
+       margin-left: 0;
+       padding: 16px;
+   }
+   
+   .mobile-menu-btn {
+       display: block;
+   }
 }
 
 @media (min-width: 769px) {
