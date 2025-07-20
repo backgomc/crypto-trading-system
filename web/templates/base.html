@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/base.html -->
-<!-- 코드명: Flask 기본 템플릿 (CSS 분리, 가독성 개선) -->
+<!-- 코드명: Flask 기본 템플릿 (AI 모델 관리 메뉴 추가, 사이드바 폭 조정) -->
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -50,11 +50,16 @@
 
     <div class="d-flex">
         <!-- 사이드바 -->
-        <nav class="sidebar col-md-2 d-md-block" id="sidebar" role="navigation" aria-label="주 메뉴">
+        <nav class="sidebar" id="sidebar" role="navigation" aria-label="주 메뉴">
             <ul class="sidebar-menu">
                 <li>
                     <a href="/" class="{% if request.endpoint == 'web.dashboard' %}active{% endif %}" aria-current="{% if request.endpoint == 'web.dashboard' %}page{% endif %}">
                         <i class="bi bi-speedometer2"></i>대시보드
+                    </a>
+                </li>
+                <li>
+                    <a href="/ai-model" class="{% if request.endpoint == 'web.ai_model' %}active{% endif %}" aria-current="{% if request.endpoint == 'web.ai_model' %}page{% endif %}">
+                        <i class="bi bi-brain"></i>AI 모델 관리
                     </a>
                 </li>
                 <li>
@@ -81,7 +86,7 @@
         </nav>
 
         <!-- 메인 컨텐츠 -->
-        <main class="main-content col-md-10" role="main">
+        <main class="main-content" role="main">
             {% block content %}{% endblock %}
         </main>
     </div>

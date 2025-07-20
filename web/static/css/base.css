@@ -1,5 +1,5 @@
 /* 파일 경로: web/static/css/base.css */
-/* 코드명: 기본 레이아웃 및 사이드바 스타일 (다크 테마) */
+/* 코드명: 기본 레이아웃 및 사이드바 스타일 (사이드바 폭 축소) */
 
 /* 전체 레이아웃 - 다크 테마 */
 body {
@@ -57,18 +57,25 @@ body {
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* 사이드바 - 다크 테마 */
+/* 레이아웃 컨테이너 */
+.d-flex {
+    display: flex;
+}
+
+/* 사이드바 - 다크 테마 (폭 축소) */
 .sidebar {
     background-color: #1e1e1e;
     min-height: calc(100vh - 64px);
     box-shadow: 4px 0 8px rgba(0,0,0,0.3);
     padding: 0;
     border-right: 1px solid #333333;
+    width: 200px; /* 기존보다 축소 */
+    flex-shrink: 0;
 }
 
 .sidebar-menu {
     list-style: none;
-    padding: 24px 0;
+    padding: 20px 0; /* 패딩 축소 */
     margin: 0;
 }
 
@@ -78,19 +85,20 @@ body {
 
 .sidebar-menu a {
     display: block;
-    padding: 16px 24px;
+    padding: 14px 18px; /* 패딩 축소 */
     color: #cccccc;
     text-decoration: none;
     transition: all 0.3s ease;
     border-left: 3px solid transparent;
     font-weight: 500;
+    font-size: 0.9rem; /* 폰트 크기 축소 */
 }
 
 .sidebar-menu a:hover {
     background-color: #2a2a2a;
     color: #ffffff;
     border-left-color: #667eea;
-    padding-left: 28px;
+    padding-left: 22px; /* 호버 시 이동 거리 축소 */
 }
 
 .sidebar-menu a.active {
@@ -102,10 +110,10 @@ body {
 }
 
 .sidebar-menu i {
-    width: 20px;
-    margin-right: 12px;
+    width: 18px; /* 아이콘 폭 축소 */
+    margin-right: 10px; /* 여백 축소 */
     text-align: center;
-    font-size: 1.1rem;
+    font-size: 1rem; /* 아이콘 크기 축소 */
 }
 
 /* 메인 콘텐츠 영역 */
@@ -114,6 +122,7 @@ body {
     min-height: calc(100vh - 64px);
     padding: 24px;
     color: #ffffff;
+    flex: 1; /* 남은 공간 모두 사용 */
 }
 
 /* 텍스트 색상 개선 */
@@ -262,11 +271,11 @@ p, span, div {
        font-size: 0.9rem;
    }
 
-   /* 사이드바 (헤더 높이 64px → 56px로 수정) */
+   /* 사이드바 (헤더 높이 64px → 56px로 수정, 폭 축소) */
    .sidebar {
        position: fixed;
-       left: -280px;
-       width: 280px;
+       left: -240px; /* 모바일에서도 폭 축소 */
+       width: 240px; /* 모바일 폭 축소 */
        z-index: 1000;
        transition: left 0.3s ease;
        height: calc(100vh - 56px); /* 56px로 변경 */
