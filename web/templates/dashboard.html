@@ -266,7 +266,7 @@
         if (typeof TradingView !== 'undefined') {
             new TradingView.widget({
                 width: "100%",
-                height: 500,
+                height: 400,
                 symbol: symbol,
                 interval: "15",
                 timezone: "Asia/Seoul",
@@ -277,35 +277,11 @@
                 enable_publishing: false,
                 allow_symbol_change: true,
                 container_id: "tradingview_chart",
-                // 하단 지표들 숨기기
                 studies: [],
-                // 레이아웃 설정 - 메인 차트만 표시
-                charts_storage_url: "",
-                charts_storage_api_version: "1.1",
-                client_id: "",
-                user_id: "",
-                fullscreen: false,
-                autosize: false,
-                // 차트 하단 패널 숨기기
-                hide_volume: true,
-                // 사이드바 숨기기 (더 넓은 차트)
                 hide_side_toolbar: false,
-                // 상단 툴바 간소화
-                hide_top_toolbar: false,
-                // 기본 지표들 비활성화
-                disabled_features: [
-                    "volume_force_overlay",
-                    //"left_toolbar",
-                    //"header_widget",
-                    //"timeframes_toolbar",
-                    //"edit_buttons_in_legend",
-                    //"context_menus",
-                    //"control_bar",
-                    //"border_around_the_chart"
-                ],
-                enabled_features: [
-                    "study_templates"
-                ]
+                details: true,
+                hotlist: true,
+                calendar: true
             });
         } else {
             // TradingView가 로드되지 않은 경우 대체 메시지
