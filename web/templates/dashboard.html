@@ -91,20 +91,23 @@
         <div class="col-lg-8 mb-4">
             <!-- 차트 영역 -->
             <div class="card main-card mb-4">
-                <div class="card-header">
-                    <h5>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
                         <i class="bi bi-graph-up me-2"></i>비트코인 차트
                     </h5>
+                    <div class="chart-controls">
+                        <select id="chartSymbol" class="form-select form-select-sm" style="width: auto;" onchange="changeSymbol()">
+                            <option value="BYBIT:BTCUSDT">BTC/USDT</option>
+                            <option value="BYBIT:ETHUSDT">ETH/USDT</option>
+                            <option value="BYBIT:ADAUSDT">ADA/USDT</option>
+                            <option value="BYBIT:SOLUSDT">SOL/USDT</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="tradingview_chart" style="height: 400px;">
-                        <div class="d-flex justify-content-center align-items-center h-100 chart-placeholder">
-                            <div class="text-center">
-                                <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
-                                <h5 class="mt-3">차트 영역</h5>
-                                <p>TradingView 차트가 여기에 표시됩니다</p>
-                            </div>
-                        </div>
+                <div class="card-body p-0">
+                    <!-- TradingView 위젯 -->
+                    <div class="tradingview-widget-container" style="height: 400px; width: 100%;">
+                        <div id="tradingview_chart"></div>
                     </div>
                 </div>
             </div>
@@ -241,7 +244,78 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- TradingView 위젯 스크립트 -->
+<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+{
+  "autosize": true,
+  "symbol": "BYBIT:BTCUSDT",
+  "interval": "15",
+  "timezone": "Asia/Seoul",
+  "theme": "dark",
+  "style": "1",
+  "locale": "kr",
+  "toolbar_bg": "#f1f3f6",
+  "enable_publishing": false,
+  "allow_symbol_change": true,
+  "container_id": "tradingview_chart",
+  "studies": [
+    "RSI@tv-basicstudies",
+    "MACD@tv-basicstudies"
+  ],
+  "show_popup_button": true,
+  "popup_width": "1000",
+  "popup_height": "650"
+}
+</script>
+
 <script>
+    let tradingViewWidget = null;
+    
+    // TradingView 위젯 초기화
+    function initTradingView(symbol = "BYBIT:BTCUSDT") {
+        // 기존 위젯 제거
+        const container = document.getElementById('tradingview_chart');
+        container.innerHTML = '';
+        
+        // 새 위젯 생성
+        new TradingView.widget({
+            autosize: true,
+            symbol: symbol,
+            interval: "15",
+            timezone: "Asia/Seoul",
+            theme: "dark",
+            style: "1",
+            locale: "kr",
+            toolbar_bg: "#1e1e1e",
+            enable_publishing: false,
+            allow_symbol_change: true,
+            container_id: "tradingview_chart",
+            studies: [
+                "RSI@tv-basicstudies",
+                "MACD@tv-basicstudies",
+                "BB@tv-basicstudies"
+            ],
+            show_popup_button: true,
+            popup_width: "1000",
+            popup_height: "650",
+            hide_side_toolbar: false,
+            details: true,
+            hotlist: true,
+            calendar: true,
+            studies_overrides: {
+                "volume.volume.color.0": "#ff4757",
+                "volume.volume.color.1": "#2ed573"
+            }
+        });
+    }
+    
+    // 심볼 변경 함수
+    function changeSymbol() {
+        const selectElement = document.getElementById('chartSymbol');
+        const selectedSymbol = selectElement.value;
+        initTradingView(selectedSymbol);
+    }
+    
     // 현재 시간 업데이트
     function updateTime() {
         const now = new Date();
@@ -279,8 +353,9 @@
         }
     }
     
-    // 페이지 로드 애니메이션
+    // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', function() {
+        // 페이지 로드 애니메이션
         const cards = document.querySelectorAll('.status-card, .main-card');
         cards.forEach((card, index) => {
             setTimeout(() => {
@@ -288,6 +363,27 @@
                 card.style.transform = 'translateY(0)';
             }, index * 100);
         });
+        
+        // TradingView 위젯 초기화 (약간의 지연 후)
+        setTimeout(() => {
+            if (typeof TradingView !== 'undefined') {
+                initTradingView();
+            }
+        }, 1000);
+    });
+    
+    // TradingView 라이브러리 로드 확인
+    window.addEventListener('load', function() {
+        if (typeof TradingView === 'undefined') {
+            console.log('TradingView 라이브러리 로딩 중...');
+            // 라이브러리가 로드될 때까지 대기
+            const checkTradingView = setInterval(() => {
+                if (typeof TradingView !== 'undefined') {
+                    clearInterval(checkTradingView);
+                    initTradingView();
+                }
+            }, 500);
+        }
     });
 </script>
 {% endblock %}
