@@ -1,5 +1,5 @@
 # 파일 경로: web/routes.py
-# 코드명: Flask 라우트 및 로그인 시스템
+# 코드명: Flask 라우트 및 로그인 시스템 (AI 모델 관리 추가)
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify
 from functools import wraps
@@ -113,6 +113,20 @@ def dashboard():
         'is_admin': session.get('is_admin', False)
     }
     return render_template('dashboard.html', user=user_info)
+
+@web_bp.route('/ai-model')
+@login_required
+def ai_model():
+    """AI 모델 관리 페이지 (로그인 필요)"""
+    user_info = {
+        'username': session.get('username'),
+        'is_admin': session.get('is_admin', False)
+    }
+    
+    # AI 모델 관리 접속 로그
+    log_system_event('INFO', 'AI_MODEL', f'AI 모델 관리 페이지 접속: {session.get("username")}')
+    
+    return render_template('ai_model.html', user=user_info)
 
 @web_bp.route('/settings')
 @login_required

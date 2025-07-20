@@ -1,0 +1,564 @@
+<!-- 파일 경로: web/templates/ai_model.html -->
+<!-- 코드명: AI 모델 관리 페이지 템플릿 -->
+
+{% extends "base.html" %}
+
+{% block title %}AI 모델 관리 - 자동매매{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ai_model.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 페이지 헤더 -->
+    <div class="d-flex justify-content-between align-items-center mb-4 page-header">
+        <h2 class="mb-0">
+            <i class="bi bi-cpu me-2"></i>AI 모델 관리
+        </h2>
+        <div class="current-time">
+            <i class="bi bi-clock me-1"></i>
+            <span id="currentTime"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 좌측: 학습 설정 및 실행 -->
+        <div class="col-lg-8 mb-4">
+            <!-- 학습 지표 선택 -->
+            <div class="card main-card mb-4">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-graph-up me-2"></i>학습 지표 선택
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">AI 모델 학습에 포함할 기술적 지표들을 선택하세요.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">가격 지표</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_price" checked>
+                                <label class="form-check-label" for="indicator_price">
+                                    가격 데이터 (OHLCV)
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_sma" checked>
+                                <label class="form-check-label" for="indicator_sma">
+                                    단순이동평균 (SMA)
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_ema" checked>
+                                <label class="form-check-label" for="indicator_ema">
+                                    지수이동평균 (EMA)
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_bb" checked>
+                                <label class="form-check-label" for="indicator_bb">
+                                    볼린저 밴드
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">모멘텀 지표</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_rsi" checked>
+                                <label class="form-check-label" for="indicator_rsi">
+                                    RSI
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_macd" checked>
+                                <label class="form-check-label" for="indicator_macd">
+                                    MACD
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_stoch" checked>
+                                <label class="form-check-label" for="indicator_stoch">
+                                    스토캐스틱
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_williams" checked>
+                                <label class="form-check-label" for="indicator_williams">
+                                    Williams %R
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">거래량 지표</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_volume" checked>
+                                <label class="form-check-label" for="indicator_volume">
+                                    거래량
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_vwap" checked>
+                                <label class="form-check-label" for="indicator_vwap">
+                                    VWAP
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">변동성 지표</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_atr" checked>
+                                <label class="form-check-label" for="indicator_atr">
+                                    ATR (Average True Range)
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="indicator_volatility" checked>
+                                <label class="form-check-label" for="indicator_volatility">
+                                    변동성
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 학습 파라미터 설정 -->
+            <div class="card main-card mb-4">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-sliders me-2"></i>학습 파라미터 설정
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-medium">학습 데이터 기간</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="trainingDays" value="365" min="30" max="1095">
+                                <span class="input-group-text">일</span>
+                            </div>
+                            <div class="form-text">과거 몇 일간의 데이터로 학습할지 설정</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-medium">에폭 (Epochs)</label>
+                            <input type="number" class="form-control" id="epochs" value="100" min="10" max="1000">
+                            <div class="form-text">모델 학습 반복 횟수</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-medium">배치 크기 (Batch Size)</label>
+                            <input type="number" class="form-control" id="batchSize" value="32" min="8" max="128">
+                            <div class="form-text">한 번에 처리할 데이터 개수</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-medium">학습률 (Learning Rate)</label>
+                            <input type="number" class="form-control" id="learningRate" value="0.001" min="0.0001" max="0.1" step="0.0001">
+                            <div class="form-text">모델 가중치 업데이트 속도</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-medium">시퀀스 길이</label>
+                            <input type="number" class="form-control" id="sequenceLength" value="60" min="10" max="200">
+                            <div class="form-text">예측에 사용할 과거 데이터 개수 (분)</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-medium">검증 비율</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="validationSplit" value="20" min="10" max="30">
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="form-text">검증용으로 사용할 데이터 비율</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 학습 실행 및 모니터링 -->
+            <div class="card main-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-play-circle me-2"></i>학습 실행 및 모니터링
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- 학습 제어 버튼 -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success" id="startTrainingBtn" onclick="startTraining()">
+                                    <i class="bi bi-play-fill me-1"></i>학습 시작
+                                </button>
+                                <button class="btn btn-danger" id="stopTrainingBtn" onclick="stopTraining()" disabled>
+                                    <i class="bi bi-stop-fill me-1"></i>학습 중지
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="resetParameters()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>기본값 복원
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="training-status">
+                                <span class="badge bg-secondary" id="trainingStatus">대기 중</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 학습 진행률 -->
+                    <div id="trainingProgress" style="display: none;">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">전체 진행률</label>
+                                <div class="progress mb-2" style="height: 25px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         id="overallProgress" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted" id="progressText">0/100 에폭</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">현재 에폭 진행률</label>
+                                <div class="progress mb-2" style="height: 25px;">
+                                    <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" 
+                                         id="epochProgress" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small class="text-muted" id="epochText">0/100 배치</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="training-info">
+                                    <div class="info-item">
+                                        <span class="label">시작 시간:</span>
+                                        <span id="startTime">-</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="label">경과 시간:</span>
+                                        <span id="elapsedTime">00:00:00</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="label">예상 완료:</span>
+                                        <span id="estimatedTime">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="training-metrics">
+                                    <div class="metric-item">
+                                        <span class="label">Loss:</span>
+                                        <span id="currentLoss" class="value">-</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="label">Accuracy:</span>
+                                        <span id="currentAccuracy" class="value">-</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="label">Val Loss:</span>
+                                        <span id="valLoss" class="value">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 모델 히스토리 및 관리 -->
+        <div class="col-lg-4">
+            <!-- 현재 활성 모델 -->
+            <div class="card main-card mb-4">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-star me-2"></i>현재 활성 모델
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="active-model-info">
+                        <div class="model-name">
+                            <strong>model_20250720_143022</strong>
+                        </div>
+                        <div class="model-stats">
+                            <div class="stat-item">
+                                <span class="label">정확도:</span>
+                                <span class="value text-success">85.3%</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="label">학습일:</span>
+                                <span class="value">2025-07-20</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="label">상태:</span>
+                                <span class="badge bg-success">활성</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 모델 히스토리 -->
+            <div class="card main-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>모델 히스토리
+                    </h5>
+                    <button class="btn btn-outline-danger btn-sm" onclick="cleanupModels()">
+                        <i class="bi bi-trash me-1"></i>정리
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="model-list">
+                        <div class="model-item active">
+                            <div class="model-info">
+                                <div class="model-name">model_20250720_143022</div>
+                                <div class="model-meta">
+                                    <small>2025-07-20 14:30</small>
+                                    <span class="accuracy">85.3%</span>
+                                </div>
+                            </div>
+                            <div class="model-actions">
+                                <button class="btn btn-sm btn-success" disabled>
+                                    <i class="bi bi-check-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="model-item">
+                            <div class="model-info">
+                                <div class="model-name">model_20250720_091544</div>
+                                <div class="model-meta">
+                                    <small>2025-07-20 09:15</small>
+                                    <span class="accuracy">82.7%</span>
+                                </div>
+                            </div>
+                            <div class="model-actions">
+                                <button class="btn btn-sm btn-outline-primary" onclick="activateModel('model_20250720_091544')">
+                                    <i class="bi bi-play"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('model_20250720_091544')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="model-item">
+                            <div class="model-info">
+                                <div class="model-name">model_20250719_235612</div>
+                                <div class="model-meta">
+                                    <small>2025-07-19 23:56</small>
+                                    <span class="accuracy">79.1%</span>
+                                </div>
+                            </div>
+                            <div class="model-actions">
+                                <button class="btn btn-sm btn-outline-primary" onclick="activateModel('model_20250719_235612')">
+                                    <i class="bi bi-play"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('model_20250719_235612')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 자동 학습 스케줄러 -->
+            <div class="card main-card">
+                <div class="card-header">
+                    <h5>
+                        <i class="bi bi-calendar-event me-2"></i>자동 학습 스케줄러
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="autoRetraining" checked>
+                        <label class="form-check-label fw-medium" for="autoRetraining">
+                            자동 재학습 활성화
+                        </label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">재학습 간격</label>
+                        <select class="form-select" id="retrainingInterval">
+                            <option value="86400">매일 (24시간)</option>
+                            <option value="172800">2일마다</option>
+                            <option value="604800">매주 (7일)</option>
+                            <option value="1209600">2주마다</option>
+                        </select>
+                    </div>
+                    
+                    <div class="next-training">
+                        <small class="text-muted">다음 자동 학습: </small>
+                        <small id="nextTraining">2025-07-21 14:30</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let trainingInterval = null;
+    let startTimestamp = null;
+
+    // 현재 시간 업데이트
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleString('ko-KR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        document.getElementById('currentTime').textContent = timeString;
+    }
+    
+    setInterval(updateTime, 1000);
+    updateTime();
+
+    // 학습 시작
+    function startTraining() {
+        // TODO: API 연동
+        const startBtn = document.getElementById('startTrainingBtn');
+        const stopBtn = document.getElementById('stopTrainingBtn');
+        const status = document.getElementById('trainingStatus');
+        const progressDiv = document.getElementById('trainingProgress');
+        
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        status.textContent = '학습 중';
+        status.className = 'badge bg-primary';
+        progressDiv.style.display = 'block';
+        
+        startTimestamp = Date.now();
+        document.getElementById('startTime').textContent = new Date().toLocaleString('ko-KR');
+        
+        // 가상 학습 진행률 (실제로는 백엔드에서 받아올 데이터)
+        simulateTraining();
+        
+        alert('AI 모델 학습을 시작합니다.');
+    }
+
+    // 학습 중지
+    function stopTraining() {
+        // TODO: API 연동
+        const startBtn = document.getElementById('startTrainingBtn');
+        const stopBtn = document.getElementById('stopTrainingBtn');
+        const status = document.getElementById('trainingStatus');
+        
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        status.textContent = '중지됨';
+        status.className = 'badge bg-warning';
+        
+        if (trainingInterval) {
+            clearInterval(trainingInterval);
+            trainingInterval = null;
+        }
+        
+        alert('AI 모델 학습을 중지했습니다.');
+    }
+
+    // 학습 시뮬레이션 (실제로는 WebSocket이나 Server-Sent Events 사용)
+    function simulateTraining() {
+        let currentEpoch = 0;
+        const totalEpochs = parseInt(document.getElementById('epochs').value);
+        
+        trainingInterval = setInterval(() => {
+            currentEpoch++;
+            const progress = (currentEpoch / totalEpochs) * 100;
+            
+            // 진행률 업데이트
+            document.getElementById('overallProgress').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${currentEpoch}/${totalEpochs} 에폭`;
+            
+            // 가상 메트릭 업데이트
+            const loss = (0.5 - (currentEpoch / totalEpochs) * 0.3 + Math.random() * 0.1).toFixed(4);
+            const accuracy = (0.5 + (currentEpoch / totalEpochs) * 0.35 + Math.random() * 0.05).toFixed(3);
+            
+            document.getElementById('currentLoss').textContent = loss;
+            document.getElementById('currentAccuracy').textContent = (accuracy * 100).toFixed(1) + '%';
+            document.getElementById('valLoss').textContent = (parseFloat(loss) + 0.02).toFixed(4);
+            
+            // 경과 시간 업데이트
+            const elapsed = Date.now() - startTimestamp;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            document.getElementById('elapsedTime').textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 완료 처리
+            if (currentEpoch >= totalEpochs) {
+                clearInterval(trainingInterval);
+                trainingInterval = null;
+                
+                document.getElementById('trainingStatus').textContent = '완료';
+                document.getElementById('trainingStatus').className = 'badge bg-success';
+                document.getElementById('startTrainingBtn').disabled = false;
+                document.getElementById('stopTrainingBtn').disabled = true;
+                
+                alert('AI 모델 학습이 완료되었습니다!');
+            }
+        }, 1000); // 실제로는 더 긴 간격
+    }
+
+    // 파라미터 기본값 복원
+    function resetParameters() {
+        if (confirm('모든 파라미터를 기본값으로 복원하시겠습니까?')) {
+            document.getElementById('trainingDays').value = 365;
+            document.getElementById('epochs').value = 100;
+            document.getElementById('batchSize').value = 32;
+            document.getElementById('learningRate').value = 0.001;
+            document.getElementById('sequenceLength').value = 60;
+            document.getElementById('validationSplit').value = 20;
+            
+            alert('파라미터가 기본값으로 복원되었습니다.');
+        }
+    }
+
+    // 모델 활성화
+    function activateModel(modelName) {
+        if (confirm(`${modelName} 모델을 활성화하시겠습니까?`)) {
+            // TODO: API 연동
+            alert(`${modelName} 모델이 활성화되었습니다.`);
+            location.reload();
+        }
+    }
+
+    // 모델 삭제
+    function deleteModel(modelName) {
+        if (confirm(`${modelName} 모델을 삭제하시겠습니까?`)) {
+            // TODO: API 연동
+            alert(`${modelName} 모델이 삭제되었습니다.`);
+            location.reload();
+        }
+    }
+
+    // 모델 정리
+    function cleanupModels() {
+        if (confirm('오래된 모델들을 정리하시겠습니까? (최근 5개 모델만 보관)')) {
+            // TODO: API 연동
+            alert('오래된 모델들이 정리되었습니다.');
+            location.reload();
+        }
+    }
+</script>
+{% endblock %}
