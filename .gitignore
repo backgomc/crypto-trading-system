@@ -42,3 +42,7 @@ pip-delete-this-directory.txt
 Thumbs.db
 *.tmp
 *.temp
+
+# db파일
+data/*.db
+data/*.sqlite
