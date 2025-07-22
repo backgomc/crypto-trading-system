@@ -264,114 +264,159 @@
     let longAvgLine = null;
     let shortAvgLine = null;
     
-    // 자동매매 포지션 데이터 (실제로는 API에서 가져올 것)
+    // 자동매매 포지션 데이터 (테스트용 샘플 데이터)
     let tradingData = {
         longPosition: {
             size: 0.05,
-            avgPrice: 95000000,
+            avgPrice: 95000000,  // 9천5백만원 - 초록 라인으로 표시
             pnl: 75000
         },
         shortPosition: {
             size: 0.05,
-            avgPrice: 96000000,
+            avgPrice: 96000000,  // 9천6백만원 - 빨간 라인으로 표시  
             pnl: 75000
         },
         trades: [
-            { time: '2024-07-23 14:30:00', type: 'buy', price: 94500000, amount: 0.01 },
-            { time: '2024-07-23 15:45:00', type: 'sell', price: 95200000, amount: 0.01 },
-            { time: '2024-07-23 16:15:00', type: 'buy', price: 94800000, amount: 0.02 }
+            { time: '2024-07-23 14:30:00', type: 'buy', price: 94500000, amount: 0.01 },   // 매수 마커 ↑
+            { time: '2024-07-23 15:45:00', type: 'sell', price: 95200000, amount: 0.01 },  // 매도 마커 ↓
+            { time: '2024-07-23 16:15:00', type: 'buy', price: 94800000, amount: 0.02 },   // 매수 마커 ↑
+            { time: '2024-07-23 17:00:00', type: 'sell', price: 95500000, amount: 0.015 }, // 매도 마커 ↓
+            { time: '2024-07-23 17:30:00', type: 'buy', price: 94200000, amount: 0.025 }   // 매수 마커 ↑
         ]
     };
     
     // 차트 초기화
     function initChart() {
+        console.log('🎯 initChart 함수 시작');
+        
         const container = document.getElementById('trading-chart');
+        if (!container) {
+            console.error('❌ 차트 컨테이너를 찾을 수 없습니다!');
+            return;
+        }
         
-        // 차트 생성
-        chart = LightweightCharts.createChart(container, {
-            width: container.clientWidth,
-            height: 600,
-            layout: {
-                background: { color: '#1e1e1e' },
-                textColor: '#d1d4dc',
-            },
-            grid: {
-                vertLines: { color: '#2b2b43' },
-                horzLines: { color: '#2b2b43' },
-            },
-            crosshair: {
-                mode: LightweightCharts.CrosshairMode.Normal,
-            },
-            rightPriceScale: {
-                borderColor: '#485c7b',
-                scaleMargins: {
-                    top: 0.3,
-                    bottom: 0.25,
+        console.log('📦 컨테이너 크기:', container.clientWidth, 'x', container.clientHeight);
+        
+        try {
+            // 차트 생성
+            chart = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: 600,
+                layout: {
+                    background: { color: '#1e1e1e' },
+                    textColor: '#d1d4dc',
                 },
-            },
-            timeScale: {
-                borderColor: '#485c7b',
-                timeVisible: true,
-                secondsVisible: false,
-            },
-        });
-        
-        // 캔들스틱 시리즈 추가
-        candlestickSeries = chart.addCandlestickSeries({
-            upColor: '#26a69a',
-            downColor: '#ef5350',
-            borderVisible: false,
-            wickUpColor: '#26a69a',
-            wickDownColor: '#ef5350',
-        });
-        
-        // 차트 데이터 로드
-        loadChartData();
-        
-        // 포지션 평단가 라인 표시
-        updatePositionLines();
-        
-        // 매매 마커 표시
-        updateTradingMarkers();
-        
-        // 반응형 차트 크기 조정
-        window.addEventListener('resize', handleResize);
+                grid: {
+                    vertLines: { color: '#2b2b43' },
+                    horzLines: { color: '#2b2b43' },
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                },
+                rightPriceScale: {
+                    borderColor: '#485c7b',
+                    scaleMargins: {
+                        top: 0.3,
+                        bottom: 0.25,
+                    },
+                },
+                timeScale: {
+                    borderColor: '#485c7b',
+                    timeVisible: true,
+                    secondsVisible: false,
+                },
+            });
+            
+            console.log('✅ 차트 객체 생성 완료');
+            
+            // 캔들스틱 시리즈 추가
+            candlestickSeries = chart.addCandlestickSeries({
+                upColor: '#26a69a',
+                downColor: '#ef5350',
+                borderVisible: false,
+                wickUpColor: '#26a69a',
+                wickDownColor: '#ef5350',
+            });
+            
+            console.log('✅ 캔들스틱 시리즈 추가 완료');
+            
+            // 차트 데이터 로드
+            loadChartData();
+            
+            // 포지션 평단가 라인 표시
+            updatePositionLines();
+            
+            // 매매 마커 표시
+            updateTradingMarkers();
+            
+            // 반응형 차트 크기 조정
+            window.addEventListener('resize', handleResize);
+            
+            console.log('🎉 차트 초기화 완전 완료!');
+            
+        } catch (error) {
+            console.error('❌ 차트 생성 중 오류:', error);
+            container.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #1e1e1e; color: white;">
+                    <div style="text-align: center;">
+                        <h5>❌ 차트 생성 실패</h5>
+                        <p>${error.message}</p>
+                        <button onclick="location.reload()" class="btn btn-primary">새로고침</button>
+                    </div>
+                </div>
+            `;
+        }
     }
     
     // 차트 데이터 로드 (실제로는 API에서 가져올 것)
     async function loadChartData() {
         try {
+            console.log('📊 차트 데이터 로드 시작...');
+            
             // 임시 데이터 (실제로는 Bybit API 호출)
             const sampleData = generateSampleData();
-            candlestickSeries.setData(sampleData);
+            console.log('🔢 생성된 데이터 수:', sampleData.length);
+            console.log('📈 첫 번째 데이터:', sampleData[0]);
+            console.log('📈 마지막 데이터:', sampleData[sampleData.length - 1]);
+            
+            if (candlestickSeries && sampleData.length > 0) {
+                candlestickSeries.setData(sampleData);
+                console.log('✅ 차트 데이터 설정 완료');
+            } else {
+                console.error('❌ 캔들스틱 시리즈 또는 데이터가 없습니다');
+            }
+            
         } catch (error) {
-            console.error('차트 데이터 로드 실패:', error);
+            console.error('❌ 차트 데이터 로드 실패:', error);
         }
     }
     
-    // 샘플 캔들 데이터 생성
+    // 샘플 캔들 데이터 생성 (포지션과 매칭되는 가격대)
     function generateSampleData() {
         const data = [];
-        let price = 95000000;
+        let basePrice = 95000000; // 9천5백만원 기준
         const now = new Date();
         
         for (let i = 100; i >= 0; i--) {
             const time = new Date(now.getTime() - i * 15 * 60 * 1000);
-            const change = (Math.random() - 0.5) * 2000000;
-            const open = price;
-            const close = price + change;
-            const high = Math.max(open, close) + Math.random() * 500000;
-            const low = Math.min(open, close) - Math.random() * 500000;
+            
+            // 가격 변동을 포지션 근처로 설정
+            const variation = (Math.random() - 0.5) * 1000000; // ±100만원 변동
+            const open = basePrice + variation;
+            const change = (Math.random() - 0.5) * 800000; // ±80만원 변화
+            const close = open + change;
+            const high = Math.max(open, close) + Math.random() * 300000;
+            const low = Math.min(open, close) - Math.random() * 300000;
             
             data.push({
                 time: Math.floor(time.getTime() / 1000),
-                open: open,
-                high: high,
-                low: low,
-                close: close
+                open: Math.round(open),
+                high: Math.round(high),
+                low: Math.round(low),
+                close: Math.round(close)
             });
             
-            price = close;
+            basePrice = close;
         }
         
         return data;
@@ -379,20 +424,31 @@
     
     // 포지션 평단가 라인 업데이트
     function updatePositionLines() {
+        console.log('🎯 포지션 평단가 라인 업데이트 중...');
+        console.log('Long Position:', tradingData.longPosition);
+        console.log('Short Position:', tradingData.shortPosition);
+        
         // 기존 라인 제거
-        if (longAvgLine) chart.removePriceLine(longAvgLine);
-        if (shortAvgLine) chart.removePriceLine(shortAvgLine);
+        if (longAvgLine) {
+            candlestickSeries.removePriceLine(longAvgLine);
+            console.log('기존 롱 라인 제거됨');
+        }
+        if (shortAvgLine) {
+            candlestickSeries.removePriceLine(shortAvgLine);
+            console.log('기존 숏 라인 제거됨');
+        }
         
         // 롱 포지션 평단가 라인 (초록색)
         if (tradingData.longPosition.size > 0) {
             longAvgLine = candlestickSeries.createPriceLine({
                 price: tradingData.longPosition.avgPrice,
                 color: '#00ff00',
-                lineWidth: 2,
+                lineWidth: 3,
                 lineStyle: LightweightCharts.LineStyle.Solid,
                 axisLabelVisible: true,
-                title: `Long Avg: ${formatPrice(tradingData.longPosition.avgPrice)}원`
+                title: `🟢 Long Avg: ${formatPrice(tradingData.longPosition.avgPrice)}원`
             });
+            console.log('✅ 롱 평단가 라인 생성:', tradingData.longPosition.avgPrice);
         }
         
         // 숏 포지션 평단가 라인 (빨간색)
@@ -400,30 +456,38 @@
             shortAvgLine = candlestickSeries.createPriceLine({
                 price: tradingData.shortPosition.avgPrice,
                 color: '#ff0000',
-                lineWidth: 2,
+                lineWidth: 3,
                 lineStyle: LightweightCharts.LineStyle.Solid,
                 axisLabelVisible: true,
-                title: `Short Avg: ${formatPrice(tradingData.shortPosition.avgPrice)}원`
+                title: `🔴 Short Avg: ${formatPrice(tradingData.shortPosition.avgPrice)}원`
             });
+            console.log('✅ 숏 평단가 라인 생성:', tradingData.shortPosition.avgPrice);
         }
     }
     
     // 매매 마커 업데이트
     function updateTradingMarkers() {
+        console.log('📌 매매 마커 업데이트 중...');
+        console.log('총 거래 수:', tradingData.trades.length);
+        
         markers = [];
         
-        tradingData.trades.forEach(trade => {
+        tradingData.trades.forEach((trade, index) => {
             const timestamp = new Date(trade.time).getTime() / 1000;
             
-            markers.push({
+            const marker = {
                 time: timestamp,
                 position: trade.type === 'buy' ? 'belowBar' : 'aboveBar',
                 color: trade.type === 'buy' ? '#00ff00' : '#ff0000',
                 shape: trade.type === 'buy' ? 'arrowUp' : 'arrowDown',
-                text: `${trade.type === 'buy' ? '매수' : '매도'} ${trade.amount} BTC @ ${formatPrice(trade.price)}원`
-            });
+                text: `${trade.type === 'buy' ? '🟢 매수' : '🔴 매도'} ${trade.amount} BTC\n${formatPrice(trade.price)}원`
+            };
+            
+            markers.push(marker);
+            console.log(`마커 ${index + 1}:`, marker.text);
         });
         
+        console.log('✅ 총', markers.length, '개 마커 추가됨');
         candlestickSeries.setMarkers(markers);
     }
     
@@ -551,12 +615,48 @@
     
     // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 페이지 로드 완료');
+        
+        // Lightweight Charts 라이브러리 로드 확인
+        if (typeof LightweightCharts === 'undefined') {
+            console.error('❌ Lightweight Charts 라이브러리가 로드되지 않았습니다!');
+            document.getElementById('trading-chart').innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #1e1e1e; color: white;">
+                    <div style="text-align: center;">
+                        <h5>⚠️ 차트 라이브러리 로드 실패</h5>
+                        <p>Lightweight Charts가 로드되지 않았습니다.</p>
+                        <button onclick="location.reload()" class="btn btn-primary">새로고침</button>
+                    </div>
+                </div>
+            `;
+            return;
+        } else {
+            console.log('✅ Lightweight Charts 라이브러리 로드 완료');
+        }
+        
         // 시간 업데이트 시작
         updateTime();
         setInterval(updateTime, 1000);
         
-        // 차트 초기화
-        setTimeout(initChart, 100);
+        // 차트 초기화 (더 긴 지연시간)
+        setTimeout(() => {
+            console.log('🎯 차트 초기화 시작...');
+            try {
+                initChart();
+                console.log('✅ 차트 초기화 완료');
+            } catch (error) {
+                console.error('❌ 차트 초기화 실패:', error);
+                document.getElementById('trading-chart').innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #1e1e1e; color: white;">
+                        <div style="text-align: center;">
+                            <h5>❌ 차트 초기화 실패</h5>
+                            <p>${error.message}</p>
+                            <button onclick="location.reload()" class="btn btn-primary">새로고침</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }, 500);
         
         // 페이지 로드 애니메이션
         const cards = document.querySelectorAll('.status-card, .main-card');
