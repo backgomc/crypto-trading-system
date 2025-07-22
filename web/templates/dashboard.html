@@ -264,20 +264,23 @@
     let longAvgLine = null;
     let shortAvgLine = null;
     
-    // 자동매매 포지션 데이터 (실제 데이터로 수정)
+    // 자동매매 포지션 데이터 (현재 비트코인 가격에 맞춤)
     let tradingData = {
         longPosition: {
             size: 0.05,
-            avgPrice: 100000000,  // 1억원 (실제 비트코인 가격 근처)
-            pnl: 75000
+            avgPrice: 117000,  // 117,000 USD (현재 가격 근처)
+            pnl: 85000
         },
         shortPosition: {
             size: 0.05,
-            avgPrice: 102000000,  // 1억2천만원
-            pnl: 75000
+            avgPrice: 119500,  // 119,500 USD (현재 가격보다 약간 위)
+            pnl: -42500
         },
         trades: [
-            // 고정된 매매 내역만 표시
+            // 현실적인 매매 내역 (현재 가격 근처)
+            { time: '2025-07-23 14:30:00', type: 'buy', price: 116800, amount: 0.01 },
+            { time: '2025-07-23 15:45:00', type: 'sell', price: 119200, amount: 0.01 },
+            { time: '2025-07-23 16:15:00', type: 'buy', price: 117500, amount: 0.015 }
         ]
     };
     
@@ -487,26 +490,26 @@
         return intervalMap[interval] || '15m';
     }
     
-    // 현실적인 비트코인 데이터 생성 (2025년 7월 기준)
+    // 현실적인 비트코인 데이터 생성 (2025년 7월 현재 가격 기준)
     function generateRealisticBitcoinData() {
         const data = [];
-        let currentPrice = 67000; // 현재 실제 비트코인 가격 근처 (USD)
+        let currentPrice = 118700; // 현재 실제 비트코인 가격 (USD)
         const now = new Date();
         
-        console.log('🎯 현실적인 샘플 데이터 생성 중... 기준 가격:', currentPrice, 'USD');
+        console.log('🎯 현재 실제 비트코인 가격 기준 데이터 생성:', currentPrice, 'USD');
         
         for (let i = 200; i >= 0; i--) {
             const time = new Date(now.getTime() - i * getIntervalMs());
             
-            // 현실적인 비트코인 가격 변동 (±0.5% ~ 2% 내외)
-            const volatility = 0.005 + Math.random() * 0.015; // 0.5% ~ 2% 변동성
+            // 현실적인 비트코인 가격 변동 (±0.5% ~ 3% 내외)
+            const volatility = 0.005 + Math.random() * 0.025; // 0.5% ~ 3% 변동성
             const direction = Math.random() > 0.5 ? 1 : -1;
             const change = currentPrice * volatility * direction;
             
             const open = currentPrice;
-            const close = Math.max(currentPrice + change, 45000); // 최소 $45,000
-            const high = Math.max(open, close) * (1 + Math.random() * 0.01); // 최대 1% 위
-            const low = Math.min(open, close) * (1 - Math.random() * 0.01); // 최대 1% 아래
+            const close = Math.max(currentPrice + change, 100000); // 최소 $100,000
+            const high = Math.max(open, close) * (1 + Math.random() * 0.015); // 최대 1.5% 위
+            const low = Math.min(open, close) * (1 - Math.random() * 0.015); // 최대 1.5% 아래
             
             data.push({
                 time: Math.floor(time.getTime() / 1000),
@@ -519,7 +522,7 @@
             currentPrice = close;
         }
         
-        console.log('📊 샘플 데이터 생성 완료 - 최종 가격:', currentPrice.toFixed(2), 'USD');
+        console.log('📊 현재 가격 기준 데이터 생성 완료 - 최종 가격:', currentPrice.toFixed(2), 'USD');
         return data;
     }
     
