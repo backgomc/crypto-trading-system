@@ -22,6 +22,16 @@ def create_app():
     # 기본 설정
     app.config['SECRET_KEY'] = SECRET_KEY
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
+
+    # HTTPS 리버스 프록시 환경에서 HTTPS 인식 강제
+    from flask import request
+    @app.before_request
+    def fix_https_proxy():
+        if request.headers.get('X-Forwarded-Proto', 'http') == 'https':
+            request.environ['wsgi.url_scheme'] = 'https'
+
+    # HTTPS URL 스킴 고정 (리디렉션 시 http로 안 가도록)
+    app.config['PREFERRED_URL_SCHEME'] = 'https'    
     
     # SQLite 데이터베이스 설정
     basedir = os.path.abspath(os.path.dirname(__file__))
