@@ -251,8 +251,8 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Lightweight Charts 라이브러리 -->
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<!-- Lightweight Charts 라이브러리 (안정적인 버전) -->
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 
 <script>
     // 전역 변수들
@@ -298,27 +298,28 @@
         console.log('📦 컨테이너 크기:', container.clientWidth, 'x', container.clientHeight);
         
         try {
-            // 차트 생성
+            // 차트 생성 (올바른 방법)
+            console.log('차트 생성 시도...');
             chart = LightweightCharts.createChart(container, {
                 width: container.clientWidth,
                 height: 600,
                 layout: {
-                    background: { color: '#1e1e1e' },
+                    backgroundColor: '#1e1e1e',
                     textColor: '#d1d4dc',
                 },
                 grid: {
-                    vertLines: { color: '#2b2b43' },
-                    horzLines: { color: '#2b2b43' },
+                    vertLines: { 
+                        color: '#2b2b43' 
+                    },
+                    horzLines: { 
+                        color: '#2b2b43' 
+                    },
                 },
                 crosshair: {
                     mode: LightweightCharts.CrosshairMode.Normal,
                 },
-                rightPriceScale: {
+                priceScale: {
                     borderColor: '#485c7b',
-                    scaleMargins: {
-                        top: 0.3,
-                        bottom: 0.25,
-                    },
                 },
                 timeScale: {
                     borderColor: '#485c7b',
@@ -328,15 +329,38 @@
             });
             
             console.log('✅ 차트 객체 생성 완료');
+            console.log('chart 객체:', chart);
+            console.log('chart 메서드들:', Object.getOwnPropertyNames(chart));
             
-            // 캔들스틱 시리즈 추가
-            candlestickSeries = chart.addCandlestickSeries({
-                upColor: '#26a69a',
-                downColor: '#ef5350',
-                borderVisible: false,
-                wickUpColor: '#26a69a',
-                wickDownColor: '#ef5350',
-            });
+            // 캔들스틱 시리즈 추가 (버전별 대응)
+            try {
+                candlestickSeries = chart.addCandlestickSeries({
+                    upColor: '#26a69a',
+                    downColor: '#ef5350',
+                    borderVisible: false,
+                    wickUpColor: '#26a69a',
+                    wickDownColor: '#ef5350',
+                });
+                console.log('✅ 캔들스틱 시리즈 추가 완료 (addCandlestickSeries)');
+            } catch (seriesError) {
+                console.log('addCandlestickSeries 실패, 다른 방법 시도...');
+                console.error('시리즈 에러:', seriesError);
+                
+                // 대안 방법 시도
+                try {
+                    candlestickSeries = chart.addSeries('Candlestick', {
+                        upColor: '#26a69a',
+                        downColor: '#ef5350',
+                        borderVisible: false,
+                        wickUpColor: '#26a69a',
+                        wickDownColor: '#ef5350',
+                    });
+                    console.log('✅ 캔들스틱 시리즈 추가 완료 (addSeries)');
+                } catch (altError) {
+                    console.error('대안 방법도 실패:', altError);
+                    throw altError;
+                }
+            }
             
             console.log('✅ 캔들스틱 시리즈 추가 완료');
             
@@ -618,6 +642,12 @@
         console.log('🚀 페이지 로드 완료');
         
         // Lightweight Charts 라이브러리 로드 확인
+        console.log('LightweightCharts 객체:', typeof LightweightCharts);
+        if (LightweightCharts) {
+            console.log('LightweightCharts 버전:', LightweightCharts.version || 'unknown');
+            console.log('사용 가능한 메서드들:', Object.getOwnPropertyNames(LightweightCharts));
+        }
+        
         if (typeof LightweightCharts === 'undefined') {
             console.error('❌ Lightweight Charts 라이브러리가 로드되지 않았습니다!');
             document.getElementById('trading-chart').innerHTML = `
