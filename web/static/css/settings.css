@@ -1,5 +1,5 @@
 /* 파일 경로: web/static/css/settings.css */
-/* 코드명: 설정 페이지 전용 스타일 (다크 테마 보정) */
+/* 코드명: 설정 페이지 전용 스타일 (다크 테마 보정, 애니메이션 추가) */
 
 /* 알림 설정 카드 다크 테마 적용 */
 .notification-card {
@@ -22,3 +22,27 @@
     background-color: #2a2a2a !important;
     border-bottom: 1px solid #404040 !important;
 }
+
+/* 페이지 로드 애니메이션 추가 */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 카드들에 애니메이션 적용 */
+.card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* 순차적 애니메이션 효과 */
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+.card:nth-child(4) { animation-delay: 0.4s; }
+.card:nth-child(5) { animation-delay: 0.5s; }
