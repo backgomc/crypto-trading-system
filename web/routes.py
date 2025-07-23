@@ -1,5 +1,5 @@
 # 파일 경로: web/routes.py
-# 코드명: Flask 라우트 및 로그인 시스템 (AI 모델 관리 추가)
+# 코드명: Flask 라우트 및 로그인 시스템 (크롤러 감지 기능 추가)
 
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, jsonify
 from functools import wraps
@@ -9,7 +9,32 @@ from config.models import User, SystemLog, db
 
 web_bp = Blueprint('web', __name__)
 
-# 로그인 필요 데코레이터
+def is_crawler(user_agent):
+    """크롤러(소셜미디어 봇) 감지 함수"""
+    if not user_agent:
+        return False
+    
+    crawler_list = [
+        'facebookexternalhit',  # 페이스북
+        'twitterbot',          # 트위터  
+        'linkedinbot',         # 링크드인
+        'kakao',               # 카카오톡
+        'kakaotalk',           # 카카오톡
+        'whatsapp',            # 왓츠앱
+        'googlebot',           # 구글
+        'bingbot',             # 빙
+        'slackbot',            # 슬랙
+        'telegrambot',         # 텔레그램
+        'discordbot',          # 디스코드
+        'bot',                 # 일반 봇
+        'crawler',             # 크롤러
+        'spider'               # 스파이더
+    ]
+    
+    user_agent_lower = user_agent.lower()
+    return any(crawler in user_agent_lower for crawler in crawler_list)
+
+# 로그인 필요 데코레이터 (dashboard 제외)
 def login_required(f):
     """로그인이 필요한 페이지에 사용하는 데코레이터"""
     @wraps(f)
@@ -104,9 +129,20 @@ def logout():
     return redirect(url_for('web.login'))
 
 @web_bp.route('/')
-@login_required
 def dashboard():
-    """메인 대시보드 (로그인 필요)"""
+    """메인 대시보드 (크롤러는 메타태그만, 일반 사용자는 로그인 필요)"""
+    user_agent = request.headers.get('User-Agent', '')
+    
+    # 크롤러인 경우 로그인 체크 없이 기존 base.html의 메타 태그만 제공
+    if is_crawler(user_agent):
+        log_system_event('INFO', 'CRAWLER', f'크롤러 접근: {user_agent[:100]}')
+        # 빈 dashboard.html을 렌더링하되, 메타 태그는 base.html에서 처리
+        return render_template('dashboard.html', user={'username': None, 'logged_in': False})
+    
+    # 일반 사용자는 로그인 체크
+    if 'logged_in' not in session or not session.get('logged_in'):
+        return redirect(url_for('web.login'))
+        
     user_info = {
         'username': session.get('username'),
         'login_time': session.get('login_time'),
@@ -117,7 +153,7 @@ def dashboard():
 @web_bp.route('/ai-model')
 @login_required
 def ai_model():
-    """AI 모델 관리 페이지 (로그인 필요)"""
+    """AI 모델 관리 페이지 (로그인 필요, 크롤러 예외 처리)"""
     user_info = {
         'username': session.get('username'),
         'is_admin': session.get('is_admin', False)
@@ -131,7 +167,7 @@ def ai_model():
 @web_bp.route('/settings')
 @login_required
 def settings():
-    """설정 페이지 (로그인 필요)"""
+    """설정 페이지 (로그인 필요, 크롤러 예외 처리)"""
     user_info = {
         'username': session.get('username'),
         'is_admin': session.get('is_admin', False)
