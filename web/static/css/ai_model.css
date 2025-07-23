@@ -1,5 +1,5 @@
 /* 파일 경로: web/static/css/ai_model.css */
-/* 코드명: AI 모델 관리 페이지 스타일 */
+/* 코드명: AI 모델 관리 페이지 스타일 (스위치 수정) */
 
 /* 페이지 헤더 */
 .page-header {
@@ -21,6 +21,7 @@
     font-weight: 500;
 }
 
+/* 나머지 기존 CSS는 그대로 유지 */
 /* 메인 카드 스타일 */
 .main-card {
     background-color: #1e1e1e;
@@ -363,44 +364,6 @@
 .btn-outline-danger:hover {
     background-color: #dc3545;
     color: #ffffff;
-}
-
-/* 자동 학습 스케줄러 */
-.form-check-input[type="checkbox"] {
-    width: 50px;
-    height: 25px;
-    border-radius: 25px;
-    background-color: #333333;
-    border: none;
-    position: relative;
-}
-
-.form-check-input:checked[type="checkbox"] {
-    background-color: #667eea;
-}
-
-.form-check-input:checked[type="checkbox"]::before {
-    content: '';
-    position: absolute;
-    width: 19px;
-    height: 19px;
-    border-radius: 50%;
-    background-color: #ffffff;
-    top: 3px;
-    right: 3px;
-    transition: all 0.3s ease;
-}
-
-.form-check-input[type="checkbox"]::before {
-    content: '';
-    position: absolute;
-    width: 19px;
-    height: 19px;
-    border-radius: 50%;
-    background-color: #ffffff;
-    top: 3px;
-    left: 3px;
-    transition: all 0.3s ease;
 }
 
 .next-training {
