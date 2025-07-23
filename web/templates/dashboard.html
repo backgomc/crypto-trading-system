@@ -1,103 +1,9 @@
-<!-- web/templates/dashboard.html -->
 {% extends "base.html" %}
 
 {% block title %}대시보드 - 자동매매{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-<style>
-/* 차트 오버레이 스타일 */
-.chart-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10;
-}
-
-.position-line {
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    pointer-events: none;
-    opacity: 0.8;
-}
-
-.position-line.long {
-    background-color: #00ff00;
-    box-shadow: 0 0 5px #00ff00;
-}
-
-.position-line.short {
-    background-color: #ff0000;
-    box-shadow: 0 0 5px #ff0000;
-}
-
-.position-label {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-.trade-marker {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 12px;
-    pointer-events: auto;
-    cursor: pointer;
-    animation: pulse 2s infinite;
-}
-
-.trade-marker.buy {
-    background-color: #00ff00;
-    color: black;
-    border: 2px solid #00aa00;
-}
-
-.trade-marker.sell {
-    background-color: #ff0000;
-    color: white;
-    border: 2px solid #aa0000;
-}
-
-.trade-tooltip {
-    position: absolute;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 100;
-    display: none;
-    border: 1px solid #444;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
-
-.chart-container {
-    position: relative;
-    height: 600px;
-    width: 100%;
-}
-</style>
 {% endblock %}
 
 {% block content %}
@@ -121,7 +27,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6>시스템 상태</h6>
-                            <h4 id="systemStatus" class="text-danger">중지됨</h4>
+                            <h4 class="text-danger">중지됨</h4>
                         </div>
                         <div class="card-icon text-danger">
                             <i class="bi bi-power" style="font-size: 2rem;"></i>
@@ -137,7 +43,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6>총 잔고</h6>
-                            <h4 id="totalBalance" class="text-primary">10,000,000원</h4>
+                            <h4 class="text-primary">10,000,000원</h4>
                         </div>
                         <div class="card-icon text-primary">
                             <i class="bi bi-wallet2" style="font-size: 2rem;"></i>
@@ -153,7 +59,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6>오늘 수익</h6>
-                            <h4 id="todayProfit" class="text-success">+150,000원</h4>
+                            <h4 class="text-success">+150,000원</h4>
                         </div>
                         <div class="card-icon text-success">
                             <i class="bi bi-graph-up-arrow" style="font-size: 2rem;"></i>
@@ -169,7 +75,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6>수익률</h6>
-                            <h4 id="profitRate" class="text-success">+1.5%</h4>
+                            <h4 class="text-success">+1.5%</h4>
                         </div>
                         <div class="card-icon text-success">
                             <i class="bi bi-percent" style="font-size: 2rem;"></i>
@@ -190,67 +96,18 @@
                         <i class="bi bi-graph-up me-2"></i>비트코인 차트
                     </h5>
                     <div class="chart-controls">
-                        <select id="chartSymbol" class="form-select form-select-sm me-2" style="width: auto;" onchange="changeSymbol()">
+                        <select id="chartSymbol" class="form-select form-select-sm" style="width: auto;" onchange="changeSymbol()">
                             <option value="BYBIT:BTCUSDT">BTC/USDT</option>
                             <option value="BYBIT:ETHUSDT">ETH/USDT</option>
                             <option value="BYBIT:ADAUSDT">ADA/USDT</option>
                             <option value="BYBIT:SOLUSDT">SOL/USDT</option>
                         </select>
-                        <button id="toggleOverlay" class="btn btn-sm btn-outline-primary" onclick="toggleOverlay()">
-                            <i class="bi bi-eye"></i> 포지션 표시
-                        </button>
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <!-- TradingView 차트 컨테이너 -->
-                    <div class="chart-container">
-                        <div class="tradingview-widget-container" style="height: 600px; width: 100%;">
-                            <div id="tradingview_chart"></div>
-                        </div>
-                        
-                        <!-- 자동매매 포지션 오버레이 -->
-                        <div id="chartOverlay" class="chart-overlay">
-                            <!-- 롱 포지션 평단가 라인 -->
-                            <div id="longPositionLine" class="position-line long" style="top: 45%; display: none;">
-                                <div class="position-label" style="right: 10px; top: -25px; background-color: #00aa00;">
-                                    🟢 Long Avg: $117,000
-                                </div>
-                            </div>
-                            
-                            <!-- 숏 포지션 평단가 라인 -->
-                            <div id="shortPositionLine" class="position-line short" style="top: 35%; display: none;">
-                                <div class="position-label" style="right: 10px; top: -25px; background-color: #aa0000;">
-                                    🔴 Short Avg: $119,500
-                                </div>
-                            </div>
-                            
-                            <!-- 매매 마커들 -->
-                            <div id="tradeMarkers">
-                                <!-- 매수 마커 -->
-                                <div class="trade-marker buy" style="left: 20%; top: 55%;" 
-                                     data-tooltip="🟢 매수 0.01 BTC<br>$116,800<br>2025-07-23 14:30"
-                                     onmouseover="showTooltip(this)" onmouseout="hideTooltip()">
-                                    ↑
-                                </div>
-                                
-                                <!-- 매도 마커 -->
-                                <div class="trade-marker sell" style="left: 40%; top: 25%;" 
-                                     data-tooltip="🔴 매도 0.01 BTC<br>$119,200<br>2025-07-23 15:45"
-                                     onmouseover="showTooltip(this)" onmouseout="hideTooltip()">
-                                    ↓
-                                </div>
-                                
-                                <!-- 매수 마커 -->
-                                <div class="trade-marker buy" style="left: 60%; top: 50%;" 
-                                     data-tooltip="🟢 매수 0.015 BTC<br>$117,500<br>2025-07-23 16:15"
-                                     onmouseover="showTooltip(this)" onmouseout="hideTooltip()">
-                                    ↑
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- 툴팁 -->
-                        <div id="tradeTooltip" class="trade-tooltip"></div>
+                    <!-- TradingView 위젯 -->
+                    <div class="tradingview-widget-container" style="height: 600px; width: 100%;">
+                        <div id="tradingview_chart"></div>
                     </div>
                 </div>
             </div>
@@ -303,23 +160,23 @@
                         <div class="col-6">
                             <div class="position-box long-position">
                                 <h6 class="text-success mb-1">롱 포지션</h6>
-                                <p id="longSize" class="mb-1">0.05 BTC</p>
-                                <small id="longAvgPrice">@ $117,000</small>
+                                <p class="mb-1">0.05 BTC</p>
+                                <small>@ 95,000,000원</small>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="position-box short-position">
                                 <h6 class="text-danger mb-1">숏 포지션</h6>
-                                <p id="shortSize" class="mb-1">0.05 BTC</p>
-                                <small id="shortAvgPrice">@ $119,500</small>
+                                <p class="mb-1">0.05 BTC</p>
+                                <small>@ 95,000,000원</small>
                             </div>
                         </div>
                     </div>
                     
                     <div class="total-pnl">
                         <h6>총 미실현 손익</h6>
-                        <h4 id="totalPnl">+$42,500</h4>
-                        <small id="totalPnlPercent">+0.36%</small>
+                        <h4>+150,000원</h4>
+                        <small>+1.5%</small>
                     </div>
                 </div>
             </div>
@@ -334,18 +191,18 @@
                 <div class="card-body">
                     <div class="ai-status-item d-flex justify-content-between align-items-center">
                         <span>모델 상태</span>
-                        <span id="aiStatus" class="badge bg-warning">대기중</span>
+                        <span class="badge bg-warning">대기중</span>
                     </div>
                     <div class="ai-status-item d-flex justify-content-between align-items-center">
                         <span>마지막 학습</span>
-                        <span id="lastTraining" class="text-muted">2시간 전</span>
+                        <span class="text-muted">2시간 전</span>
                     </div>
                     <div class="ai-status-item d-flex justify-content-between align-items-center">
                         <span>정확도</span>
-                        <span id="aiAccuracy" class="text-success">85.3%</span>
+                        <span class="text-success">85.3%</span>
                     </div>
                     <div class="ai-progress mt-2">
-                        <div id="aiProgressBar" class="progress-bar" style="width: 85.3%"></div>
+                        <div class="progress-bar" style="width: 85.3%"></div>
                     </div>
                 </div>
             </div>
@@ -357,27 +214,27 @@
                         <i class="bi bi-clock-history me-2"></i>최근 거래
                     </h5>
                 </div>
-                <div class="card-body" id="recentTrades">
+                <div class="card-body">
                     <div class="recent-trade d-flex justify-content-between align-items-center">
                         <div>
                             <span class="badge bg-success">매수</span>
-                            <span class="ms-2">0.015 BTC</span>
+                            <span class="ms-2">0.01 BTC</span>
                         </div>
-                        <small>5분 전</small>
+                        <small>10분 전</small>
                     </div>
                     <div class="recent-trade d-flex justify-content-between align-items-center">
                         <div>
                             <span class="badge bg-danger">매도</span>
                             <span class="ms-2">0.01 BTC</span>
                         </div>
-                        <small>25분 전</small>
+                        <small>1시간 전</small>
                     </div>
                     <div class="recent-trade d-flex justify-content-between align-items-center">
                         <div>
                             <span class="badge bg-success">매수</span>
-                            <span class="ms-2">0.01 BTC</span>
+                            <span class="ms-2">0.02 BTC</span>
                         </div>
-                        <small>1시간 전</small>
+                        <small>3시간 전</small>
                     </div>
                 </div>
             </div>
@@ -387,44 +244,27 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- TradingView 라이브러리 -->
+<!-- TradingView 라이브러리만 로드 -->
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
     let tradingViewWidget = null;
-    let overlayVisible = true;
-    
-    // 자동매매 포지션 데이터
-    let tradingData = {
-        longPosition: {
-            size: 0.05,
-            avgPrice: 117000,
-            pnl: 85000
-        },
-        shortPosition: {
-            size: 0.05,
-            avgPrice: 119500,
-            pnl: -42500
-        },
-        trades: [
-            { time: '2025-07-23 14:30:00', type: 'buy', price: 116800, amount: 0.01 },
-            { time: '2025-07-23 15:45:00', type: 'sell', price: 119200, amount: 0.01 },
-            { time: '2025-07-23 16:15:00', type: 'buy', price: 117500, amount: 0.015 }
-        ]
-    };
     
     // TradingView 위젯 초기화
     function initTradingView(symbol = "BYBIT:BTCUSDT") {
+        // 컨테이너 확인
         const container = document.getElementById('tradingview_chart');
         if (!container) {
             console.error('TradingView 컨테이너를 찾을 수 없습니다.');
             return;
         }
         
+        // 기존 위젯 내용 초기화
         container.innerHTML = '';
         
+        // TradingView 위젯 생성 (라이브러리가 로드된 후)
         if (typeof TradingView !== 'undefined') {
-            tradingViewWidget = new TradingView.widget({
+            new TradingView.widget({
                 width: "100%",
                 height: 600,
                 symbol: symbol,
@@ -443,91 +283,28 @@
                 details: false,
                 hotlist: false,
                 calendar: false,
+                // 모바일 최적화 옵션
                 mobile_friendly: true,
                 auto_scale: true,
-                hide_volume: false
+                hide_volume: true
             });
-            
-            console.log('✅ TradingView 위젯 로드 완료');
-            
-            // 위젯 로드 후 오버레이 표시
-            setTimeout(() => {
-                updatePositionOverlay();
-            }, 3000);
-            
         } else {
+            // TradingView가 로드되지 않은 경우 대체 메시지
             container.innerHTML = `
                 <div class="d-flex justify-content-center align-items-center h-100 chart-placeholder">
                     <div class="text-center">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
-                        <h5 class="mt-3">TradingView 차트 로딩 중...</h5>
-                        <p>실시간 차트를 불러오고 있습니다</p>
+                        <h5 class="mt-3">차트 로딩 중...</h5>
+                        <p>TradingView 차트를 불러오고 있습니다</p>
                     </div>
                 </div>
             `;
         }
     }
     
-    // 포지션 오버레이 업데이트
-    function updatePositionOverlay() {
-        if (!overlayVisible) return;
-        
-        const longLine = document.getElementById('longPositionLine');
-        const shortLine = document.getElementById('shortPositionLine');
-        
-        if (tradingData.longPosition.size > 0) {
-            longLine.style.display = 'block';
-            longLine.querySelector('.position-label').textContent = 
-                `🟢 Long Avg: $${tradingData.longPosition.avgPrice.toLocaleString()}`;
-        }
-        
-        if (tradingData.shortPosition.size > 0) {
-            shortLine.style.display = 'block';
-            shortLine.querySelector('.position-label').textContent = 
-                `🔴 Short Avg: $${tradingData.shortPosition.avgPrice.toLocaleString()}`;
-        }
-    }
-    
-    // 오버레이 토글
-    function toggleOverlay() {
-        overlayVisible = !overlayVisible;
-        const overlay = document.getElementById('chartOverlay');
-        const button = document.getElementById('toggleOverlay');
-        
-        if (overlayVisible) {
-            overlay.style.display = 'block';
-            button.innerHTML = '<i class="bi bi-eye-slash"></i> 포지션 숨김';
-            updatePositionOverlay();
-        } else {
-            overlay.style.display = 'none';
-            button.innerHTML = '<i class="bi bi-eye"></i> 포지션 표시';
-        }
-    }
-    
-    // 툴팁 표시
-    function showTooltip(element) {
-        const tooltip = document.getElementById('tradeTooltip');
-        const tooltipText = element.getAttribute('data-tooltip');
-        
-        tooltip.innerHTML = tooltipText.replace(/\n/g, '<br>');
-        tooltip.style.display = 'block';
-        
-        const rect = element.getBoundingClientRect();
-        const containerRect = element.closest('.chart-container').getBoundingClientRect();
-        
-        tooltip.style.left = (rect.left - containerRect.left + 25) + 'px';
-        tooltip.style.top = (rect.top - containerRect.top - 10) + 'px';
-    }
-    
-    // 툴팁 숨김
-    function hideTooltip() {
-        const tooltip = document.getElementById('tradeTooltip');
-        tooltip.style.display = 'none';
-    }
-    
-    // 심볼 변경
+    // 심볼 변경 함수
     function changeSymbol() {
         const selectElement = document.getElementById('chartSymbol');
         const selectedSymbol = selectElement.value;
@@ -548,52 +325,31 @@
         document.getElementById('currentTime').textContent = timeString;
     }
     
-    // 제어 버튼 함수들
+    // 1초마다 시간 업데이트
+    setInterval(updateTime, 1000);
+    updateTime();
+    
+    // 제어 버튼 함수들 (나중에 API 연동)
     function startTrading() {
-        document.getElementById('systemStatus').textContent = '실행중';
-        document.getElementById('systemStatus').className = 'text-success';
         alert('자동매매를 시작합니다.');
     }
     
     function stopTrading() {
-        document.getElementById('systemStatus').textContent = '중지됨';
-        document.getElementById('systemStatus').className = 'text-danger';
         alert('자동매매를 중단합니다.');
     }
     
     function trainAI() {
-        document.getElementById('aiStatus').textContent = '학습중';
-        document.getElementById('aiStatus').className = 'badge bg-info';
         alert('AI 학습을 시작합니다.');
-        
-        setTimeout(() => {
-            document.getElementById('aiStatus').textContent = '완료';
-            document.getElementById('aiStatus').className = 'badge bg-success';
-        }, 3000);
     }
     
     function emergencyStop() {
         if (confirm('모든 포지션을 청산하시겠습니까?')) {
             alert('긴급 청산을 실행합니다.');
-            tradingData.longPosition.size = 0;
-            tradingData.shortPosition.size = 0;
-            updatePositionOverlay();
         }
     }
     
     // 페이지 로드 시 초기화
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🚀 대시보드 로드 완료');
-        
-        // 시간 업데이트 시작
-        updateTime();
-        setInterval(updateTime, 1000);
-        
-        // TradingView 위젯 초기화
-        setTimeout(() => {
-            initTradingView();
-        }, 1000);
-        
         // 페이지 로드 애니메이션
         const cards = document.querySelectorAll('.status-card, .main-card');
         cards.forEach((card, index) => {
@@ -602,17 +358,28 @@
                 card.style.transform = 'translateY(0)';
             }, index * 100);
         });
+        
+        // TradingView 위젯 초기화 (DOM 로드 후 실행)
+        setTimeout(() => {
+            initTradingView();
+        }, 2000); // 2초 지연 후 실행
     });
     
     // TradingView 라이브러리 로드 확인
     window.addEventListener('load', function() {
+        // 라이브러리 로드 상태 확인
         const checkTradingView = setInterval(() => {
             if (typeof TradingView !== 'undefined') {
                 clearInterval(checkTradingView);
-                console.log('✅ TradingView 라이브러리 로드 완료');
+                console.log('TradingView 라이브러리 로드 완료');
+                // DOM이 준비되었는지 확인 후 초기화
+                if (document.getElementById('tradingview_chart')) {
+                    initTradingView();
+                }
             }
-        }, 100);
+        }, 100); // 100ms마다 확인
         
+        // 10초 후에도 로드되지 않으면 타임아웃
         setTimeout(() => {
             clearInterval(checkTradingView);
             if (typeof TradingView === 'undefined') {
