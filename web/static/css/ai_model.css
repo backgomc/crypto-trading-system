@@ -54,32 +54,62 @@
     background-color: #1e1e1e;
 }
 
-/* 지표 선택 섹션 */
+/* 지표 선택 섹션 - 모든 체크박스를 스위치로 변경 */
 .form-check {
     margin-bottom: 12px;
+    display: flex;
+    align-items: center; /* 상하 가운데 정렬 */
+    gap: 8px;
 }
 
+/* 모든 form-check-input을 스위치 스타일로 변경 */
 .form-check-input {
-    background-color: #2d2d2d;
-    border-color: #444444;
-    width: 18px;
-    height: 18px;
+    width: 40px !important;
+    height: 20px !important;
+    border-radius: 20px !important;
+    background-color: #333333 !important;
+    border: none !important;
+    position: relative !important;
+    cursor: pointer !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    flex-shrink: 0;
 }
 
 .form-check-input:checked {
-    background-color: #667eea;
-    border-color: #667eea;
+    background-color: #667eea !important;
+    border-color: #667eea !important;
+}
+
+.form-check-input::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    top: 2px;
+    left: 2px;
+    transition: all 0.3s ease;
+}
+
+.form-check-input:checked::before {
+    transform: translateX(20px);
 }
 
 .form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+    outline: none !important;
 }
 
 .form-check-label {
-    color: #e0e0e0;
-    font-weight: 500;
-    margin-left: 8px;
-    font-size: 0.95rem;
+    color: #e0e0e0 !important;
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    margin: 0 !important; /* 기본 마진 제거 */
+    line-height: 1.2; /* 텍스트 높이 조정 */
 }
 
 /* 학습 파라미터 폼 */
@@ -365,7 +395,14 @@
     color: #ffffff;
 }
 
-/* 자동 학습 스케줄러 - 스위치 스타일 (겹침 문제 해결) */
+/* 자동 학습 스케줄러 - 스위치와 텍스트 정렬 개선 */
+.form-switch {
+    display: flex;
+    align-items: center; /* 상하 가운데 정렬 */
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
 .form-switch .form-check-input {
     width: 50px !important;
     height: 25px !important;
@@ -374,9 +411,11 @@
     border: none !important;
     position: relative !important;
     cursor: pointer !important;
-    appearance: none !important; /* 기본 체크박스 모양 제거 */
+    appearance: none !important;
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
+    flex-shrink: 0;
+    margin: 0 !important; /* 기본 마진 제거 */
 }
 
 .form-switch .form-check-input:checked {
@@ -408,7 +447,8 @@
     cursor: pointer !important;
     color: #e0e0e0 !important;
     font-weight: 500 !important;
-    margin-left: 8px !important;
+    margin: 0 !important; /* 기본 마진 제거 */
+    line-height: 1.2; /* 텍스트 높이 조정 */
 }
 
 .next-training {
