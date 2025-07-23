@@ -133,13 +133,30 @@ def dashboard():
     """메인 대시보드 (크롤러는 메타태그만, 일반 사용자는 로그인 필요)"""
     user_agent = request.headers.get('User-Agent', '')
     
-    # 크롤러인 경우 로그인 체크 없이 기존 base.html의 메타 태그만 제공
+    # 크롤러인 경우에만 로그인 체크 없이 메타 태그 제공
     if is_crawler(user_agent):
         log_system_event('INFO', 'CRAWLER', f'크롤러 접근: {user_agent[:100]}')
-        # 빈 dashboard.html을 렌더링하되, 메타 태그는 base.html에서 처리
-        return render_template('dashboard.html', user={'username': None, 'logged_in': False})
+        # 메타 태그만 있는 최소한의 HTML 응답
+        return '''<!DOCTYPE html>
+                    <html lang="ko">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta property="og:type" content="website">
+                        <meta property="og:title" content="NHBot - 비트코인 AI자동매매 시스템">
+                        <meta property="og:description" content="링크를 눌러 매매를 시작하세요">
+                        <meta property="og:image" content="https://nhbot.mooo.com/static/images/og-thumbnail.png">
+                        <meta property="og:url" content="https://nhbot.mooo.com">
+                        <meta property="og:site_name" content="NHBot">
+                        <meta property="og:locale" content="ko_KR">
+                        <title>NHBot</title>
+                    </head>
+                    <body>
+                        <h1>NHBot - 자동매매 시스템</h1>
+                        <p>크롤러 전용 페이지</p>
+                    </body>
+                    </html>'''
     
-    # 일반 사용자는 로그인 체크
+    # 일반 사용자는 반드시 로그인 체크
     if 'logged_in' not in session or not session.get('logged_in'):
         return redirect(url_for('web.login'))
         
