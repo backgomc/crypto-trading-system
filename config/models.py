@@ -1,6 +1,10 @@
+# 파일 경로: config/models.py
+# 코드명: 데이터베이스 모델 정의 (사용자별 설정 추가)
+
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+import json
 
 db = SQLAlchemy()
 
@@ -65,3 +69,281 @@ class SystemLog(db.Model):
     
     def __repr__(self):
         return f'<SystemLog {self.level}: {self.message[:50]}>'
+
+# ============================================================================
+# 새로 추가: 사용자별 설정 관리 모델들
+# ============================================================================
+
+class UserConfig(db.Model):
+    """사용자별 매매 설정 모델"""
+    __tablename__ = 'user_configs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    config_key = db.Column(db.String(100), nullable=False, index=True)
+    config_value = db.Column(db.Text, nullable=False)
+    config_type = db.Column(db.String(20), default='json', nullable=False)  # json, string, number, boolean
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # 복합 인덱스: 사용자별 설정 키는 유일
+    __table_args__ = (db.UniqueConstraint('user_id', 'config_key', name='uq_user_config'),)
+    
+    # 관계 설정
+    user = db.relationship('User', backref='configs')
+    
+    def set_value(self, value):
+        """값 설정 (타입에 따라 자동 변환)"""
+        if isinstance(value, dict) or isinstance(value, list):
+            self.config_value = json.dumps(value, ensure_ascii=False)
+            self.config_type = 'json'
+        elif isinstance(value, bool):
+            self.config_value = str(value).lower()
+            self.config_type = 'boolean'
+        elif isinstance(value, (int, float)):
+            self.config_value = str(value)
+            self.config_type = 'number'
+        else:
+            self.config_value = str(value)
+            self.config_type = 'string'
+    
+    def get_value(self):
+        """값 반환 (타입에 따라 자동 변환)"""
+        if self.config_type == 'json':
+            try:
+                return json.loads(self.config_value)
+            except:
+                return {}
+        elif self.config_type == 'boolean':
+            return self.config_value.lower() == 'true'
+        elif self.config_type == 'number':
+            try:
+                if '.' in self.config_value:
+                    return float(self.config_value)
+                else:
+                    return int(self.config_value)
+            except:
+                return 0
+        else:
+            return self.config_value
+    
+    @classmethod
+    def get_user_config(cls, user_id, config_key, default_value=None):
+        """사용자 설정 조회"""
+        config = cls.query.filter_by(user_id=user_id, config_key=config_key).first()
+        if config:
+            return config.get_value()
+        return default_value
+    
+    @classmethod
+    def set_user_config(cls, user_id, config_key, value):
+        """사용자 설정 저장"""
+        config = cls.query.filter_by(user_id=user_id, config_key=config_key).first()
+        if not config:
+            config = cls(user_id=user_id, config_key=config_key)
+            db.session.add(config)
+        
+        config.set_value(value)
+        config.updated_at = datetime.utcnow()
+        db.session.commit()
+        return config
+    
+    def to_dict(self):
+        """딕셔너리로 변환"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'config_key': self.config_key,
+            'config_value': self.get_value(),
+            'config_type': self.config_type,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+    
+    def __repr__(self):
+        return f'<UserConfig {self.config_key} for user {self.user_id}>'
+
+class TradingState(db.Model):
+    """사용자별 매매 상태 모델"""
+    __tablename__ = 'trading_states'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    state_key = db.Column(db.String(100), nullable=False, index=True)
+    state_value = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # 복합 인덱스: 사용자별 상태 키는 유일
+    __table_args__ = (db.UniqueConstraint('user_id', 'state_key', name='uq_user_state'),)
+    
+    # 관계 설정
+    user = db.relationship('User', backref='trading_states')
+    
+    @classmethod
+    def get_state(cls, user_id, state_key, default=None):
+        """상태 값 조회"""
+        state = cls.query.filter_by(user_id=user_id, state_key=state_key).first()
+        if state:
+            try:
+                return json.loads(state.state_value) if state.state_value else default
+            except:
+                return state.state_value
+        return default
+    
+    @classmethod
+    def set_state(cls, user_id, state_key, value):
+        """상태 값 설정"""
+        state = cls.query.filter_by(user_id=user_id, state_key=state_key).first()
+        if not state:
+            state = cls(user_id=user_id, state_key=state_key)
+            db.session.add(state)
+        
+        if isinstance(value, (dict, list)):
+            state.state_value = json.dumps(value, ensure_ascii=False)
+        else:
+            state.state_value = str(value) if value is not None else None
+        
+        state.updated_at = datetime.utcnow()
+        db.session.commit()
+        return state
+    
+    def to_dict(self):
+        """딕셔너리로 변환"""
+        try:
+            value = json.loads(self.state_value) if self.state_value else None
+        except:
+            value = self.state_value
+        
+        return {
+            'user_id': self.user_id,
+            'state_key': self.state_key,
+            'state_value': value,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+    
+    def __repr__(self):
+        return f'<TradingState {self.state_key} for user {self.user_id}>'
+
+class ConfigHistory(db.Model):
+    """설정 변경 이력 모델"""
+    __tablename__ = 'config_history'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    config_key = db.Column(db.String(100), nullable=False, index=True)
+    old_value = db.Column(db.Text)
+    new_value = db.Column(db.Text)
+    changed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    ip_address = db.Column(db.String(45))
+    user_agent = db.Column(db.String(200))
+    
+    # 관계 설정
+    user = db.relationship('User', backref='config_changes')
+    
+    @classmethod
+    def log_change(cls, user_id, config_key, old_value, new_value, ip_address=None, user_agent=None):
+        """설정 변경 로그 생성"""
+        history = cls(
+            user_id=user_id,
+            config_key=config_key,
+            old_value=json.dumps(old_value, ensure_ascii=False) if isinstance(old_value, (dict, list)) else str(old_value) if old_value is not None else None,
+            new_value=json.dumps(new_value, ensure_ascii=False) if isinstance(new_value, (dict, list)) else str(new_value) if new_value is not None else None,
+            ip_address=ip_address,
+            user_agent=user_agent
+        )
+        db.session.add(history)
+        db.session.commit()
+        return history
+    
+    def to_dict(self):
+        """딕셔너리로 변환"""
+        try:
+            old_val = json.loads(self.old_value) if self.old_value else None
+        except:
+            old_val = self.old_value
+        
+        try:
+            new_val = json.loads(self.new_value) if self.new_value else None
+        except:
+            new_val = self.new_value
+        
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'config_key': self.config_key,
+            'old_value': old_val,
+            'new_value': new_val,
+            'changed_at': self.changed_at.isoformat() if self.changed_at else None,
+            'ip_address': self.ip_address
+        }
+    
+    def __repr__(self):
+        return f'<ConfigHistory {self.config_key} changed for user {self.user_id}>'
+
+# ============================================================================
+# 헬퍼 함수들
+# ============================================================================
+
+def get_default_user_config():
+    """기본 사용자 설정 반환"""
+    return {
+        'trading_settings': {
+            'demo_mode': True,
+            'virtual_balance': 10000,
+            'symbol': 'BTCUSDT',
+            'initial_position_size': 0.05,
+            'adjustment_size': 0.01,
+            'base_threshold': 1000,
+            'loop_delay': 60,
+            'consecutive_threshold': 4
+        },
+        'ai_settings': {
+            'ai_enabled': True,
+            'adaptive_threshold_enabled': True,
+            'volatility_window': 20,
+            'model_retrain_interval': 86400,
+            'main_interval': '15',
+            'ai_training_days': 365,
+            'timeframes': ['1', '5', '15', '60'],
+            'ai_sequence_length': 96
+        },
+        'macd_settings': {
+            'short_window': 90,
+            'long_window': 100,
+            'signal_window': 9
+        },
+        'risk_management': {
+            'max_position_size': 1.0,
+            'stop_loss_percentage': 5.0,
+            'take_profit_percentage': 3.0
+        },
+        'notification_settings': {
+            'telegram_enabled': True,
+            'telegram_retry_count': 5,
+            'telegram_retry_interval': 60
+        }
+    }
+
+def init_user_config(user_id):
+    """사용자 기본 설정 초기화"""
+    default_config = get_default_user_config()
+    
+    for section_key, section_value in default_config.items():
+        UserConfig.set_user_config(user_id, section_key, section_value)
+    
+    print(f"✅ 사용자 {user_id} 기본 설정 초기화 완료")
+
+def get_user_full_config(user_id):
+    """사용자 전체 설정 조회"""
+    configs = UserConfig.query.filter_by(user_id=user_id).all()
+    
+    if not configs:
+        # 기본 설정으로 초기화
+        init_user_config(user_id)
+        configs = UserConfig.query.filter_by(user_id=user_id).all()
+    
+    result = {}
+    for config in configs:
+        result[config.config_key] = config.get_value()
+    
+    return result

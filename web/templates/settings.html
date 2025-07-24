@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/settings.html -->
-<!-- 코드명: 설정 페이지 템플릿 (AI 항목 제거, 추가 설정 포함) -->
+<!-- 코드명: 설정 페이지 템플릿 (API 연동 완료) -->
 
 {% extends "base.html" %}
 
@@ -17,14 +17,27 @@
             <i class="bi bi-gear me-2"></i>설정
         </h2>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary" onclick="resetSettings()">
+            <button class="btn btn-outline-secondary" onclick="resetSettings()" id="resetBtn">
                 <i class="bi bi-arrow-clockwise me-1"></i>기본값 복원
             </button>
-            <button class="btn btn-primary" onclick="saveSettings()">
+            <button class="btn btn-primary" onclick="saveSettings()" id="saveBtn">
                 <i class="bi bi-check-lg me-1"></i>설정 저장
             </button>
         </div>
     </div>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loadingOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 9999;">
+        <div class="position-absolute top-50 start-50 translate-middle text-center">
+            <div class="spinner-border text-primary mb-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="text-white">설정 처리 중...</div>
+        </div>
+    </div>
+
+    <!-- 알림 메시지 -->
+    <div id="alertContainer"></div>
 
     <div class="row">
         <!-- 좌측: 설정 폼들 -->
@@ -41,16 +54,16 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">매매 모드</label>
-                                <select class="form-select" id="tradingMode">
-                                    <option value="demo" selected>📊 데모 매매</option>
-                                    <option value="real">💰 실제 매매</option>
+                                <select class="form-select" id="demo_mode">
+                                    <option value="true">📊 데모 매매</option>
+                                    <option value="false">💰 실제 매매</option>
                                 </select>
                                 <div class="form-text">데모 모드에서는 가상 자금으로 매매가 진행됩니다</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">가상 잔고 (USDT)</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="virtualBalance" value="10000" min="1000" max="1000000">
+                                    <input type="number" class="form-control" id="virtual_balance" min="1000" max="1000000">
                                     <span class="input-group-text">USDT</span>
                                 </div>
                                 <div class="form-text">데모 모드에서 사용할 가상 자금</div>
@@ -61,7 +74,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">초기 포지션 크기</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="initialPosition" value="0.05" step="0.001" min="0.001" max="1">
+                                    <input type="number" class="form-control" id="initial_position_size" step="0.001" min="0.001" max="1">
                                     <span class="input-group-text">BTC</span>
                                 </div>
                                 <div class="form-text">첫 매매 시 진입할 포지션 크기</div>
@@ -69,7 +82,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">조정 크기</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="adjustmentSize" value="0.01" step="0.001" min="0.001" max="0.1">
+                                    <input type="number" class="form-control" id="adjustment_size" step="0.001" min="0.001" max="0.1">
                                     <span class="input-group-text">BTC</span>
                                 </div>
                                 <div class="form-text">추가 매매 시 조정할 포지션 크기</div>
@@ -80,7 +93,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">기본 임계값</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="baseThreshold" value="1000" min="100" max="10000">
+                                    <input type="number" class="form-control" id="base_threshold" min="100" max="10000">
                                     <span class="input-group-text">USDT</span>
                                 </div>
                                 <div class="form-text">매매 신호를 발생시킬 가격 변동 기준</div>
@@ -88,7 +101,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">연속 신호 기준</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="consecutiveThreshold" value="4" min="2" max="10">
+                                    <input type="number" class="form-control" id="consecutive_threshold" min="2" max="10">
                                     <span class="input-group-text">회</span>
                                 </div>
                                 <div class="form-text">연속 신호 후 대응 매매를 실행할 기준</div>
@@ -98,8 +111,8 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="adaptiveThreshold" checked>
-                                    <label class="form-check-label fw-medium" for="adaptiveThreshold">
+                                    <input class="form-check-input" type="checkbox" id="adaptive_threshold_enabled">
+                                    <label class="form-check-label fw-medium" for="adaptive_threshold_enabled">
                                         적응형 임계값 사용
                                     </label>
                                 </div>
@@ -108,10 +121,74 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">변동성 윈도우</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="volatilityWindow" value="20" min="5" max="100">
+                                    <input type="number" class="form-control" id="volatility_window" min="5" max="100">
                                     <span class="input-group-text">일</span>
                                 </div>
                                 <div class="form-text">변동성 계산에 사용할 기간</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">루프 간격</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="loop_delay" min="10" max="300">
+                                    <span class="input-group-text">초</span>
+                                </div>
+                                <div class="form-text">매매 로직 실행 간격</div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- AI 설정 -->
+            <div class="card bg-dark border-secondary shadow-sm mb-4">
+                <div class="card-header bg-secondary">
+                    <h5 class="mb-0">
+                        <i class="bi bi-brain me-2"></i>AI 설정
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="aiForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="ai_enabled">
+                                    <label class="form-check-label fw-medium" for="ai_enabled">
+                                        AI 모델 사용
+                                    </label>
+                                </div>
+                                <div class="form-text">AI 예측을 매매 결정에 반영</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">메인 시간대</label>
+                                <select class="form-select" id="main_interval">
+                                    <option value="1">1분봉</option>
+                                    <option value="5">5분봉</option>
+                                    <option value="15">15분봉</option>
+                                    <option value="60">1시간봉</option>
+                                </select>
+                                <div class="form-text">주요 매매 판단 기준 시간대</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">AI 학습 기간</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="ai_training_days" min="30" max="1095">
+                                    <span class="input-group-text">일</span>
+                                </div>
+                                <div class="form-text">AI 학습에 사용할 과거 데이터 기간</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium">모델 재훈련 간격</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="model_retrain_interval" min="1" max="30">
+                                    <span class="input-group-text">일</span>
+                                </div>
+                                <div class="form-text">자동 재훈련 실행 간격</div>
                             </div>
                         </div>
                     </form>
@@ -131,7 +208,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">최대 손실 한도</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="maxLossLimit" value="5" min="1" max="20" step="0.1">
+                                    <input type="number" class="form-control" id="max_loss_limit" min="1" max="20" step="0.1">
                                     <span class="input-group-text">%</span>
                                 </div>
                                 <div class="form-text">전체 잔고 대비 최대 손실 허용 비율</div>
@@ -139,7 +216,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">일일 거래 한도</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="dailyTradeLimit" value="10" min="1" max="100">
+                                    <input type="number" class="form-control" id="daily_trade_limit" min="1" max="100">
                                     <span class="input-group-text">회</span>
                                 </div>
                                 <div class="form-text">하루 최대 거래 실행 횟수</div>
@@ -150,15 +227,15 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">포지션 크기 상한</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="maxPositionSize" value="0.5" step="0.01" min="0.01" max="2">
+                                    <input type="number" class="form-control" id="max_position_size" step="0.01" min="0.01" max="2">
                                     <span class="input-group-text">BTC</span>
                                 </div>
                                 <div class="form-text">단일 포지션의 최대 크기</div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check form-switch mt-4">
-                                    <input class="form-check-input" type="checkbox" id="emergencyStopEnabled" checked>
-                                    <label class="form-check-label fw-medium" for="emergencyStopEnabled">
+                                    <input class="form-check-input" type="checkbox" id="emergency_stop_enabled">
+                                    <label class="form-check-label fw-medium" for="emergency_stop_enabled">
                                         긴급 정지 활성화
                                     </label>
                                 </div>
@@ -170,7 +247,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">연속 손실 제한</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="consecutiveLossLimit" value="3" min="2" max="10">
+                                    <input type="number" class="form-control" id="consecutive_loss_limit" min="2" max="10">
                                     <span class="input-group-text">회</span>
                                 </div>
                                 <div class="form-text">연속 손실 시 거래 일시 중지</div>
@@ -178,96 +255,10 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">쿨다운 시간</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="cooldownTime" value="30" min="5" max="120">
+                                    <input type="number" class="form-control" id="cooldown_time" min="5" max="120">
                                     <span class="input-group-text">분</span>
                                 </div>
                                 <div class="form-text">연속 손실 후 거래 재개까지 대기 시간</div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- 거래 시간 설정 -->
-            <div class="card bg-dark border-secondary shadow-sm mb-4">
-                <div class="card-header bg-secondary">
-                    <h5 class="mb-0">
-                        <i class="bi bi-clock me-2"></i>거래 시간 설정
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form id="timeForm">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="enableTimeFilter">
-                                    <label class="form-check-label fw-medium" for="enableTimeFilter">
-                                        거래 시간 제한
-                                    </label>
-                                </div>
-                                <div class="form-text">특정 시간대에만 거래 실행</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium">루프 간격</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="loopDelay" value="60" min="10" max="300">
-                                    <span class="input-group-text">초</span>
-                                </div>
-                                <div class="form-text">매매 로직 실행 간격</div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium">거래 시작 시간</label>
-                                <input type="time" class="form-control" id="tradingStartTime" value="09:00">
-                                <div class="form-text">하루 거래 시작 시간</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-medium">거래 종료 시간</label>
-                                <input type="time" class="form-control" id="tradingEndTime" value="23:00">
-                                <div class="form-text">하루 거래 종료 시간</div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-12">
-                                <label class="form-label fw-medium">거래 제외 요일</label>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="excludeSunday">
-                                            <label class="form-check-label" for="excludeSunday">일요일</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="excludeMonday">
-                                            <label class="form-check-label" for="excludeMonday">월요일</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="excludeTuesday">
-                                            <label class="form-check-label" for="excludeTuesday">화요일</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="excludeWednesday">
-                                            <label class="form-check-label" for="excludeWednesday">수요일</label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="excludeThursday">
-                                            <label class="form-check-label" for="excludeThursday">목요일</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="excludeFriday">
-                                            <label class="form-check-label" for="excludeFriday">금요일</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="excludeSaturday">
-                                            <label class="form-check-label" for="excludeSaturday">토요일</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-text">선택된 요일에는 거래를 실행하지 않습니다</div>
                             </div>
                         </div>
                     </form>
@@ -286,8 +277,8 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="enableTelegram" checked>
-                                    <label class="form-check-label fw-medium" for="enableTelegram">
+                                    <input class="form-check-input" type="checkbox" id="enable_telegram">
+                                    <label class="form-check-label fw-medium" for="enable_telegram">
                                         텔레그램 알림
                                     </label>
                                 </div>
@@ -295,8 +286,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="enableEmail">
-                                    <label class="form-check-label fw-medium" for="enableEmail">
+                                    <input class="form-check-input" type="checkbox" id="enable_email">
+                                    <label class="form-check-label fw-medium" for="enable_email">
                                         이메일 알림
                                     </label>
                                 </div>
@@ -307,8 +298,8 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">알림 빈도</label>
-                                <select class="form-select" id="notificationFrequency">
-                                    <option value="all" selected>모든 거래</option>
+                                <select class="form-select" id="notification_frequency">
+                                    <option value="all">모든 거래</option>
                                     <option value="important">중요 이벤트만</option>
                                     <option value="summary">일일 요약</option>
                                 </select>
@@ -316,7 +307,7 @@
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">수익 알림 기준</label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control" id="profitNotification" value="1000" min="100">
+                                    <input type="number" class="form-control" id="profit_notification" min="100">
                                     <span class="input-group-text">원</span>
                                 </div>
                             </div>
@@ -338,11 +329,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span>설정 상태</span>
-                        <span class="badge bg-success">저장됨</span>
+                        <span class="badge bg-secondary" id="configStatus">로딩 중</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span>마지막 저장</span>
-                        <span class="text-muted" id="lastSaved">방금 전</span>
+                        <span class="text-muted" id="lastSaved">-</span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span>설정 파일</span>
@@ -355,13 +346,13 @@
                     
                     <h6 class="mb-3">빠른 설정</h6>
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary btn-sm" onclick="applyConservative()">
+                        <button class="btn btn-outline-primary btn-sm" onclick="applyPreset('conservative')">
                             <i class="bi bi-shield me-1"></i>보수적 설정
                         </button>
-                        <button class="btn btn-outline-warning btn-sm" onclick="applyBalanced()">
+                        <button class="btn btn-outline-warning btn-sm" onclick="applyPreset('balanced')">
                             <i class="bi bi-bar-chart me-1"></i>균형 설정
                         </button>
-                        <button class="btn btn-outline-danger btn-sm" onclick="applyAggressive()">
+                        <button class="btn btn-outline-danger btn-sm" onclick="applyPreset('aggressive')">
                             <i class="bi bi-lightning me-1"></i>공격적 설정
                         </button>
                     </div>
@@ -406,12 +397,12 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help3">
-                                    적응형 임계값
+                                    AI 모델
                                 </button>
                             </h2>
                             <div id="help3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
                                 <div class="accordion-body">
-                                    <small>적응형 임계값은 시장 변동성에 따라 매매 기준을 자동으로 조정합니다. 변동성이 높을 때는 임계값이 높아집니다.</small>
+                                    <small>AI 모델은 원웨이 장에서의 손실을 최소화하기 위해 매매 타이밍을 정교하게 판단합니다. 15분봉 기준을 권장합니다.</small>
                                 </div>
                             </div>
                         </div>
@@ -425,99 +416,539 @@
 
 {% block extra_js %}
 <script>
-    // 설정 저장
-    function saveSettings() {
-        // TODO: API 연동
-        alert('설정이 저장되었습니다.');
-        document.getElementById('lastSaved').textContent = '방금 전';
-    }
-    
-    // 기본값 복원
-    function resetSettings() {
-        if (confirm('모든 설정을 기본값으로 복원하시겠습니까?')) {
-            // 기본 매매 설정
-            document.getElementById('tradingMode').value = 'demo';
-            document.getElementById('virtualBalance').value = 10000;
-            document.getElementById('initialPosition').value = 0.05;
-            document.getElementById('adjustmentSize').value = 0.01;
-            document.getElementById('baseThreshold').value = 1000;
-            document.getElementById('consecutiveThreshold').value = 4;
-            document.getElementById('adaptiveThreshold').checked = true;
-            document.getElementById('volatilityWindow').value = 20;
-            
-            // 리스크 관리 설정
-            document.getElementById('maxLossLimit').value = 5;
-            document.getElementById('dailyTradeLimit').value = 10;
-            document.getElementById('maxPositionSize').value = 0.5;
-            document.getElementById('emergencyStopEnabled').checked = true;
-            document.getElementById('consecutiveLossLimit').value = 3;
-            document.getElementById('cooldownTime').value = 30;
-            
-            // 거래 시간 설정
-            document.getElementById('enableTimeFilter').checked = false;
-            document.getElementById('loopDelay').value = 60;
-            document.getElementById('tradingStartTime').value = '09:00';
-            document.getElementById('tradingEndTime').value = '23:00';
-            
-            alert('기본값으로 복원되었습니다.');
-        }
-    }
-    
-    // 빠른 설정 함수들
-    function applyConservative() {
-        // 보수적 설정
-        document.getElementById('initialPosition').value = 0.03;
-        document.getElementById('adjustmentSize').value = 0.005;
-        document.getElementById('baseThreshold').value = 1500;
-        document.getElementById('maxLossLimit').value = 3;
-        document.getElementById('dailyTradeLimit').value = 5;
-        document.getElementById('consecutiveLossLimit').value = 2;
-        alert('보수적 설정이 적용되었습니다.');
-    }
-    
-    function applyBalanced() {
-        // 균형 설정
-        document.getElementById('initialPosition').value = 0.05;
-        document.getElementById('adjustmentSize').value = 0.01;
-        document.getElementById('baseThreshold').value = 1000;
-        document.getElementById('maxLossLimit').value = 5;
-        document.getElementById('dailyTradeLimit').value = 10;
-        document.getElementById('consecutiveLossLimit').value = 3;
-        alert('균형 설정이 적용되었습니다.');
-    }
-    
-    function applyAggressive() {
-        // 공격적 설정
-        document.getElementById('initialPosition').value = 0.08;
-        document.getElementById('adjustmentSize').value = 0.02;
-        document.getElementById('baseThreshold').value = 500;
-        document.getElementById('maxLossLimit').value = 8;
-        document.getElementById('dailyTradeLimit').value = 20;
-        document.getElementById('consecutiveLossLimit').value = 5;
-        alert('공격적 설정이 적용되었습니다.');
-    }
-    
-    // 거래 시간 제한 토글
-    document.getElementById('enableTimeFilter').addEventListener('change', function() {
-        const timeInputs = document.querySelectorAll('#tradingStartTime, #tradingEndTime');
-        const dayCheckboxes = document.querySelectorAll('[id^="exclude"]');
-        
-        timeInputs.forEach(input => {
-            input.disabled = !this.checked;
-        });
-        
-        dayCheckboxes.forEach(checkbox => {
-            checkbox.disabled = !this.checked;
-        });
-    });
-    
-    // 페이지 로드 시 초기화
+    // 전역 변수
+    let currentSettings = {};
+    let isLoading = false;
+
+    // 페이지 로드 시 설정 불러오기
     document.addEventListener('DOMContentLoaded', function() {
-        // 거래 시간 제한이 비활성화된 경우 관련 요소들 비활성화
-        const enableTimeFilter = document.getElementById('enableTimeFilter');
-        if (!enableTimeFilter.checked) {
-            enableTimeFilter.dispatchEvent(new Event('change'));
-        }
+        loadSettings();
     });
+
+    // API 호출 헬퍼 함수
+    async function apiCall(url, method = 'GET', data = null) {
+        showLoading(true);
+        try {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+            
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(url, options);
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || '요청 처리 중 오류가 발생했습니다.');
+            }
+
+            return result;
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+            showAlert('error', error.message || '네트워크 오류가 발생했습니다.');
+            throw error;
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // 로딩 상태 표시
+    function showLoading(show) {
+        isLoading = show;
+        const overlay = document.getElementById('loadingOverlay');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        if (show) {
+            overlay.classList.remove('d-none');
+            saveBtn.disabled = true;
+            resetBtn.disabled = true;
+        } else {
+            overlay.classList.add('d-none');
+            saveBtn.disabled = false;
+            resetBtn.disabled = false;
+        }
+    }
+
+    // 알림 메시지 표시
+    function showAlert(type, message) {
+        const container = document.getElementById('alertContainer');
+        const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+        const iconClass = type === 'error' ? 'bi-exclamation-triangle' : 'bi-check-circle';
+        
+        const alertHtml = `
+            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                <i class="bi ${iconClass} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        container.innerHTML = alertHtml;
+        
+        // 3초 후 자동 제거
+        setTimeout(() => {
+            const alert = container.querySelector('.alert');
+            if (alert) {
+                alert.remove();
+            }
+        }, 3000);
+    }
+
+    // 현재 설정 로드
+    async function loadSettings() {
+        try {
+            const result = await apiCall('/api/settings');
+            currentSettings = result.data;
+            
+            // 폼에 설정값 적용
+            populateForm(currentSettings);
+            
+            // 상태 업데이트
+            updateStatusDisplay();
+            showAlert('success', '설정을 성공적으로 불러왔습니다.');
+            
+        } catch (error) {
+            console.error('설정 로드 실패:', error);
+            showAlert('error', '설정을 불러오는데 실패했습니다.');
+        }
+    }
+
+    // 폼에 설정값 적용
+    function populateForm(settings) {
+        // 매매 설정
+        if (settings.trading_settings) {
+            const ts = settings.trading_settings;
+            setElementValue('demo_mode', ts.demo_mode?.toString() || 'true');
+            setElementValue('virtual_balance', ts.virtual_balance || 10000);
+            setElementValue('initial_position_size', ts.initial_position_size || 0.05);
+            setElementValue('adjustment_size', ts.adjustment_size || 0.01);
+            setElementValue('base_threshold', ts.base_threshold || 1000);
+            setElementValue('consecutive_threshold', ts.consecutive_threshold || 4);
+            setElementValue('adaptive_threshold_enabled', ts.adaptive_threshold_enabled !== false);
+            setElementValue('volatility_window', ts.volatility_window || 20);
+            setElementValue('loop_delay', ts.loop_delay || 60);
+        }
+
+        // AI 설정
+        if (settings.ai_settings) {
+            const as = settings.ai_settings;
+            setElementValue('ai_enabled', as.ai_enabled !== false);
+            setElementValue('main_interval', as.main_interval || '15');
+            setElementValue('ai_training_days', as.ai_training_days || 365);
+            setElementValue('model_retrain_interval', Math.floor((as.model_retrain_interval || 86400) / 86400));
+        }
+
+        // 리스크 설정
+        if (settings.risk_settings) {
+            const rs = settings.risk_settings;
+            setElementValue('max_loss_limit', rs.max_loss_limit || 5);
+            setElementValue('daily_trade_limit', rs.daily_trade_limit || 10);
+            setElementValue('max_position_size', rs.max_position_size || 0.5);
+            setElementValue('emergency_stop_enabled', rs.emergency_stop_enabled !== false);
+            setElementValue('consecutive_loss_limit', rs.consecutive_loss_limit || 3);
+            setElementValue('cooldown_time', rs.cooldown_time || 30);
+        }
+
+        // 알림 설정
+        if (settings.notification_settings) {
+            const ns = settings.notification_settings;
+            setElementValue('enable_telegram', ns.enable_telegram !== false);
+            setElementValue('enable_email', ns.enable_email || false);
+            setElementValue('notification_frequency', ns.notification_frequency || 'all');
+            setElementValue('profit_notification', ns.profit_notification || 1000);
+        }
+    }
+
+    // 엘리먼트 값 설정 헬퍼
+    function setElementValue(id, value) {
+        const element = document.getElementById(id);
+        if (!element) return;
+
+        if (element.type === 'checkbox') {
+            element.checked = Boolean(value);
+        } else if (element.type === 'select-one') {
+            element.value = value;
+        } else {
+            element.value = value;
+        }
+    }
+
+    // 폼에서 설정값 수집
+    function collectFormData() {
+        return {
+            trading_settings: {
+                demo_mode: document.getElementById('demo_mode').value === 'true',
+                virtual_balance: parseFloat(document.getElementById('virtual_balance').value),
+                initial_position_size: parseFloat(document.getElementById('initial_position_size').value),
+                adjustment_size: parseFloat(document.getElementById('adjustment_size').value),
+                base_threshold: parseInt(document.getElementById('base_threshold').value),
+                consecutive_threshold: parseInt(document.getElementById('consecutive_threshold').value),
+                adaptive_threshold_enabled: document.getElementById('adaptive_threshold_enabled').checked,
+                volatility_window: parseInt(document.getElementById('volatility_window').value),
+                loop_delay: parseInt(document.getElementById('loop_delay').value)
+            },
+            ai_settings: {
+                ai_enabled: document.getElementById('ai_enabled').checked,
+                main_interval: document.getElementById('main_interval').value,
+                ai_training_days: parseInt(document.getElementById('ai_training_days').value),
+                model_retrain_interval: parseInt(document.getElementById('model_retrain_interval').value) * 86400
+            },
+            risk_settings: {
+                max_loss_limit: parseFloat(document.getElementById('max_loss_limit').value),
+                daily_trade_limit: parseInt(document.getElementById('daily_trade_limit').value),
+                max_position_size: parseFloat(document.getElementById('max_position_size').value),
+                emergency_stop_enabled: document.getElementById('emergency_stop_enabled').checked,
+                consecutive_loss_limit: parseInt(document.getElementById('consecutive_loss_limit').value),
+                cooldown_time: parseInt(document.getElementById('cooldown_time').value)
+            },
+            notification_settings: {
+                enable_telegram: document.getElementById('enable_telegram').checked,
+                enable_email: document.getElementById('enable_email').checked,
+                notification_frequency: document.getElementById('notification_frequency').value,
+                profit_notification: parseInt(document.getElementById('profit_notification').value)
+            }
+        };
+    }
+
+    // 설정 저장
+    async function saveSettings() {
+        if (isLoading) return;
+
+        try {
+            const formData = collectFormData();
+            const result = await apiCall('/api/settings/bulk', 'POST', formData);
+            
+            currentSettings = formData;
+            updateStatusDisplay();
+            showAlert('success', '설정이 성공적으로 저장되었습니다.');
+            
+        } catch (error) {
+            console.error('설정 저장 실패:', error);
+        }
+    }
+
+    // 기본값 복원
+    async function resetSettings() {
+        if (isLoading) return;
+
+        if (!confirm('모든 설정을 기본값으로 복원하시겠습니까?\n현재 설정은 모두 삭제됩니다.')) {
+            return;
+        }
+
+        try {
+            const result = await apiCall('/api/settings/reset', 'POST');
+            
+            // 페이지 새로고침하여 기본값 적용
+            showAlert('success', '기본값으로 복원되었습니다. 페이지를 새로고침합니다.');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+            
+        } catch (error) {
+            console.error('기본값 복원 실패:', error);
+        }
+    }
+
+    // 프리셋 설정 적용
+    async function applyPreset(presetType) {
+        if (isLoading) return;
+
+        const presetNames = {
+            conservative: '보수적',
+            balanced: '균형',
+            aggressive: '공격적'
+        };
+
+        if (!confirm(`${presetNames[presetType]} 설정을 적용하시겠습니까?\n현재 설정이 변경됩니다.`)) {
+            return;
+        }
+
+        try {
+            const result = await apiCall(`/api/settings/preset/${presetType}`, 'POST');
+            
+            // 새로운 설정 적용
+            currentSettings = result.data;
+            populateForm(currentSettings);
+            updateStatusDisplay();
+            
+            showAlert('success', `${presetNames[presetType]} 설정이 적용되었습니다.`);
+            
+        } catch (error) {
+            console.error('프리셋 적용 실패:', error);
+        }
+    }
+
+    // 상태 표시 업데이트
+    function updateStatusDisplay() {
+        const configStatus = document.getElementById('configStatus');
+        const lastSaved = document.getElementById('lastSaved');
+        
+        configStatus.textContent = '저장됨';
+        configStatus.className = 'badge bg-success';
+        
+        const now = new Date();
+        lastSaved.textContent = now.toLocaleString('ko-KR', {
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // 폼 유효성 검사
+    function validateForm() {
+        const errors = [];
+
+        // 필수 필드 검사
+        const requiredFields = [
+            'virtual_balance', 'initial_position_size', 'adjustment_size',
+            'base_threshold', 'consecutive_threshold', 'volatility_window', 'loop_delay'
+        ];
+
+        for (const fieldId of requiredFields) {
+            const element = document.getElementById(fieldId);
+            if (!element.value || isNaN(parseFloat(element.value))) {
+                errors.push(`${element.previousElementSibling.textContent}은(는) 필수 입력값입니다.`);
+            }
+        }
+
+        // 범위 검사
+        const rangeChecks = [
+            { id: 'virtual_balance', min: 1000, max: 1000000, name: '가상 잔고' },
+            { id: 'initial_position_size', min: 0.001, max: 1, name: '초기 포지션 크기' },
+            { id: 'adjustment_size', min: 0.001, max: 0.1, name: '조정 크기' },
+            { id: 'base_threshold', min: 100, max: 10000, name: '기본 임계값' },
+            { id: 'consecutive_threshold', min: 2, max: 10, name: '연속 신호 기준' },
+            { id: 'volatility_window', min: 5, max: 100, name: '변동성 윈도우' },
+            { id: 'loop_delay', min: 10, max: 300, name: '루프 간격' }
+        ];
+
+        for (const check of rangeChecks) {
+            const element = document.getElementById(check.id);
+            const value = parseFloat(element.value);
+            
+            if (value < check.min || value > check.max) {
+                errors.push(`${check.name}은(는) ${check.min}~${check.max} 범위 내에서 입력해주세요.`);
+            }
+        }
+
+        if (errors.length > 0) {
+            showAlert('error', errors.join('<br>'));
+            return false;
+        }
+
+        return true;
+    }
+
+    // 실시간 유효성 검사 이벤트 리스너
+    document.addEventListener('DOMContentLoaded', function() {
+        // 숫자 입력 필드들에 실시간 검증 추가
+        const numberInputs = document.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                const min = parseFloat(this.min);
+                const max = parseFloat(this.max);
+                const value = parseFloat(this.value);
+                
+                if (this.value && (value < min || value > max)) {
+                    this.classList.add('is-invalid');
+                    
+                    // 기존 에러 메시지 제거
+                    const existingError = this.parentNode.querySelector('.invalid-feedback');
+                    if (existingError) {
+                        existingError.remove();
+                    }
+                    
+                    // 에러 메시지 추가
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.textContent = `${min}~${max} 범위 내에서 입력해주세요.`;
+                    this.parentNode.appendChild(errorDiv);
+                } else {
+                    this.classList.remove('is-invalid');
+                    const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                }
+            });
+        });
+
+        // 설정 변경 감지
+        const formElements = document.querySelectorAll('input, select');
+        formElements.forEach(element => {
+            element.addEventListener('change', function() {
+                // 설정이 변경되었음을 표시
+                const configStatus = document.getElementById('configStatus');
+                configStatus.textContent = '변경됨';
+                configStatus.className = 'badge bg-warning';
+            });
+        });
+
+        // 키보드 단축키 (Ctrl+S로 저장)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                if (validateForm()) {
+                    saveSettings();
+                }
+            }
+        });
+
+        // 페이지 떠날 때 경고 (설정이 변경된 경우)
+        window.addEventListener('beforeunload', function(e) {
+            const configStatus = document.getElementById('configStatus');
+            if (configStatus.textContent === '변경됨') {
+                e.preventDefault();
+                e.returnValue = '저장하지 않은 설정 변경사항이 있습니다. 페이지를 떠나시겠습니까?';
+            }
+        });
+    });
+
+    // 고급 기능들
+    
+    // 설정 내보내기
+    function exportSettings() {
+        try {
+            const formData = collectFormData();
+            const dataStr = JSON.stringify(formData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `nhbot_settings_${new Date().toISOString().slice(0, 10)}.json`;
+            link.click();
+            
+            showAlert('success', '설정이 파일로 내보내기되었습니다.');
+        } catch (error) {
+            showAlert('error', '설정 내보내기에 실패했습니다.');
+        }
+    }
+
+    // 설정 가져오기
+    function importSettings() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const settings = JSON.parse(e.target.result);
+                    populateForm(settings);
+                    showAlert('success', '설정을 성공적으로 가져왔습니다.');
+                    
+                    // 상태 업데이트
+                    const configStatus = document.getElementById('configStatus');
+                    configStatus.textContent = '변경됨';
+                    configStatus.className = 'badge bg-warning';
+                } catch (error) {
+                    showAlert('error', '설정 파일 형식이 올바르지 않습니다.');
+                }
+            };
+            reader.readAsText(file);
+        };
+        
+        input.click();
+    }
+
+    // 설정 비교 기능
+    function compareSettings(settings1, settings2) {
+        const differences = [];
+        
+        function compareObjects(obj1, obj2, path = '') {
+            for (const key in obj1) {
+                const currentPath = path ? `${path}.${key}` : key;
+                
+                if (typeof obj1[key] === 'object' && obj1[key] !== null) {
+                    if (typeof obj2[key] === 'object' && obj2[key] !== null) {
+                        compareObjects(obj1[key], obj2[key], currentPath);
+                    } else {
+                        differences.push(`${currentPath}: ${obj1[key]} → ${obj2[key]}`);
+                    }
+                } else if (obj1[key] !== obj2[key]) {
+                    differences.push(`${currentPath}: ${obj1[key]} → ${obj2[key]}`);
+                }
+            }
+        }
+        
+        compareObjects(settings1, settings2);
+        return differences;
+    }
+
+    // 폼 리셋 시 확인
+    function confirmReset() {
+        return confirm('정말로 모든 설정을 기본값으로 되돌리시겠습니까?\n이 작업은 되돌릴 수 없습니다.');
+    }
+
+    // 디버그 정보 표시 (개발용)
+    function showDebugInfo() {
+        console.log('현재 설정:', currentSettings);
+        console.log('폼 데이터:', collectFormData());
+        
+        const differences = compareSettings(currentSettings, collectFormData());
+        if (differences.length > 0) {
+            console.log('변경된 설정:', differences);
+        } else {
+            console.log('설정 변경 없음');
+        }
+    }
+
+    // 전역 함수로 노출 (콘솔에서 사용 가능)
+    window.debugSettings = showDebugInfo;
+    window.exportSettings = exportSettings;
+    window.importSettings = importSettings;
+
+    // 설정 저장 전 유효성 검사 추가
+    const originalSaveSettings = saveSettings;
+    saveSettings = async function() {
+        if (!validateForm()) {
+            return;
+        }
+        return originalSaveSettings();
+    };
+
+    // 도움말 토글 기능
+    function toggleHelp(show) {
+        const helpTexts = document.querySelectorAll('.form-text');
+        helpTexts.forEach(text => {
+            text.style.display = show ? 'block' : 'none';
+        });
+    }
+
+    // 설정 검색 기능
+    function searchSettings(query) {
+        const labels = document.querySelectorAll('label');
+        const query_lower = query.toLowerCase();
+        
+        labels.forEach(label => {
+            const text = label.textContent.toLowerCase();
+            const card = label.closest('.card');
+            
+            if (text.includes(query_lower) || query === '') {
+                card.style.display = 'block';
+                label.style.backgroundColor = query ? 'yellow' : '';
+            } else {
+                label.style.backgroundColor = '';
+            }
+        });
+    }
+
+    // 최종 초기화
+    console.log('🚀 NHBot 설정 페이지가 로드되었습니다.');
+    console.log('💡 사용 가능한 콘솔 명령어:');
+    console.log('   - debugSettings(): 현재 설정 상태 확인');
+    console.log('   - exportSettings(): 설정 내보내기');
+    console.log('   - importSettings(): 설정 가져오기');
 </script>
 {% endblock %}
