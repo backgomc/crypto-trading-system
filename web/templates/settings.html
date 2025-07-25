@@ -501,6 +501,35 @@
         }, 3000);
     }
 
+    // 브라우저 알림 함수 추가
+    function showBrowserNotification(title, message) {
+        // 알림 권한 체크
+        if (Notification.permission === 'granted') {
+            new Notification(`NHBot - ${title}`, {
+                body: message,
+                icon: '/static/images/nhbot-icon.png',
+                badge: '/static/images/nhbot-icon.png'
+            });
+        } else if (Notification.permission !== 'denied') {
+            // 권한 요청
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification(`NHBot - ${title}`, {
+                        body: message,
+                        icon: '/static/images/nhbot-icon.png',
+                        badge: '/static/images/nhbot-icon.png'
+                    });
+                } else {
+                    // 권한이 없으면 기존 방식으로 fallback
+                    showAlert(title === '성공' ? 'success' : 'error', message);
+                }
+            });
+        } else {
+            // 권한이 거부된 경우 기존 방식으로 fallback
+            showAlert(title === '성공' ? 'success' : 'error', message);
+        }
+    }
+
     // ============================================================================
     // 설정 로드 및 저장 함수들
     // ============================================================================
@@ -656,7 +685,9 @@
             if (result.success) {
                 currentConfig = result.data.config;
                 updateStatusDisplay();
-                showAlert('success', result.message || '설정이 성공적으로 저장되었습니다.');
+                
+                // 브라우저 알림으로 변경
+                showBrowserNotification('성공', '설정이 성공적으로 저장되었습니다.');
                 console.log('✅ 설정 저장 완료');
             } else {
                 throw new Error(result.error || '설정 저장에 실패했습니다.');
@@ -664,7 +695,7 @@
             
         } catch (error) {
             console.error('❌ 설정 저장 실패:', error);
-            showAlert('error', '설정 저장 실패: ' + error.message);
+            showBrowserNotification('오류', '설정 저장 실패: ' + error.message);
         }
     }
 
