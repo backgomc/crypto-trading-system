@@ -2,15 +2,17 @@
 # 코드명: 라우터 통합 및 Blueprint 등록
 
 from flask import Blueprint
-from .auth import auth_bp
-from .pages import pages_bp
-from .api import api_bp
 
 # 메인 웹 Blueprint 생성
 web_bp = Blueprint('web', __name__)
 
 def register_routes(app):
     """Flask 앱에 모든 라우터 등록"""
+
+    # 필요한 시점에만 임포트해서 순환참조 방지
+    from .auth import auth_bp
+    from .pages import pages_bp
+    from .api import api_bp    
     
     # 인증 라우터 등록 (우선순위 높음)
     app.register_blueprint(auth_bp, url_prefix='')
