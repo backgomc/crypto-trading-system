@@ -1,7 +1,7 @@
 # 파일 경로: web/routes/pages.py
 # 코드명: 페이지 렌더링 라우터 (대시보드, 설정, AI 모델)
 
-from flask import Blueprint, render_template, session, redirect, url_for
+from flask import Blueprint, render_template, session, redirect, url_for, request
 from functools import wraps
 from config.models import SystemLog, db
 
