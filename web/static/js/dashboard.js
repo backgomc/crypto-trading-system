@@ -12,12 +12,6 @@ let timeUpdateInterval = null;
 // TradingView 차트 관리
 // ============================================================================
 
-// 파일 경로: web/static/js/dashboard.js (일부 수정)
-// 코드명: TradingView 워닝 완전 해결
-
-// 파일 경로: web/static/js/dashboard.js (수정)
-// 코드명: TradingView 스키마 오류 근본 원인 해결
-
 function initTradingView(symbol = "BYBIT:BTCUSDT") {
     const container = document.getElementById('tradingview_chart');
     if (!container) {
@@ -30,56 +24,31 @@ function initTradingView(symbol = "BYBIT:BTCUSDT") {
     
     if (typeof TradingView !== 'undefined') {
         try {
-            // 🔍 근본 원인: TradingView 최신 버전의 엄격한 스키마 검증
-            // 해결: 검증된 설정만 사용하고 미지원 속성 완전 제거
-            
             tradingViewWidget = new TradingView.widget({
-                // ✅ 필수 기본 설정
-                container_id: "tradingview_chart",
                 width: "100%",
                 height: 600,
                 symbol: symbol,
                 interval: "15",
                 timezone: "Asia/Seoul",
-                
-                // ✅ 테마 설정 (검증된 속성만)
                 theme: "dark",
                 style: "1",
                 locale: "kr",
-                
-                // 🚫 문제 원인 1: 미지원 속성 완전 제거
-                // toolbar_bg: "#1e1e1e",  // ❌ 미지원 속성 (스키마 오류 원인)
-                
-                // ✅ 기능 설정 (TradingView 공식 지원 속성만)
+                toolbar_bg: "#1e1e1e",
                 enable_publishing: false,
                 allow_symbol_change: true,
+                container_id: "tradingview_chart",
+                studies: [],
                 hide_side_toolbar: false,
-                
-                // 🚫 문제 원인 2: 불안정한 속성들 제거
-                // hide_volume: true,        // ❌ 스키마 오류 주범
-                // mobile_friendly: true,    // ❌ 미지원
-                // auto_scale: true,         // ❌ 미지원
-                // details: false,           // ❌ 미지원
-                // hotlist: false,           // ❌ 미지원  
-                // calendar: false,          // ❌ 미지원
-                
-                // ✅ 안전한 기능 제어 (공식 지원)
-                disabled_features: [
-                    "use_localstorage_for_settings"
-                ],
-                
-                // ✅ 안전한 스타일 오버라이드 (공식 지원)
-                overrides: {
-                    "paneProperties.background": "#1e1e1e",
-                    "paneProperties.vertGridProperties.color": "#363636",
-                    "paneProperties.horzGridProperties.color": "#363636"
-                },
-                
-                // ✅ 기본값 유지 (명시하지 않음으로써 오류 방지)
-                studies: []
+                disabled_features: [],
+                details: false,
+                hotlist: false,
+                calendar: false,
+                mobile_friendly: true,
+                auto_scale: true
+                // hide_volume: true  <- 이 줄만 제거! (워닝 원인)
             });
             
-            console.log('✅ TradingView 위젯 초기화 완료 (스키마 검증 통과)');
+            console.log('✅ TradingView 위젯 초기화 완료');
             
         } catch (error) {
             console.error('❌ TradingView 위젯 생성 오류:', error);
