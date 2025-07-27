@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/settings.html -->
-<!-- 코드명: 설정 페이지 템플릿 (routes.py와 완전 동기화) -->
+<!-- 코드명: 설정 페이지 템플릿 (압축 + JS 분리) -->
 
 {% extends "base.html" %}
 
@@ -13,9 +13,7 @@
 <div class="container-fluid">
     <!-- 페이지 헤더 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">
-            <i class="bi bi-gear me-2"></i>설정
-        </h2>
+        <h2 class="mb-0"><i class="bi bi-gear me-2"></i>설정</h2>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-secondary" onclick="resetSettings()" id="resetBtn">
                 <i class="bi bi-arrow-clockwise me-1"></i>기본값 복원
@@ -45,9 +43,7 @@
             <!-- 기본 매매 설정 -->
             <div class="card bg-dark border-secondary shadow-sm mb-4">
                 <div class="card-header bg-secondary">
-                    <h5 class="mb-0">
-                        <i class="bi bi-graph-up me-2"></i>기본 매매 설정
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>기본 매매 설정</h5>
                 </div>
                 <div class="card-body">
                     <form id="tradingForm">
@@ -69,7 +65,6 @@
                                 <div class="form-text">데모 모드에서 사용할 가상 자금</div>
                             </div>
                         </div>
-                        
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">초기 포지션 크기</label>
@@ -88,7 +83,6 @@
                                 <div class="form-text">추가 매매 시 조정할 포지션 크기</div>
                             </div>
                         </div>
-                        
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">기본 임계값</label>
@@ -107,14 +101,11 @@
                                 <div class="form-text">연속 신호 후 대응 매매를 실행할 기준</div>
                             </div>
                         </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="adaptive_threshold_enabled">
-                                    <label class="form-check-label fw-medium" for="adaptive_threshold_enabled">
-                                        적응형 임계값 사용
-                                    </label>
+                                    <label class="form-check-label fw-medium" for="adaptive_threshold_enabled">적응형 임계값 사용</label>
                                 </div>
                                 <div class="form-text">시장 변동성에 따른 임계값 자동 조정</div>
                             </div>
@@ -127,7 +118,6 @@
                                 <div class="form-text">변동성 계산에 사용할 기간</div>
                             </div>
                         </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">루프 간격</label>
@@ -145,9 +135,7 @@
             <!-- AI 설정 -->
             <div class="card bg-dark border-secondary shadow-sm mb-4">
                 <div class="card-header bg-secondary">
-                    <h5 class="mb-0">
-                        <i class="bi bi-brain me-2"></i>AI 설정
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-brain me-2"></i>AI 설정</h5>
                 </div>
                 <div class="card-body">
                     <form id="aiForm">
@@ -155,9 +143,7 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="ai_enabled">
-                                    <label class="form-check-label fw-medium" for="ai_enabled">
-                                        AI 모델 사용
-                                    </label>
+                                    <label class="form-check-label fw-medium" for="ai_enabled">AI 모델 사용</label>
                                 </div>
                                 <div class="form-text">AI 예측을 매매 결정에 반영</div>
                             </div>
@@ -172,7 +158,6 @@
                                 <div class="form-text">주요 매매 판단 기준 시간대</div>
                             </div>
                         </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">AI 학습 기간</label>
@@ -198,9 +183,7 @@
             <!-- 리스크 관리 설정 -->
             <div class="card bg-dark border-secondary shadow-sm mb-4">
                 <div class="card-header bg-secondary">
-                    <h5 class="mb-0">
-                        <i class="bi bi-shield-check me-2"></i>리스크 관리 설정
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>리스크 관리 설정</h5>
                 </div>
                 <div class="card-body">
                     <form id="riskForm">
@@ -222,7 +205,6 @@
                                 <div class="form-text">하루 최대 거래 실행 횟수</div>
                             </div>
                         </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">포지션 크기 상한</label>
@@ -235,14 +217,11 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch mt-4">
                                     <input class="form-check-input" type="checkbox" id="emergency_stop_enabled">
-                                    <label class="form-check-label fw-medium" for="emergency_stop_enabled">
-                                        긴급 정지 활성화
-                                    </label>
+                                    <label class="form-check-label fw-medium" for="emergency_stop_enabled">긴급 정지 활성화</label>
                                 </div>
                                 <div class="form-text">비정상 상황 시 자동 거래 중지</div>
                             </div>
                         </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">연속 손실 제한</label>
@@ -268,9 +247,7 @@
             <!-- 알림 설정 -->
             <div class="card notification-card shadow-sm">
                 <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-bell me-2"></i>알림 설정
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-bell me-2"></i>알림 설정</h5>
                 </div>
                 <div class="card-body">
                     <form id="notificationForm">
@@ -278,23 +255,18 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="telegram_enabled">
-                                    <label class="form-check-label fw-medium" for="telegram_enabled">
-                                        텔레그램 알림
-                                    </label>
+                                    <label class="form-check-label fw-medium" for="telegram_enabled">텔레그램 알림</label>
                                 </div>
                                 <div class="form-text">매매 및 시스템 상태 알림</div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="email_enabled">
-                                    <label class="form-check-label fw-medium" for="email_enabled">
-                                        이메일 알림
-                                    </label>
+                                    <label class="form-check-label fw-medium" for="email_enabled">이메일 알림</label>
                                 </div>
                                 <div class="form-text">중요 이벤트 이메일 알림</div>
                             </div>
                         </div>
-
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-medium">알림 빈도</label>
@@ -322,9 +294,7 @@
             <!-- 현재 상태 -->
             <div class="card bg-dark border-secondary shadow-sm mb-4">
                 <div class="card-header bg-secondary">
-                    <h5 class="mb-0">
-                        <i class="bi bi-info-circle me-2"></i>현재 상태
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>현재 상태</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -337,13 +307,9 @@
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span>설정 파일</span>
-                        <span class="text-success">
-                            <i class="bi bi-check-circle"></i>
-                        </span>
+                        <span class="text-success"><i class="bi bi-check-circle"></i></span>
                     </div>
-                    
                     <hr>
-                    
                     <h6 class="mb-3">빠른 설정</h6>
                     <div class="d-grid gap-2">
                         <button class="btn btn-outline-primary btn-sm" onclick="applyPreset('conservative')">
@@ -362,17 +328,13 @@
             <!-- 설정 도움말 -->
             <div class="card help-card shadow-sm">
                 <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-question-circle me-2"></i>설정 도움말
-                    </h5>
+                    <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>설정 도움말</h5>
                 </div>
                 <div class="card-body">
                     <div class="accordion accordion-flush" id="helpAccordion">
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help1">
-                                    매매 모드
-                                </button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help1">매매 모드</button>
                             </h2>
                             <div id="help1" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
                                 <div class="accordion-body">
@@ -380,12 +342,9 @@
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help2">
-                                    리스크 관리
-                                </button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help2">리스크 관리</button>
                             </h2>
                             <div id="help2" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
                                 <div class="accordion-body">
@@ -393,12 +352,9 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help3">
-                                    AI 모델
-                                </button>
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#help3">AI 모델</button>
                             </h2>
                             <div id="help3" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
                                 <div class="accordion-body">
@@ -415,531 +371,6 @@
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // 전역 변수
-    let currentConfig = {};
-    let isLoading = false;
-
-    // 페이지 로드 시 설정 불러오기
-    document.addEventListener('DOMContentLoaded', function() {
-        loadConfig();
-        initEventListeners();
-    });
-
-    // ============================================================================
-    // API 호출 및 유틸리티 함수들
-    // ============================================================================
-
-    async function apiCall(url, method = 'GET', data = null) {
-        showLoading(true);
-        try {
-            const options = {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            };
-            
-            if (data) {
-                options.body = JSON.stringify(data);
-            }
-
-            const response = await fetch(url, options);
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || `HTTP ${response.status}: 요청 처리 중 오류가 발생했습니다.`);
-            }
-
-            return result;
-        } catch (error) {
-            console.error('API 호출 오류:', error);
-            showAlert('error', error.message || '네트워크 오류가 발생했습니다.');
-            throw error;
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    function showLoading(show) {
-        isLoading = show;
-        const overlay = document.getElementById('loadingOverlay');
-        const saveBtn = document.getElementById('saveBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        
-        if (show) {
-            overlay.classList.remove('d-none');
-            saveBtn.disabled = true;
-            resetBtn.disabled = true;
-        } else {
-            overlay.classList.add('d-none');
-            saveBtn.disabled = false;
-            resetBtn.disabled = false;
-        }
-    }
-
-    function showAlert(type, message) {
-        const container = document.getElementById('alertContainer');
-        const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
-        const iconClass = type === 'error' ? 'bi-exclamation-triangle' : 'bi-check-circle';
-        
-        const alertHtml = `
-            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                <i class="bi ${iconClass} me-2"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        container.innerHTML = alertHtml;
-        
-        setTimeout(() => {
-            const alert = container.querySelector('.alert');
-            if (alert) {
-                alert.remove();
-            }
-        }, 3000);
-    }
-
-    // ============================================================================
-    // 설정 로드 및 저장 함수들
-    // ============================================================================
-
-    async function loadConfig() {
-        try {
-            console.log('🔄 설정 로드 시작...');
-            const result = await apiCall('/api/config');
-            
-            if (result.success && result.data && result.data.config) {
-                currentConfig = result.data.config;
-                console.log('✅ 설정 로드 성공:', currentConfig);
-                
-                // 폼에 설정값 적용
-                populateForm(currentConfig);
-                updateStatusDisplay();
-                showAlert('success', '설정을 성공적으로 불러왔습니다.');
-            } else {
-                throw new Error('설정 데이터 형식이 올바르지 않습니다.');
-            }
-            
-        } catch (error) {
-            console.error('❌ 설정 로드 실패:', error);
-            showAlert('error', '설정을 불러오는데 실패했습니다: ' + error.message);
-        }
-    }
-
-    function populateForm(config) {
-        console.log('📝 폼 데이터 적용 시작:', config);
-        
-        // 매매 설정 (trading)
-        if (config.trading) {
-            const t = config.trading;
-            setElementValue('demo_mode', String(t.demo_mode !== false));
-            setElementValue('virtual_balance', t.virtual_balance || 10000);
-            setElementValue('initial_position_size', t.initial_position_size || 0.05);
-            setElementValue('adjustment_size', t.adjustment_size || 0.01);
-            setElementValue('base_threshold', t.base_threshold || 1000);
-            setElementValue('consecutive_threshold', t.consecutive_threshold || 4);
-            setElementValue('adaptive_threshold_enabled', t.adaptive_threshold_enabled !== false);
-            setElementValue('volatility_window', t.volatility_window || 20);
-            setElementValue('loop_delay', t.loop_delay || 60);
-        }
-
-        // AI 설정 (ai)
-        if (config.ai) {
-            const a = config.ai;
-            setElementValue('ai_enabled', a.enabled !== false);
-            setElementValue('main_interval', a.main_interval || '15');
-            setElementValue('training_days', a.training_days || 365);
-            setElementValue('retrain_interval_days', a.retrain_interval_days || 14);
-        }
-
-        // 리스크 설정 (risk)
-        if (config.risk) {
-            const r = config.risk;
-            setElementValue('max_loss_percent', r.max_loss_percent || 5.0);
-            setElementValue('daily_trade_limit', r.daily_trade_limit || 10);
-            setElementValue('max_position_size', r.max_position_size || 0.5);
-            setElementValue('emergency_stop_enabled', r.emergency_stop_enabled !== false);
-            setElementValue('consecutive_loss_limit', r.consecutive_loss_limit || 3);
-            setElementValue('cooldown_minutes', r.cooldown_minutes || 30);
-        }
-
-        // 알림 설정 (notifications)
-        if (config.notifications) {
-            const n = config.notifications;
-            setElementValue('telegram_enabled', n.telegram_enabled !== false);
-            setElementValue('email_enabled', n.email_enabled || false);
-            setElementValue('frequency', n.frequency || 'all');
-            setElementValue('profit_threshold_krw', n.profit_threshold_krw || 1000);
-        }
-        
-        console.log('✅ 폼 데이터 적용 완료');
-    }
-
-    function setElementValue(id, value) {
-        const element = document.getElementById(id);
-        if (!element) {
-            console.warn(`⚠️ 요소를 찾을 수 없습니다: ${id}`);
-            return;
-        }
-
-        if (element.type === 'checkbox') {
-            element.checked = Boolean(value);
-        } else if (element.type === 'select-one') {
-            element.value = String(value);
-        } else {
-            element.value = value;
-        }
-    }
-
-    function collectFormData() {
-        const formData = {
-            config: {
-                trading: {
-                    demo_mode: document.getElementById('demo_mode').value === 'true',
-                    virtual_balance: parseFloat(document.getElementById('virtual_balance').value),
-                    symbol: "BTCUSDT",
-                    initial_position_size: parseFloat(document.getElementById('initial_position_size').value),
-                    adjustment_size: parseFloat(document.getElementById('adjustment_size').value),
-                    base_threshold: parseInt(document.getElementById('base_threshold').value),
-                    consecutive_threshold: parseInt(document.getElementById('consecutive_threshold').value),
-                    adaptive_threshold_enabled: document.getElementById('adaptive_threshold_enabled').checked,
-                    volatility_window: parseInt(document.getElementById('volatility_window').value),
-                    loop_delay: parseInt(document.getElementById('loop_delay').value)
-                },
-                ai: {
-                    enabled: document.getElementById('ai_enabled').checked,
-                    main_interval: document.getElementById('main_interval').value,
-                    training_days: parseInt(document.getElementById('training_days').value),
-                    retrain_interval_days: parseInt(document.getElementById('retrain_interval_days').value),
-                    timeframes: ["1", "5", "15", "60"]
-                },
-                risk: {
-                    max_loss_percent: parseFloat(document.getElementById('max_loss_percent').value),
-                    daily_trade_limit: parseInt(document.getElementById('daily_trade_limit').value),
-                    max_position_size: parseFloat(document.getElementById('max_position_size').value),
-                    emergency_stop_enabled: document.getElementById('emergency_stop_enabled').checked,
-                    consecutive_loss_limit: parseInt(document.getElementById('consecutive_loss_limit').value),
-                    cooldown_minutes: parseInt(document.getElementById('cooldown_minutes').value)
-                },
-                notifications: {
-                    telegram_enabled: document.getElementById('telegram_enabled').checked,
-                    email_enabled: document.getElementById('email_enabled').checked,
-                    frequency: document.getElementById('frequency').value,
-                    profit_threshold_krw: parseInt(document.getElementById('profit_threshold_krw').value)
-                }
-            }
-        };
-        
-        console.log('📊 수집된 폼 데이터:', formData);
-        return formData;
-    }
-
-    // ============================================================================
-    // 설정 저장 및 리셋 함수들
-    // ============================================================================
-
-    async function saveSettings() {
-        if (isLoading) return;
-
-        try {
-            if (!validateForm()) {
-                return;
-            }
-
-            console.log('💾 설정 저장 시작...');
-            const formData = collectFormData();
-            
-            const result = await apiCall('/api/config', 'PUT', formData);
-            
-            if (result.success) {
-                currentConfig = result.data.config;
-                updateStatusDisplay();
-                showAlert('success', result.message || '설정이 성공적으로 저장되었습니다.');
-                console.log('✅ 설정 저장 완료');
-            } else {
-                throw new Error(result.error || '설정 저장에 실패했습니다.');
-            }
-            
-        } catch (error) {
-            console.error('❌ 설정 저장 실패:', error);
-            showAlert('error', '설정 저장 실패: ' + error.message);
-        }
-    }
-
-    async function resetSettings() {
-        if (isLoading) return;
-
-        if (!confirm('모든 설정을 기본값으로 복원하시겠습니까?\n현재 설정은 모두 삭제됩니다.')) {
-            return;
-        }
-
-        try {
-            console.log('🔄 설정 초기화 시작...');
-            const result = await apiCall('/api/config/reset', 'POST');
-            
-            if (result.success) {
-                currentConfig = result.data.config;
-                populateForm(currentConfig);
-                updateStatusDisplay();
-                showAlert('success', result.message || '모든 설정이 기본값으로 복원되었습니다.');
-                console.log('✅ 설정 초기화 완료');
-            } else {
-                throw new Error(result.error || '설정 초기화에 실패했습니다.');
-            }
-            
-        } catch (error) {
-            console.error('❌ 설정 초기화 실패:', error);
-            showAlert('error', '설정 초기화 실패: ' + error.message);
-        }
-    }
-
-    async function applyPreset(presetType) {
-        if (isLoading) return;
-
-        const presetNames = {
-            conservative: '보수적',
-            balanced: '균형',
-            aggressive: '공격적'
-        };
-
-        if (!confirm(`${presetNames[presetType]} 설정을 적용하시겠습니까?\n현재 설정이 변경됩니다.`)) {
-            return;
-        }
-
-        try {
-            console.log(`🎯 ${presetType} 프리셋 적용 시작...`);
-            const result = await apiCall(`/api/config/preset/${presetType}`, 'POST');
-            
-            if (result.success) {
-                currentConfig = result.data.config;
-                populateForm(currentConfig);
-                updateStatusDisplay();
-                showAlert('success', result.message || `${presetNames[presetType]} 설정이 적용되었습니다.`);
-                console.log(`✅ ${presetType} 프리셋 적용 완료`);
-            } else {
-                throw new Error(result.error || '프리셋 적용에 실패했습니다.');
-            }
-            
-        } catch (error) {
-            console.error(`❌ ${presetType} 프리셋 적용 실패:`, error);
-            showAlert('error', '프리셋 적용 실패: ' + error.message);
-        }
-    }
-
-    // ============================================================================
-    // 유효성 검사 및 상태 관리
-    // ============================================================================
-
-    function validateForm() {
-        const errors = [];
-
-        // 필수 필드 검사
-        const requiredFields = [
-            'virtual_balance', 'initial_position_size', 'adjustment_size',
-            'base_threshold', 'consecutive_threshold', 'volatility_window', 'loop_delay',
-            'training_days', 'retrain_interval_days',
-            'max_loss_percent', 'daily_trade_limit', 'max_position_size',
-            'consecutive_loss_limit', 'cooldown_minutes', 'profit_threshold_krw'
-        ];
-
-        for (const fieldId of requiredFields) {
-            const element = document.getElementById(fieldId);
-            if (!element || !element.value || isNaN(parseFloat(element.value))) {
-                const label = element ? element.closest('.col-md-6, .col-md-12')?.querySelector('label')?.textContent || fieldId : fieldId;
-                errors.push(`${label}은(는) 필수 입력값입니다.`);
-            }
-        }
-
-        // 범위 검사
-        const rangeChecks = [
-            { id: 'virtual_balance', min: 1000, max: 1000000, name: '가상 잔고' },
-            { id: 'initial_position_size', min: 0.001, max: 1, name: '초기 포지션 크기' },
-            { id: 'adjustment_size', min: 0.001, max: 0.1, name: '조정 크기' },
-            { id: 'base_threshold', min: 100, max: 10000, name: '기본 임계값' },
-            { id: 'consecutive_threshold', min: 2, max: 10, name: '연속 신호 기준' },
-            { id: 'volatility_window', min: 5, max: 100, name: '변동성 윈도우' },
-            { id: 'loop_delay', min: 10, max: 300, name: '루프 간격' },
-            { id: 'training_days', min: 30, max: 1095, name: 'AI 학습 기간' },
-            { id: 'retrain_interval_days', min: 1, max: 30, name: '모델 재훈련 간격' },
-            { id: 'max_loss_percent', min: 1.0, max: 20.0, name: '최대 손실 한도' },
-            { id: 'daily_trade_limit', min: 1, max: 100, name: '일일 거래 한도' },
-            { id: 'max_position_size', min: 0.01, max: 2.0, name: '포지션 크기 상한' },
-            { id: 'consecutive_loss_limit', min: 2, max: 10, name: '연속 손실 제한' },
-            { id: 'cooldown_minutes', min: 5, max: 120, name: '쿨다운 시간' },
-            { id: 'profit_threshold_krw', min: 100, max: 100000, name: '수익 알림 기준' }
-        ];
-
-        for (const check of rangeChecks) {
-            const element = document.getElementById(check.id);
-            if (element && element.value) {
-                const value = parseFloat(element.value);
-                if (value < check.min || value > check.max) {
-                    errors.push(`${check.name}은(는) ${check.min}~${check.max} 범위 내에서 입력해주세요.`);
-                }
-            }
-        }
-
-        if (errors.length > 0) {
-            showAlert('error', errors.join('<br>'));
-            return false;
-        }
-
-        return true;
-    }
-
-    function updateStatusDisplay() {
-        const configStatus = document.getElementById('configStatus');
-        const lastSaved = document.getElementById('lastSaved');
-        
-        configStatus.textContent = '저장됨';
-        configStatus.className = 'badge bg-success';
-        
-        const now = new Date();
-        lastSaved.textContent = now.toLocaleString('ko-KR', {
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    }
-
-    function markAsChanged() {
-        const configStatus = document.getElementById('configStatus');
-        configStatus.textContent = '변경됨';
-        configStatus.className = 'badge bg-warning';
-    }
-
-    // ============================================================================
-    // 이벤트 리스너 초기화
-    // ============================================================================
-
-    function initEventListeners() {
-        // 실시간 유효성 검사
-        const numberInputs = document.querySelectorAll('input[type="number"]');
-        numberInputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                validateField(this);
-            });
-        });
-
-        // 설정 변경 감지
-        const formElements = document.querySelectorAll('input, select');
-        formElements.forEach(element => {
-            element.addEventListener('change', markAsChanged);
-        });
-
-        // 키보드 단축키 (Ctrl+S로 저장)
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                saveSettings();
-            }
-        });
-
-        // 페이지 이탈 시 경고
-        window.addEventListener('beforeunload', function(e) {
-            const configStatus = document.getElementById('configStatus');
-            if (configStatus.textContent === '변경됨') {
-                e.preventDefault();
-                e.returnValue = '저장하지 않은 설정 변경사항이 있습니다. 페이지를 떠나시겠습니까?';
-            }
-        });
-    }
-
-    function validateField(input) {
-        const min = parseFloat(input.min);
-        const max = parseFloat(input.max);
-        const value = parseFloat(input.value);
-        
-        if (input.value && (value < min || value > max)) {
-            input.classList.add('is-invalid');
-            
-            // 기존 에러 메시지 제거
-            const existingError = input.parentNode.querySelector('.invalid-feedback');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            // 에러 메시지 추가
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'invalid-feedback';
-            errorDiv.textContent = `${min}~${max} 범위 내에서 입력해주세요.`;
-            input.parentNode.appendChild(errorDiv);
-        } else {
-            input.classList.remove('is-invalid');
-            const errorDiv = input.parentNode.querySelector('.invalid-feedback');
-            if (errorDiv) {
-                errorDiv.remove();
-            }
-        }
-    }
-
-    // ============================================================================
-    // 추가 유틸리티 함수들
-    // ============================================================================
-
-    function exportSettings() {
-        try {
-            const formData = collectFormData();
-            const dataStr = JSON.stringify(formData.config, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `nhbot_settings_${new Date().toISOString().slice(0, 10)}.json`;
-            link.click();
-            
-            showAlert('success', '설정이 파일로 내보내기되었습니다.');
-        } catch (error) {
-            showAlert('error', '설정 내보내기에 실패했습니다.');
-        }
-    }
-
-    function importSettings() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        
-        input.onchange = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const settings = JSON.parse(e.target.result);
-                    populateForm(settings);
-                    markAsChanged();
-                    showAlert('success', '설정을 성공적으로 가져왔습니다.');
-                } catch (error) {
-                    showAlert('error', '설정 파일 형식이 올바르지 않습니다.');
-                }
-            };
-            reader.readAsText(file);
-        };
-        
-        input.click();
-    }
-
-    function showDebugInfo() {
-        console.log('🔍 디버그 정보:');
-        console.log('현재 설정:', currentConfig);
-        console.log('폼 데이터:', collectFormData());
-        console.log('로딩 상태:', isLoading);
-    }
-
-    // 전역 함수로 노출 (개발용)
-    window.debugSettings = showDebugInfo;
-    window.exportSettings = exportSettings;
-    window.importSettings = importSettings;
-
-    // 초기화 완료 로그
-    console.log('🚀 NHBot 설정 페이지가 로드되었습니다.');
-    console.log('💡 사용 가능한 콘솔 명령어:');
-    console.log('   - debugSettings(): 현재 설정 상태 확인');
-    console.log('   - exportSettings(): 설정 내보내기');
-    console.log('   - importSettings(): 설정 가져오기');
-</script>
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}
