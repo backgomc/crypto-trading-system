@@ -1,0 +1,337 @@
+<!-- 파일 경로: web/templates/admin.html -->
+<!-- 코드명: 관리자 페이지 템플릿 (DB 조회, 사용자 관리) -->
+
+{% extends "base.html" %}
+
+{% block title %}NHBot - 관리자{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 페이지 헤더 -->
+    <div class="d-flex justify-content-between align-items-center mb-4 page-header">
+        <h2 class="mb-0">
+            <i class="bi bi-shield-lock me-2"></i>시스템 관리
+        </h2>
+        <div class="admin-badge">
+            <span class="badge bg-warning text-dark">
+                <i class="bi bi-star-fill me-1"></i>관리자 모드
+            </span>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    <!-- 시스템 통계 카드 -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>전체 사용자</h6>
+                            <h3>{{ admin_data.stats.total_users }}</h3>
+                        </div>
+                        <div class="stats-icon text-primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>활성 사용자</h6>
+                            <h3 class="text-success">{{ admin_data.stats.active_users }}</h3>
+                        </div>
+                        <div class="stats-icon text-success">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>관리자</h6>
+                            <h3 class="text-warning">{{ admin_data.stats.admin_users }}</h3>
+                        </div>
+                        <div class="stats-icon text-warning">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card stats-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>비활성</h6>
+                            <h3 class="text-danger">{{ admin_data.stats.inactive_users }}</h3>
+                        </div>
+                        <div class="stats-icon text-danger">
+                            <i class="bi bi-person-x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 좌측: 사용자 관리 -->
+        <div class="col-lg-8 mb-4">
+            <!-- 사용자 목록 -->
+            <div class="card main-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people me-2"></i>사용자 관리
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="refreshUsers()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>새로고침
+                        </button>
+                        <button class="btn btn-primary btn-sm" onclick="addUser()">
+                            <i class="bi bi-person-plus me-1"></i>사용자 추가
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>사용자명</th>
+                                    <th>이메일</th>
+                                    <th>상태</th>
+                                    <th>권한</th>
+                                    <th>마지막 로그인</th>
+                                    <th class="text-center">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in admin_data.all_users %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ user.username }}</strong>
+                                        {% if user.id == session.get('user_id') %}
+                                        <span class="badge bg-info ms-1">나</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.email or '-' }}</td>
+                                    <td>
+                                        {% if user.is_active %}
+                                        <span class="badge bg-success">활성</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">비활성</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_admin %}
+                                        <span class="badge bg-warning text-dark">관리자</span>
+                                        {% else %}
+                                        <span class="badge bg-light text-dark">일반</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.last_login %}
+                                        {{ user.last_login.strftime('%m/%d %H:%M') }}
+                                        {% else %}
+                                        <span class="text-muted">없음</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="editUser({{ user.id }}, '{{ user.username }}', {{ user.is_active|lower }}, {{ user.is_admin|lower }})" title="편집">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" onclick="resetPassword({{ user.id }}, '{{ user.username }}')" title="비밀번호 리셋">
+                                                <i class="bi bi-key"></i>
+                                            </button>
+                                            {% if user.id != session.get('user_id') %}
+                                            <button class="btn btn-outline-danger" onclick="deleteUser({{ user.id }}, '{{ user.username }}')" title="삭제">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        사용자 데이터가 없습니다.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 설정 변경 이력 -->
+            <div class="card main-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>최근 설정 변경
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="config-history">
+                        {% for config in admin_data.recent_configs %}
+                        <div class="history-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ config.config_key }}</strong>
+                                    <small class="text-muted d-block">
+                                        사용자 {{ config.user_id }} | {{ config.changed_at.strftime('%m/%d %H:%M') }}
+                                    </small>
+                                </div>
+                                <button class="btn btn-outline-info btn-sm" onclick="viewConfigChange({{ config.id }})" title="변경 내용 보기">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted py-3">
+                            최근 설정 변경 내역이 없습니다.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 시스템 로그 -->
+        <div class="col-lg-4">
+            <!-- 시스템 로그 -->
+            <div class="card main-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-journal-text me-2"></i>시스템 로그
+                    </h5>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearLogs()" title="로그 정리">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="log-container">
+                        {% for log in admin_data.recent_logs %}
+                        <div class="log-item log-{{ log.level.lower() }}">
+                            <div class="log-header">
+                                <span class="log-level badge 
+                                    {% if log.level == 'ERROR' %}bg-danger
+                                    {% elif log.level == 'WARNING' %}bg-warning text-dark
+                                    {% elif log.level == 'INFO' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ log.level }}
+                                </span>
+                                <span class="log-category">{{ log.category }}</span>
+                                <small class="log-time">{{ log.timestamp.strftime('%m/%d %H:%M') }}</small>
+                            </div>
+                            <div class="log-message">{{ log.message }}</div>
+                        </div>
+                        {% else %}
+                        <div class="text-center text-muted py-3">
+                            시스템 로그가 없습니다.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 사용자 편집 모달 -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">사용자 편집</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label class="form-label">사용자명</label>
+                        <input type="text" class="form-control" id="editUsername" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editIsActive">
+                            <label class="form-check-label" for="editIsActive">계정 활성화</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="editIsAdmin">
+                            <label class="form-check-label" for="editIsAdmin">관리자 권한</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="saveUserChanges()">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 비밀번호 리셋 모달 -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">비밀번호 리셋</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="resetPasswordForm">
+                    <input type="hidden" id="resetUserId">
+                    <div class="mb-3">
+                        <label class="form-label">사용자명</label>
+                        <input type="text" class="form-control" id="resetUsername" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">새 비밀번호</label>
+                        <input type="password" class="form-control" id="newPassword" placeholder="새 비밀번호 입력">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">비밀번호 확인</label>
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="비밀번호 다시 입력">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-warning" onclick="savePasswordReset()">비밀번호 변경</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

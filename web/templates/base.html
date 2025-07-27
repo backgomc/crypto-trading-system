@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/base.html -->
-<!-- 코드명: Flask 기본 템플릿 (AI 모델 관리 메뉴 추가, 사이드바 폭 조정) -->
+<!-- 코드명: Flask 기본 템플릿 (관리자 메뉴 추가) -->
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -48,6 +48,9 @@
                 <div class="d-flex align-items-center">
                     <span class="user-info me-3">
                         <i class="bi bi-person-circle me-1"></i>{{ current_user.username }}님
+                        {% if current_user.is_admin %}
+                        <span class="badge bg-warning text-dark ms-1">관리자</span>
+                        {% endif %}
                     </span>
                     <a href="/logout" class="logout-btn">
                         <i class="bi bi-box-arrow-right me-1"></i>로그아웃
@@ -76,6 +79,24 @@
                     <a href="/settings" class="{% if request.endpoint == 'web.settings' %}active{% endif %}" aria-current="{% if request.endpoint == 'web.settings' %}page{% endif %}">
                         <i class="bi bi-gear"></i>설정
                     </a>
+                </li>
+                
+                <!-- 관리자 전용 메뉴 -->
+                {% if current_user.is_admin %}
+                <li class="sidebar-divider">
+                    <hr class="sidebar-hr">
+                    <small class="sidebar-label">관리자 메뉴</small>
+                </li>
+                <li>
+                    <a href="/admin" class="{% if request.endpoint == 'web.admin' %}active{% endif %}" aria-current="{% if request.endpoint == 'web.admin' %}page{% endif %}">
+                        <i class="bi bi-shield-lock"></i>시스템 관리
+                    </a>
+                </li>
+                {% endif %}
+                
+                <!-- 일반 메뉴 구분선 -->
+                <li class="sidebar-divider">
+                    <hr class="sidebar-hr">
                 </li>
                 <li>
                     <a href="#" onclick="showComingSoon('거래 내역')" aria-disabled="true">
