@@ -97,6 +97,55 @@ function createAlertContainer() {
 }
 
 // ============================================================================
+// 부트스트랩 모달 확인창
+// ============================================================================
+
+function showConfirm(title, message, callback) {
+    // 모달이 없으면 생성
+    if (!document.getElementById('confirmModal')) {
+        createConfirmModal();
+    }
+    
+    document.getElementById('confirmModalTitle').textContent = title;
+    document.getElementById('confirmModalBody').textContent = message;
+    
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    const okBtn = document.getElementById('confirmModalOk');
+    
+    // 기존 이벤트 제거 후 새로 추가
+    okBtn.replaceWith(okBtn.cloneNode(true));
+    document.getElementById('confirmModalOk').onclick = function() {
+        modal.hide();
+        callback(true);
+    };
+    
+    modal.show();
+}
+
+function createConfirmModal() {
+    const modalHtml = `
+        <div class="modal fade" id="confirmModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title text-white" id="confirmModalTitle">확인</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-white" id="confirmModalBody">
+                        정말 실행하시겠습니까?
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn btn-primary" id="confirmModalOk">확인</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+// ============================================================================
 // 폼 유틸리티 함수들
 // ============================================================================
 
@@ -177,28 +226,6 @@ function validateAllNumberFields() {
     });
     
     return allValid;
-}
-
-// ============================================================================
-// 확인 대화상자 함수들
-// ============================================================================
-
-function confirmAction(message, title = '확인') {
-    return confirm(`${title}\n\n${message}`);
-}
-
-function confirmReset() {
-    return confirmAction(
-        '모든 설정을 기본값으로 복원하시겠습니까?\n현재 설정은 모두 삭제됩니다.',
-        '설정 초기화'
-    );
-}
-
-function confirmPreset(presetName) {
-    return confirmAction(
-        `${presetName} 설정을 적용하시겠습니까?\n현재 설정이 변경됩니다.`,
-        '프리셋 적용'
-    );
 }
 
 // ============================================================================

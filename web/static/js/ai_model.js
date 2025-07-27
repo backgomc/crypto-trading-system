@@ -214,30 +214,30 @@ async function startTraining() {
 async function stopTraining() {
     if (!isTraining) return;
     
-    if (!confirmAction('진행 중인 학습을 중지하시겠습니까?', '학습 중지')) {
-        return;
-    }
-    
-    try {
-        showLoading(true);
+    showConfirm('학습 중지', '진행 중인 학습을 중지하시겠습니까?', async function(result) {
+        if (!result) return;
         
-        const result = await apiCall('/api/ai/training/stop', 'POST');
-        
-        if (result.success) {
-            isTraining = false;
-            updateTrainingUI(false);
-            stopTrainingMonitor();
-            showToast('warning', 'AI 모델 학습을 중지했습니다.');
-        } else {
-            throw new Error(result.error || '학습 중지에 실패했습니다.');
+        try {
+            showLoading(true);
+            
+            const result = await apiCall('/api/ai/training/stop', 'POST');
+            
+            if (result.success) {
+                isTraining = false;
+                updateTrainingUI(false);
+                stopTrainingMonitor();
+                showToast('warning', 'AI 모델 학습을 중지했습니다.');
+            } else {
+                throw new Error(result.error || '학습 중지에 실패했습니다.');
+            }
+            
+        } catch (error) {
+            console.error('학습 중지 실패:', error);
+            showToast('error', '학습 중지 실패: ' + error.message);
+        } finally {
+            showLoading(false);
         }
-        
-    } catch (error) {
-        console.error('학습 중지 실패:', error);
-        showToast('error', '학습 중지 실패: ' + error.message);
-    } finally {
-        showLoading(false);
-    }
+    });
 }
 
 function updateTrainingUI(training) {
@@ -380,79 +380,79 @@ function updateTrainingProgress(data) {
 // ============================================================================
 
 async function activateModel(modelName) {
-    if (!confirmAction(`${modelName} 모델을 활성화하시겠습니까?`, '모델 활성화')) {
-        return;
-    }
-    
-    try {
-        showLoading(true);
+    showConfirm('모델 활성화', `${modelName} 모델을 활성화하시겠습니까?`, async function(result) {
+        if (!result) return;
         
-        const result = await apiCall(`/api/ai/model/activate/${modelName}`, 'POST');
-        
-        if (result.success) {
-            showToast('success', `${modelName} 모델이 활성화되었습니다.`);
-            loadCurrentModel();
-            loadModelHistory();
-        } else {
-            throw new Error(result.error || '모델 활성화에 실패했습니다.');
+        try {
+            showLoading(true);
+            
+            const result = await apiCall(`/api/ai/model/activate/${modelName}`, 'POST');
+            
+            if (result.success) {
+                showToast('success', `${modelName} 모델이 활성화되었습니다.`);
+                loadCurrentModel();
+                loadModelHistory();
+            } else {
+                throw new Error(result.error || '모델 활성화에 실패했습니다.');
+            }
+            
+        } catch (error) {
+            console.error('모델 활성화 실패:', error);
+            showToast('error', '모델 활성화 실패: ' + error.message);
+        } finally {
+            showLoading(false);
         }
-        
-    } catch (error) {
-        console.error('모델 활성화 실패:', error);
-        showToast('error', '모델 활성화 실패: ' + error.message);
-    } finally {
-        showLoading(false);
-    }
+    });
 }
 
 async function deleteModel(modelName) {
-    if (!confirmAction(`${modelName} 모델을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`, '모델 삭제')) {
-        return;
-    }
-    
-    try {
-        showLoading(true);
+    showConfirm('모델 삭제', `${modelName} 모델을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`, async function(result) {
+        if (!result) return;
         
-        const result = await apiCall(`/api/ai/model/delete/${modelName}`, 'DELETE');
-        
-        if (result.success) {
-            showToast('success', `${modelName} 모델이 삭제되었습니다.`);
-            loadModelHistory();
-        } else {
-            throw new Error(result.error || '모델 삭제에 실패했습니다.');
+        try {
+            showLoading(true);
+            
+            const result = await apiCall(`/api/ai/model/delete/${modelName}`, 'DELETE');
+            
+            if (result.success) {
+                showToast('success', `${modelName} 모델이 삭제되었습니다.`);
+                loadModelHistory();
+            } else {
+                throw new Error(result.error || '모델 삭제에 실패했습니다.');
+            }
+            
+        } catch (error) {
+            console.error('모델 삭제 실패:', error);
+            showToast('error', '모델 삭제 실패: ' + error.message);
+        } finally {
+            showLoading(false);
         }
-        
-    } catch (error) {
-        console.error('모델 삭제 실패:', error);
-        showToast('error', '모델 삭제 실패: ' + error.message);
-    } finally {
-        showLoading(false);
-    }
+    });
 }
 
 async function cleanupModels() {
-    if (!confirmAction('오래된 모델들을 정리하시겠습니까?\n(최근 5개 모델만 보관)', '모델 정리')) {
-        return;
-    }
-    
-    try {
-        showLoading(true);
+    showConfirm('모델 정리', '오래된 모델들을 정리하시겠습니까?\n(최근 5개 모델만 보관)', async function(result) {
+        if (!result) return;
         
-        const result = await apiCall('/api/ai/model/cleanup', 'POST');
-        
-        if (result.success) {
-            showToast('success', '오래된 모델들이 정리되었습니다.');
-            loadModelHistory();
-        } else {
-            throw new Error(result.error || '모델 정리에 실패했습니다.');
+        try {
+            showLoading(true);
+            
+            const result = await apiCall('/api/ai/model/cleanup', 'POST');
+            
+            if (result.success) {
+                showToast('success', '오래된 모델들이 정리되었습니다.');
+                loadModelHistory();
+            } else {
+                throw new Error(result.error || '모델 정리에 실패했습니다.');
+            }
+            
+        } catch (error) {
+            console.error('모델 정리 실패:', error);
+            showToast('error', '모델 정리 실패: ' + error.message);
+        } finally {
+            showLoading(false);
         }
-        
-    } catch (error) {
-        console.error('모델 정리 실패:', error);
-        showToast('error', '모델 정리 실패: ' + error.message);
-    } finally {
-        showLoading(false);
-    }
+    });
 }
 
 // ============================================================================
@@ -460,12 +460,12 @@ async function cleanupModels() {
 // ============================================================================
 
 function resetParameters() {
-    if (!confirmAction('모든 파라미터를 기본값으로 복원하시겠습니까?', '파라미터 초기화')) {
-        return;
-    }
-    
-    setDefaultTrainingParams();
-    showToast('success', '파라미터가 기본값으로 복원되었습니다.');
+    showConfirm('파라미터 초기화', '모든 파라미터를 기본값으로 복원하시겠습니까?', function(result) {
+        if (result) {
+            setDefaultTrainingParams();
+            showToast('success', '파라미터가 기본값으로 복원되었습니다.');
+        }
+    });
 }
 
 async function saveTrainingParams() {
