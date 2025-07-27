@@ -1,11 +1,6 @@
 # 파일 경로: web/routes/__init__.py
 # 코드명: 라우터 통합 및 Blueprint 등록
 
-from flask import Blueprint
-
-# 메인 웹 Blueprint 생성
-web_bp = Blueprint('web', __name__)
-
 def register_routes(app):
     """Flask 앱에 모든 라우터 등록"""
 
