@@ -86,34 +86,48 @@ def ai_model():
     
     return render_template('ai_model.html', user=user_info)
 
+# 파일 경로: web/routes/pages.py
+# 코드명: 페이지 라우트 (SQLite 호환 수정)
+
 @pages_bp.route('/admin')
 @admin_required
 def admin():
-    """관리자 페이지 (DB 조회, 사용자 관리)"""
+    """관리자 페이지 (SQLite 호환 수정)"""
     try:
-
         print("🔍 DEBUG: admin() 함수 시작")
-        print(f"🔍 DEBUG: User 모델: {User}")
         
-        total_users = User.query.count()
-        print(f"🔍 DEBUG: total_users = {total_users}")
-                
         # 시스템 통계 수집
         total_users = User.query.count()
-        active_users = User.query.filter_by(is_active=True).count()
-        admin_users = User.query.filter_by(is_admin=True).count()
+        print(f"🔍 DEBUG: total_users = {total_users}")
         
-        # 최근 사용자 목록 (최근 로그인 순)
-        recent_users = User.query.order_by(User.last_login.desc().nullslast()).limit(10).all()
+        active_users = User.query.filter_by(is_active=True).count()
+        print(f"🔍 DEBUG: active_users = {active_users}")
+        
+        admin_users = User.query.filter_by(is_admin=True).count()
+        print(f"🔍 DEBUG: admin_users = {admin_users}")
+        
+        # 최근 사용자 목록 (SQLite 호환)
+        # NULLS LAST 대신 CASE WHEN 사용
+        recent_users = User.query.order_by(
+            db.case(
+                (User.last_login.is_(None), 1),
+                else_=0
+            ),
+            User.last_login.desc()
+        ).limit(10).all()
+        print(f"🔍 DEBUG: recent_users count = {len(recent_users)}")
         
         # 최근 시스템 로그 (최신 20개)
         recent_logs = SystemLog.query.order_by(SystemLog.timestamp.desc()).limit(20).all()
+        print(f"🔍 DEBUG: recent_logs count = {len(recent_logs)}")
         
-        # 최근 설정 변경 이력 (최신 10개)
+        # 최근 설정 변경 이력 (최신 10개) 
         recent_configs = ConfigHistory.query.order_by(ConfigHistory.changed_at.desc()).limit(10).all()
+        print(f"🔍 DEBUG: recent_configs count = {len(recent_configs)}")
         
         # 전체 사용자 목록 (관리용)
         all_users = User.query.order_by(User.created_at.desc()).all()
+        print(f"🔍 DEBUG: all_users count = {len(all_users)}")
         
         admin_data = {
             'stats': {
@@ -136,20 +150,22 @@ def admin():
         # 관리자 페이지 접속 로그
         log_system_event('INFO', 'ADMIN', f'관리자 페이지 접속: {session.get("username")}')
         
+        print("🔍 DEBUG: admin_data 준비 완료")
         return render_template('admin.html', user=user_info, admin_data=admin_data)
         
     except Exception as e:
-        print(f"관리자 페이지 로드 오류: {e}")
-        log_system_event('ERROR', 'ADMIN', f'관리자 페이지 로드 실패: {e}')
+        print(f"❌ DEBUG: admin() 함수 오류: {e}")
+        import traceback
+        traceback.print_exc()
         
-        # 오류 발생 시 기본 데이터로 처리
+        # 오류 발생 시 빈 데이터로 처리
         admin_data = {
             'stats': {'total_users': 0, 'active_users': 0, 'admin_users': 0, 'inactive_users': 0},
             'recent_users': [], 'recent_logs': [], 'recent_configs': [], 'all_users': []
         }
         user_info = {'username': session.get('username'), 'is_admin': True}
         
-        return render_template('admin.html', user=user_info, admin_data=admin_data, error='데이터 로드 중 오류가 발생했습니다.')
+        return render_template('admin.html', user=user_info, admin_data=admin_data, error=f'데이터 로드 중 오류: {str(e)}')
 
 # ============================================================================
 # 에러 핸들러 (페이지 관련)
