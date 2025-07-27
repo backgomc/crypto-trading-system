@@ -125,7 +125,7 @@ function showConfirm(title, message, callback) {
 function createConfirmModal() {
     const modalHtml = `
         <div class="modal fade" id="confirmModal" tabindex="-1">
-            <div class="modal-dialog" style="margin-top: 5vh;">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content bg-dark">
                     <div class="modal-header border-secondary">
                         <h5 class="modal-title text-white" id="confirmModalTitle">확인</h5>
