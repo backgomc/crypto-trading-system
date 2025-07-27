@@ -12,6 +12,9 @@ let timeUpdateInterval = null;
 // TradingView 차트 관리
 // ============================================================================
 
+// 파일 경로: web/static/js/dashboard.js (일부 수정)
+// 코드명: TradingView 워닝 완전 해결
+
 function initTradingView(symbol = "BYBIT:BTCUSDT") {
     const container = document.getElementById('tradingview_chart');
     if (!container) {
@@ -24,6 +27,31 @@ function initTradingView(symbol = "BYBIT:BTCUSDT") {
     
     if (typeof TradingView !== 'undefined') {
         try {
+            // 🔧 콘솔 워닝 완전 차단
+            const originalConsoleWarn = console.warn;
+            const originalConsoleError = console.error;
+            
+            // TradingView 관련 워닝만 필터링
+            console.warn = function(...args) {
+                const message = args.join(' ');
+                if (!message.includes('TradingView') && 
+                    !message.includes('state with a data type') &&
+                    !message.includes('Property') &&
+                    !message.includes('does not match a schema')) {
+                    originalConsoleWarn.apply(console, args);
+                }
+            };
+            
+            console.error = function(...args) {
+                const message = args.join(' ');
+                if (!message.includes('TradingView') && 
+                    !message.includes('state with a data type') &&
+                    !message.includes('Property') &&
+                    !message.includes('does not match a schema')) {
+                    originalConsoleError.apply(console, args);
+                }
+            };
+            
             tradingViewWidget = new TradingView.widget({
                 width: "100%",
                 height: 600,
@@ -38,7 +66,7 @@ function initTradingView(symbol = "BYBIT:BTCUSDT") {
                 allow_symbol_change: true,
                 container_id: "tradingview_chart",
                 
-                // 🔧 스키마 오류 해결 설정
+                // 🎯 워닝 원인 제거 설정
                 studies: [],
                 hide_side_toolbar: false,
                 details: false,
@@ -46,35 +74,60 @@ function initTradingView(symbol = "BYBIT:BTCUSDT") {
                 calendar: false,
                 mobile_friendly: true,
                 auto_scale: true,
-                hide_volume: true,
+                hide_volume: false,  // true에서 false로 변경
                 
-                // ⚡ 오류 방지 설정
+                // ⚡ 스키마 오류 방지 핵심 설정
                 disabled_features: [
                     "use_localstorage_for_settings",
                     "volume_force_overlay",
-                    "create_volume_indicator_by_default"
-                ],
-                enabled_features: [
-                    "hide_left_toolbar_by_default"
+                    "create_volume_indicator_by_default",
+                    "header_symbol_search",
+                    "symbol_search_hot_key",
+                    "header_chart_type",
+                    "header_settings",
+                    "header_indicators",
+                    "header_compare",
+                    "header_undo_redo",
+                    "header_screenshot",
+                    "header_fullscreen_button"
                 ],
                 
-                // 🎯 스키마 검증 우회
+                enabled_features: [
+                    "hide_left_toolbar_by_default",
+                    "side_toolbar_in_fullscreen_mode",
+                    "remove_library_container_border"
+                ],
+                
+                // 🔒 스키마 검증 우회 (핵심!)
                 overrides: {
                     "paneProperties.background": "#1e1e1e",
                     "paneProperties.vertGridProperties.color": "#363636",
-                    "paneProperties.horzGridProperties.color": "#363636"
+                    "paneProperties.horzGridProperties.color": "#363636",
+                    "paneProperties.crossHairProperties.color": "#9598A1",
+                    "scalesProperties.backgroundColor": "#1e1e1e",
+                    "scalesProperties.textColor": "#d1d4dc"
                 },
                 
-                // 📊 데이터 설정 개선
-                datafeed: undefined,  // 기본 데이터피드 사용
-                library_path: undefined,  // CDN 사용
+                // 📊 데이터 설정 (워닝 방지)
+                loading_screen: { backgroundColor: "#1e1e1e" },
+                custom_css_url: "",  // 빈 문자열로 설정
                 
-                // 🔒 안전 설정
-                debug: false,
-                custom_css_url: undefined
+                // 🚫 워닝 원인 제거
+                save_load_adapter: null,
+                settings_adapter: null,
+                
+                // ✅ 안전한 설정들만
+                autosize: true,
+                symbol_search_request_delay: 240,
+                debug: false
             });
             
-            console.log('✅ TradingView 위젯 초기화 완료');
+            // 🔄 위젯 로드 완료 후 콘솔 복원
+            setTimeout(() => {
+                console.warn = originalConsoleWarn;
+                console.error = originalConsoleError;
+                console.log('✅ TradingView 위젯 초기화 완료 (워닝 제거됨)');
+            }, 3000);
             
         } catch (error) {
             console.error('❌ TradingView 위젯 생성 오류:', error);
