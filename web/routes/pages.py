@@ -91,6 +91,13 @@ def ai_model():
 def admin():
     """관리자 페이지 (DB 조회, 사용자 관리)"""
     try:
+
+        print("🔍 DEBUG: admin() 함수 시작")
+        print(f"🔍 DEBUG: User 모델: {User}")
+        
+        total_users = User.query.count()
+        print(f"🔍 DEBUG: total_users = {total_users}")
+                
         # 시스템 통계 수집
         total_users = User.query.count()
         active_users = User.query.filter_by(is_active=True).count()
