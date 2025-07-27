@@ -88,7 +88,8 @@ function createAlertContainer() {
     container.id = 'alertContainer';
     container.style.position = 'fixed';
     container.style.top = '20px';
-    container.style.right = '20px';
+    container.style.left = '50%';
+    container.style.transform = 'translateX(-50%)';
     container.style.zIndex = '9999';
     container.style.maxWidth = '400px';
     document.body.appendChild(container);
