@@ -1,5 +1,5 @@
 # 파일 경로: main.py
-# 코드명: Flask 메인 애플리케이션 및 로그인 시스템 통합 (보안 개선)
+# 코드명: Flask 메인 애플리케이션 (분리된 라우터 구조 적용)
 
 import threading
 import time
@@ -52,15 +52,9 @@ def create_app():
     # 데이터베이스 초기화
     db.init_app(app)
     
-    # API 블루프린트 등록 (나중에 구현)
-    # from api.trading_api import trading_bp
-    # from api.control_api import control_bp
-    # app.register_blueprint(trading_bp, url_prefix='/api/trading')
-    # app.register_blueprint(control_bp, url_prefix='/api/control')
-    
-    # 웹 페이지 블루프린트 등록
-    from web.routes import web_bp
-    app.register_blueprint(web_bp)
+    # 🆕 분리된 라우터 등록
+    from web.routes import register_routes
+    register_routes(app)
     
     # 애플리케이션 컨텍스트에서 DB 초기화
     with app.app_context():
@@ -159,6 +153,7 @@ def main():
     print("="*60)
     print("📋 현재 모드: 웹 인터페이스 + 로그인 시스템")
     print("🔐 보안: 세션 기반 인증 활성화")
+    print("🔧 라우터: 기능별 분리 구조")
     print("="*60)
     
     # 자동매매 시스템 백그라운드 시작 (나중에 구현)
