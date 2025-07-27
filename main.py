@@ -129,7 +129,8 @@ def start_trading_system():
         # from core.trader import AutoTrader
         
         # 설정 로드
-        config = load_trading_config()
+        with app.app_context():
+            config = load_trading_config()
         if not config:
             print("❌ 설정 파일 로드 실패")
             return
