@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/admin.html -->
-<!-- 코드명: 관리자 페이지 템플릿 (DB 조회, 사용자 관리) -->
+<!-- 코드명: 관리자 페이지 템플릿 (접속중 컬럼 추가, HTML 오류 수정) -->
 
 {% extends "base.html" %}
 
@@ -29,7 +29,7 @@
     </div>
     {% endif %}
 
-    <!-- 시스템 통계 카드 -->
+    <!-- 시스템 통계 카드 (접속자 수 추가) -->
     <div class="row mb-4">
         <div class="col-xl-3 col-md-6 mb-3">
             <div class="card stats-card">
@@ -84,11 +84,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6>비활성</h6>
-                            <h3 class="text-danger">{{ admin_data.stats.inactive_users }}</h3>
+                            <h6>현재 접속</h6>
+                            <h3 class="text-info">{{ admin_data.stats.online_users | default(0) }}</h3>
                         </div>
-                        <div class="stats-icon text-danger">
-                            <i class="bi bi-person-x"></i>
+                        <div class="stats-icon text-info">
+                            <i class="bi bi-circle-fill"></i>
                         </div>
                     </div>
                 </div>
@@ -116,13 +116,13 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0">
+                        <table class="table table-dark table-hover mb-0" id="usersTable">
                             <thead>
                                 <tr>
                                     <th>사용자명</th>
-                                    <th>이메일</th>
                                     <th>상태</th>
                                     <th>권한</th>
+                                    <th>접속</th>
                                     <th>마지막 로그인</th>
                                     <th class="text-center">관리</th>
                                 </tr>
@@ -135,8 +135,10 @@
                                         {% if user.id == session.get('user_id') %}
                                         <span class="badge bg-info ms-1">나</span>
                                         {% endif %}
+                                        {% if user.email %}
+                                        <br><small class="text-muted">{{ user.email }}</small>
+                                        {% endif %}
                                     </td>
-                                    <td>{{ user.email or '-' }}</td>
                                     <td>
                                         {% if user.is_active %}
                                         <span class="badge bg-success">활성</span>
@@ -152,15 +154,22 @@
                                         {% endif %}
                                     </td>
                                     <td>
+                                        {% set is_online = user.is_online | default(false) %}
+                                        <span class="badge {% if is_online %}bg-success{% else %}bg-secondary{% endif %}">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 0.6rem;"></i>
+                                            {% if is_online %}접속중{% else %}오프라인{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
                                         {% if user.last_login %}
-                                        {{ user.last_login.strftime('%m/%d %H:%M') }}
+                                        <small class="text-muted">{{ user.last_login.strftime('%m/%d %H:%M') }}</small>
                                         {% else %}
-                                        <span class="text-muted">없음</span>
+                                        <small class="text-muted">없음</small>
                                         {% endif %}
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-outline-primary" onclick="editUser({{ user.id }}, '{{ user.username }}', {{ user.is_active|lower }}, {{ user.is_admin|lower }})" title="편집">
+                                            <button class="btn btn-outline-primary" onclick="editUser({{ user.id }})" title="편집">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button class="btn btn-outline-warning" onclick="resetPassword({{ user.id }}, '{{ user.username }}')" title="비밀번호 리셋">
@@ -234,26 +243,36 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="log-container">
-                        {% for log in admin_data.recent_logs %}
-                        <div class="log-item log-{{ log.level.lower() }}">
-                            <div class="log-header">
-                                <span class="log-level badge 
-                                    {% if log.level == 'ERROR' %}bg-danger
-                                    {% elif log.level == 'WARNING' %}bg-warning text-dark
-                                    {% elif log.level == 'INFO' %}bg-info
-                                    {% else %}bg-secondary{% endif %}">
-                                    {{ log.level }}
-                                </span>
-                                <span class="log-category">{{ log.category }}</span>
-                                <small class="log-time">{{ log.timestamp.strftime('%m/%d %H:%M') }}</small>
-                            </div>
-                            <div class="log-message">{{ log.message }}</div>
-                        </div>
-                        {% else %}
-                        <div class="text-center text-muted py-3">
-                            시스템 로그가 없습니다.
-                        </div>
-                        {% endfor %}
+                        <table class="table table-dark table-sm mb-0" id="logsTable">
+                            <tbody>
+                                {% for log in admin_data.recent_logs %}
+                                <tr class="log-item log-{{ log.level.lower() }}">
+                                    <td>
+                                        <span class="log-level badge 
+                                            {% if log.level == 'ERROR' %}bg-danger
+                                            {% elif log.level == 'WARNING' %}bg-warning text-dark
+                                            {% elif log.level == 'INFO' %}bg-info
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ log.level }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="log-category text-muted">{{ log.category }}</small>
+                                    </td>
+                                    <td>{{ log.message }}</td>
+                                    <td>
+                                        <small class="log-time text-muted">{{ log.timestamp.strftime('%m/%d %H:%M') }}</small>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">
+                                        시스템 로그가 없습니다.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -262,18 +281,18 @@
 </div>
 
 <!-- 사용자 편집 모달 -->
-<div class="modal fade" id="editUserModal" tabindex="-1">
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content bg-dark">
             <div class="modal-header border-secondary">
-                <h5 class="modal-title">사용자 편집</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="editUserModalLabel">사용자 편집</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="editUserForm">
                     <input type="hidden" id="editUserId">
                     <div class="mb-3">
-                        <label class="form-label">사용자명</label>
+                        <label for="editUsername" class="form-label">사용자명</label>
                         <input type="text" class="form-control" id="editUsername" readonly>
                     </div>
                     <div class="mb-3">
@@ -299,27 +318,30 @@
 </div>
 
 <!-- 비밀번호 리셋 모달 -->
-<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content bg-dark">
             <div class="modal-header border-secondary">
-                <h5 class="modal-title">비밀번호 리셋</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="resetPasswordModalLabel">비밀번호 리셋</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="resetPasswordForm">
                     <input type="hidden" id="resetUserId">
                     <div class="mb-3">
-                        <label class="form-label">사용자명</label>
+                        <label for="resetUsername" class="form-label">사용자명</label>
                         <input type="text" class="form-control" id="resetUsername" readonly>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">새 비밀번호</label>
-                        <input type="password" class="form-control" id="newPassword" placeholder="새 비밀번호 입력">
+                        <label for="newPassword" class="form-label">새 비밀번호</label>
+                        <input type="password" class="form-control" id="newPassword" placeholder="새 비밀번호 입력" autocomplete="new-password">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">비밀번호 확인</label>
-                        <input type="password" class="form-control" id="confirmPassword" placeholder="비밀번호 다시 입력">
+                        <label for="confirmPassword" class="form-label">비밀번호 확인</label>
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="비밀번호 다시 입력" autocomplete="new-password">
+                        <div class="invalid-feedback">
+                            비밀번호가 일치하지 않습니다.
+                        </div>
                     </div>
                 </form>
             </div>

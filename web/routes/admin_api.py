@@ -1,9 +1,10 @@
 # 파일 경로: web/routes/admin_api.py
-# 코드명: 관리자 전용 API 엔드포인트
+# 코드명: 관리자 전용 API 엔드포인트 (접속자 통계, 한국시간, 수정)
 
 from flask import Blueprint, request, session, jsonify
 from functools import wraps
 from datetime import datetime, timedelta
+import pytz
 from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db
 from api.utils import (
     error_response, success_response, 
@@ -12,6 +13,9 @@ from api.utils import (
 )
 
 admin_api_bp = Blueprint('admin_api', __name__)
+
+# 한국 시간대 설정
+KST = pytz.timezone('Asia/Seoul')
 
 # ============================================================================
 # 관리자 권한 데코레이터
@@ -31,19 +35,51 @@ def admin_required(f):
     return decorated_function
 
 def log_admin_event(level, category, message):
-    """관리자 작업 로깅"""
+    """관리자 작업 로깅 (한국시간 적용)"""
     try:
+        # UTC로 저장하되, 로그 조회 시 한국시간으로 변환
         log_entry = SystemLog(
             level=level,
             category=category,
             message=message,
             ip_address=request.remote_addr,
-            user_agent=request.headers.get('User-Agent', '')[:200]
+            user_agent=request.headers.get('User-Agent', '')[:200],
+            timestamp=datetime.utcnow()  # UTC로 저장
         )
         db.session.add(log_entry)
         db.session.commit()
     except Exception as e:
         print(f"관리자 로그 저장 실패: {e}")
+
+def get_online_users():
+    """현재 접속중인 사용자 수 계산 (최근 5분 이내 활동)"""
+    try:
+        # 5분 이내 로그인한 사용자를 접속중으로 간주
+        five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
+        online_count = User.query.filter(
+            User.is_active == True,
+            User.last_login >= five_minutes_ago
+        ).count()
+        return online_count
+    except Exception as e:
+        print(f"접속자 수 계산 오류: {e}")
+        return 0
+
+def add_user_online_status(users):
+    """사용자 목록에 접속 상태 추가"""
+    try:
+        five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
+        for user in users:
+            # 최근 5분 이내 로그인한 경우 접속중으로 표시
+            if user.get('last_login'):
+                last_login_dt = datetime.fromisoformat(user['last_login'].replace('Z', '+00:00'))
+                user['is_online'] = last_login_dt >= five_minutes_ago
+            else:
+                user['is_online'] = False
+        return users
+    except Exception as e:
+        print(f"접속 상태 추가 오류: {e}")
+        return users
 
 # ============================================================================
 # 사용자 관리 API
@@ -53,7 +89,7 @@ def log_admin_event(level, category, message):
 @admin_required
 @handle_api_errors
 def get_all_users():
-    """모든 사용자 목록 조회"""
+    """모든 사용자 목록 조회 (접속 상태 포함)"""
     try:
         users = User.query.order_by(User.created_at.desc()).all()
         
@@ -69,6 +105,9 @@ def get_all_users():
                 'last_login': user.last_login.isoformat() if user.last_login else None
             })
         
+        # 접속 상태 추가
+        users_data = add_user_online_status(users_data)
+        
         log_admin_event('INFO', 'ADMIN', f'사용자 목록 조회: {session.get("username")}')
         
         return success_response(
@@ -80,7 +119,7 @@ def get_all_users():
         log_admin_event('ERROR', 'ADMIN', f'사용자 목록 조회 실패: {e}')
         return error_response('사용자 목록 조회 중 오류가 발생했습니다.', 'DATABASE_ERROR', 500)
 
-@admin_api_bp.route('/api/admin/user', methods=['POST'])
+@admin_api_bp.route('/api/admin/users', methods=['POST'])
 @admin_required
 @handle_api_errors
 def create_user():
@@ -143,7 +182,7 @@ def create_user():
         log_admin_event('ERROR', 'ADMIN', f'사용자 생성 실패: {e}')
         return error_response('사용자 생성 중 오류가 발생했습니다.', 'DATABASE_ERROR', 500)
 
-@admin_api_bp.route('/api/admin/user/<int:user_id>', methods=['PUT'])
+@admin_api_bp.route('/api/admin/users/<int:user_id>', methods=['PUT'])
 @admin_required
 @handle_api_errors
 def update_user(user_id):
@@ -216,7 +255,7 @@ def update_user(user_id):
         log_admin_event('ERROR', 'ADMIN', f'사용자 수정 실패 (ID: {user_id}): {e}')
         return error_response('사용자 정보 수정 중 오류가 발생했습니다.', 'DATABASE_ERROR', 500)
 
-@admin_api_bp.route('/api/admin/user/<int:user_id>/password', methods=['PUT'])
+@admin_api_bp.route('/api/admin/users/<int:user_id>/reset-password', methods=['POST'])
 @admin_required
 @handle_api_errors
 def reset_user_password(user_id):
@@ -256,7 +295,7 @@ def reset_user_password(user_id):
         log_admin_event('ERROR', 'ADMIN', f'비밀번호 리셋 실패 (ID: {user_id}): {e}')
         return error_response('비밀번호 변경 중 오류가 발생했습니다.', 'DATABASE_ERROR', 500)
 
-@admin_api_bp.route('/api/admin/user/<int:user_id>', methods=['DELETE'])
+@admin_api_bp.route('/api/admin/users/<int:user_id>', methods=['DELETE'])
 @admin_required
 @handle_api_errors
 def delete_user(user_id):
@@ -302,12 +341,13 @@ def delete_user(user_id):
 @admin_required
 @handle_api_errors
 def get_system_stats():
-    """시스템 통계 조회"""
+    """시스템 통계 조회 (접속자 수 포함)"""
     try:
         # 사용자 통계
         total_users = User.query.count()
         active_users = User.query.filter_by(is_active=True).count()
         admin_users = User.query.filter_by(is_admin=True).count()
+        online_users = get_online_users()  # 접속자 수 추가
         
         # 최근 로그 통계 (24시간)
         yesterday = datetime.utcnow() - timedelta(days=1)
@@ -328,7 +368,8 @@ def get_system_stats():
                 'total': total_users,
                 'active': active_users,
                 'inactive': total_users - active_users,
-                'admins': admin_users
+                'admins': admin_users,
+                'online': online_users  # 접속자 수 추가
             },
             'logs': {
                 'recent_24h': recent_logs,
@@ -352,24 +393,53 @@ def get_system_stats():
         log_admin_event('ERROR', 'ADMIN', f'시스템 통계 조회 실패: {e}')
         return error_response('시스템 통계 조회 중 오류가 발생했습니다.', 'DATABASE_ERROR', 500)
 
-@admin_api_bp.route('/api/admin/logs', methods=['DELETE'])
+@admin_api_bp.route('/api/admin/logs/recent', methods=['GET'])
+@admin_required
+@handle_api_errors
+def get_recent_logs():
+    """최근 로그 조회 (한국시간 적용)"""
+    try:
+        recent_logs = SystemLog.query.order_by(SystemLog.timestamp.desc()).limit(20).all()
+        
+        logs_data = []
+        for log in recent_logs:
+            # UTC → 한국시간 변환
+            if log.timestamp:
+                kst_time = log.timestamp.replace(tzinfo=pytz.UTC).astimezone(KST)
+                timestamp_str = kst_time.isoformat()
+            else:
+                timestamp_str = None
+                
+            logs_data.append({
+                'id': log.id,
+                'timestamp': timestamp_str,
+                'level': log.level,
+                'category': log.category,
+                'message': log.message,
+                'ip_address': log.ip_address
+            })
+        
+        return success_response(data=logs_data, message='최근 로그 조회 성공')
+        
+    except Exception as e:
+        log_admin_event('ERROR', 'ADMIN', f'최근 로그 조회 실패: {e}')
+        return error_response('로그 조회 중 오류가 발생했습니다.', 'LOGS_ERROR', 500)
+
+@admin_api_bp.route('/api/admin/logs/cleanup', methods=['POST'])
 @admin_required
 @handle_api_errors
 def cleanup_logs():
-    """시스템 로그 정리"""
+    """시스템 로그 정리 (30일 이전 삭제)"""
     try:
         # 30일 이전 로그 삭제
         cutoff_date = datetime.utcnow() - timedelta(days=30)
         
-        old_logs = SystemLog.query.filter(SystemLog.timestamp < cutoff_date)
-        deleted_count = old_logs.count()
-        old_logs.delete()
+        # 실제 삭제 실행
+        deleted_count = SystemLog.query.filter(SystemLog.timestamp < cutoff_date).delete(synchronize_session=False)
         
         # 설정 변경 이력도 정리 (90일 이전)
         config_cutoff = datetime.utcnow() - timedelta(days=90)
-        old_configs = ConfigHistory.query.filter(ConfigHistory.changed_at < config_cutoff)
-        config_deleted = old_configs.count()
-        old_configs.delete()
+        config_deleted = ConfigHistory.query.filter(ConfigHistory.changed_at < config_cutoff).delete(synchronize_session=False)
         
         db.session.commit()
         
@@ -392,7 +462,7 @@ def cleanup_logs():
 @admin_required
 @handle_api_errors
 def get_config_change_detail(config_id):
-    """설정 변경 상세 정보 조회"""
+    """설정 변경 상세 정보 조회 (한국시간 적용)"""
     try:
         config_change = ConfigHistory.query.get(config_id)
         if not config_change:
@@ -401,6 +471,13 @@ def get_config_change_detail(config_id):
         # 사용자 정보도 함께 조회
         user = User.query.get(config_change.user_id)
         
+        # UTC → 한국시간 변환
+        if config_change.changed_at:
+            kst_time = config_change.changed_at.replace(tzinfo=pytz.UTC).astimezone(KST)
+            changed_at_str = kst_time.isoformat()
+        else:
+            changed_at_str = None
+        
         detail = {
             'id': config_change.id,
             'user_id': config_change.user_id,
@@ -408,7 +485,7 @@ def get_config_change_detail(config_id):
             'config_key': config_change.config_key,
             'old_value': config_change.old_value,
             'new_value': config_change.new_value,
-            'changed_at': config_change.changed_at.isoformat(),
+            'changed_at': changed_at_str,
             'ip_address': config_change.ip_address,
             'user_agent': config_change.user_agent
         }
