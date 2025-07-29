@@ -1,5 +1,5 @@
 // 파일 경로: web/static/js/admin.js
-// 코드명: 관리자 페이지 JavaScript 로직 (모든 문제점 수정)
+// 코드명: 관리자 페이지 JavaScript 로직 (모든 문제점 완전 수정)
 
 // 전역 변수
 let isLoading = false;
@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 현재 사용자 ID 가져오기 (먼저 실행)
     getCurrentUserId().then(() => {
+        // 현재 사용자 로그인 시간 즉시 갱신
+        updateCurrentUserLoginTime();
         // 실시간 데이터 로드
         loadAllData();
     });
@@ -26,24 +28,38 @@ document.addEventListener('DOMContentLoaded', function() {
     // 비밀번호 실시간 체크 설정
     setupPasswordValidation();
     
-    // 5초마다 통계 자동 새로고침
-    setInterval(loadStats, 5000);
+    // 10초마다 통계 자동 새로고침 (접속자 수 실시간 반영)
+    setInterval(loadStats, 10000);
 });
+
+// 현재 사용자 로그인 시간 갱신
+async function updateCurrentUserLoginTime() {
+    try {
+        // 현재 사용자의 로그인 시간을 갱신하여 접속중으로 표시
+        await fetch('/api/status', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+    } catch (error) {
+        console.log('로그인 시간 갱신 실패:', error);
+    }
+}
 
 // 현재 사용자 ID 가져오기 (수정)
 async function getCurrentUserId() {
     try {
-        const result = await apiCall('/api/status');
-        if (result && result.user_id) {
+        const response = await fetch('/api/status');
+        const result = await response.json();
+        
+        if (result.user_id) {
             currentUserId = parseInt(result.user_id);
         } else {
-            // 세션에서 직접 가져오기
-            const response = await fetch('/api/status');
-            const data = await response.json();
-            if (data.user_id) {
-                currentUserId = parseInt(data.user_id);
-            }
+            // session에서 직접 가져오기 시도
+            currentUserId = parseInt(document.body.dataset.userId) || null;
         }
+        
         console.log('현재 사용자 ID:', currentUserId);
     } catch (error) {
         console.error('현재 사용자 ID 조회 실패:', error);
@@ -87,22 +103,22 @@ async function loadRecentLogs() {
     }
 }
 
-// 통계 표시 (수정)
+// 통계 표시 (수정: 비활성 사용자로 변경)
 function displayStats(stats) {
     const elements = {
         total: document.querySelector('.stats-card:nth-child(1) h3'),
         active: document.querySelector('.stats-card:nth-child(2) h3'),
         admin: document.querySelector('.stats-card:nth-child(3) h3'),
-        online: document.querySelector('.stats-card:nth-child(4) h3')
+        inactive: document.querySelector('.stats-card:nth-child(4) h3') // 비활성 사용자로 변경
     };
     
     if (elements.total) elements.total.textContent = stats.users?.total || 0;
     if (elements.active) elements.active.textContent = stats.users?.active || 0;
     if (elements.admin) elements.admin.textContent = stats.users?.admins || 0;
-    if (elements.online) elements.online.textContent = stats.users?.online || 0;
+    if (elements.inactive) elements.inactive.textContent = stats.users?.inactive || 0;
 }
 
-// 사용자 목록 표시 (수정: currentUserId 타입 체크)
+// 사용자 목록 표시 (수정: 로그인 시간 한국시간 표시, 삭제 버튼 수정)
 function displayUsers(users) {
     const tbody = document.querySelector('#usersTable tbody');
     if (!tbody) return;
@@ -115,9 +131,9 @@ function displayUsers(users) {
     tbody.innerHTML = users.map(user => {
         const isOnline = user.is_online || false;
         const lastLoginText = user.last_login ? 
-            formatDateTime(user.last_login) : '로그인 기록 없음';
+            formatKoreanDateTime(user.last_login) : '로그인 기록 없음';
         
-        // 타입 안전 비교
+        // 정확한 타입 비교
         const isCurrentUser = parseInt(user.id) === parseInt(currentUserId);
         
         return `
@@ -166,7 +182,7 @@ function displayUsers(users) {
     }).join('');
 }
 
-// 최근 로그 표시 (한국시간 통일)
+// 최근 로그 표시 (사용자명으로 표시)
 function displayRecentLogs(logs) {
     const tbody = document.querySelector('#logsTable tbody');
     if (!tbody) return;
@@ -189,20 +205,22 @@ function displayRecentLogs(logs) {
             <td>${log.message}</td>
             <td>
                 <small class="text-muted">
-                    ${formatDateTime(log.timestamp)}
+                    ${formatKoreanDateTime(log.timestamp)}
                 </small>
             </td>
         </tr>
     `).join('');
 }
 
-// 시간 포맷 통일 함수
-function formatDateTime(dateString) {
+// 한국시간 포맷 함수 (수정)
+function formatKoreanDateTime(dateString) {
     if (!dateString) return '없음';
     
     try {
         const date = new Date(dateString);
+        // 한국시간으로 변환하여 표시
         return date.toLocaleString('ko-KR', {
+            timeZone: 'Asia/Seoul',
             month: '2-digit',
             day: '2-digit',
             hour: '2-digit',
@@ -329,14 +347,14 @@ function animateCards() {
 // 사용자 관리 함수들
 // ============================================================================
 
-// 사용자 목록 새로고침
+// 사용자 목록 새로고침 (수정: 확인창 제거)
 async function refreshUsers() {
     console.log('사용자 목록 새로고침 실행');
     await loadAllData();
-    showToast('success', '데이터가 새로고침되었습니다.');
+    // 확인창 제거 - 조용히 새로고침
 }
 
-// 새 사용자 추가 (수정)
+// 새 사용자 추가 (수정: 관리자 권한 창 제거, 오류 수정)
 async function addUser() {
     const username = prompt('새 사용자명을 입력하세요:');
     if (!username || !username.trim()) return;
@@ -347,24 +365,23 @@ async function addUser() {
         return;
     }
     
-    const email = prompt('이메일 주소를 입력하세요 (선택사항):');
+    const email = prompt('이메일 주소를 입력하세요 (선택사항, 취소 가능):');
     
-    showConfirm('관리자 권한', '이 사용자에게 관리자 권한을 부여하시겠습니까?', async function(isAdmin) {
-        const data = {
-            username: username.trim(),
-            password: password,
-            email: email?.trim() || null,
-            is_admin: isAdmin
-        };
-        
-        console.log('사용자 생성 요청:', data);
-        
-        const result = await apiCall('/api/admin/users', 'POST', data);
-        if (result && result.success) {
-            showToast('success', result.message || '사용자가 생성되었습니다.');
-            await loadAllData(); // 즉시 새로고침
-        }
-    });
+    // 관리자 권한 창 제거 - 기본값은 일반 사용자
+    const data = {
+        username: username.trim(),
+        password: password,
+        email: email?.trim() || null,
+        is_admin: false // 기본값: 일반 사용자
+    };
+    
+    console.log('사용자 생성 요청:', data);
+    
+    const result = await apiCall('/api/admin/users', 'POST', data);
+    if (result && result.success) {
+        showToast('success', result.message || '사용자가 생성되었습니다.');
+        await loadAllData(); // 즉시 새로고침
+    }
 }
 
 // 사용자 편집
@@ -386,7 +403,7 @@ function editUser(userId) {
     modal.show();
 }
 
-// 사용자 변경사항 저장 (수정)
+// 사용자 변경사항 저장
 async function saveUserChanges() {
     const userId = parseInt(document.getElementById('editUserId').value);
     const isActive = document.getElementById('editIsActive').checked;
@@ -436,7 +453,7 @@ function resetPassword(userId, username) {
     }, 500);
 }
 
-// 비밀번호 리셋 저장 (수정)
+// 비밀번호 리셋 저장
 async function savePasswordReset() {
     const userId = document.getElementById('resetUserId').value;
     const username = document.getElementById('resetUsername').value;
@@ -480,7 +497,7 @@ async function savePasswordReset() {
     });
 }
 
-// 사용자 삭제 (수정)
+// 사용자 삭제
 async function deleteUser(userId, username) {
     const userIdNum = parseInt(userId);
     
@@ -523,7 +540,7 @@ async function viewConfigChange(configId) {
         const data = result.data;
         const details = `설정 키: ${data.config_key}
 사용자: ${data.username} (ID: ${data.user_id})
-변경 시간: ${formatDateTime(data.changed_at)}
+변경 시간: ${formatKoreanDateTime(data.changed_at)}
 IP 주소: ${data.ip_address || 'N/A'}
 
 이전 값: ${data.old_value || '(없음)'}
@@ -533,14 +550,14 @@ IP 주소: ${data.ip_address || 'N/A'}
     }
 }
 
-// 시스템 로그 정리
+// 시스템 로그 정리 (수정: 모든 로그 삭제)
 async function clearLogs() {
-    showConfirm('로그 정리', '시스템 로그를 정리하시겠습니까?\n\n📋 30일 이전의 시스템 로그가 삭제됩니다.\n📝 90일 이전의 설정 변경 이력도 함께 정리됩니다.', async function(confirmed) {
+    showConfirm('로그 정리', '모든 시스템 로그를 삭제하시겠습니까?\n\n📋 모든 시스템 로그가 삭제됩니다.\n📝 모든 설정 변경 이력도 함께 삭제됩니다.\n\n⚠️ 이 작업은 되돌릴 수 없습니다.', async function(confirmed) {
         if (!confirmed) return;
         
         const result = await apiCall('/api/admin/logs/cleanup', 'POST');
         if (result && result.success) {
-            showToast('success', result.message || '로그가 정리되었습니다.');
+            showToast('success', result.message || '모든 로그가 삭제되었습니다.');
             await loadAllData();
         }
     });
@@ -607,7 +624,7 @@ window.adminDebug = {
             total_users: stats[0]?.textContent,
             active_users: stats[1]?.textContent,
             admin_users: stats[2]?.textContent,
-            online_users: stats[3]?.textContent
+            inactive_users: stats[3]?.textContent
         });
     },
     

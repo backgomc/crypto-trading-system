@@ -1,5 +1,5 @@
 # 파일 경로: web/routes/admin_api.py
-# 코드명: 관리자 전용 API 엔드포인트 (접속자 통계, 한국시간, 수정)
+# 코드명: 관리자 전용 API 엔드포인트 (모든 문제점 완전 수정)
 
 from flask import Blueprint, request, session, jsonify
 from functools import wraps
@@ -28,23 +28,21 @@ def admin_required(f):
         if not session.get('logged_in'):
             return error_response('로그인이 필요합니다.', 'AUTH_REQUIRED', 401)
         if not session.get('is_admin', False):
-            # 무권한 접근 로그
             log_admin_event('WARNING', 'SECURITY', f'관리자 API 무권한 접근: {session.get("username")}')
             return error_response('관리자 권한이 필요합니다.', 'ADMIN_REQUIRED', 403)
         return f(*args, **kwargs)
     return decorated_function
 
 def log_admin_event(level, category, message):
-    """관리자 작업 로깅 (한국시간 적용)"""
+    """관리자 작업 로깅"""
     try:
-        # UTC로 저장하되, 로그 조회 시 한국시간으로 변환
         log_entry = SystemLog(
             level=level,
             category=category,
             message=message,
             ip_address=request.remote_addr,
             user_agent=request.headers.get('User-Agent', '')[:200],
-            timestamp=datetime.utcnow()  # UTC로 저장
+            timestamp=datetime.utcnow()
         )
         db.session.add(log_entry)
         db.session.commit()
@@ -52,8 +50,15 @@ def log_admin_event(level, category, message):
         print(f"관리자 로그 저장 실패: {e}")
 
 def get_online_users():
-    """현재 접속중인 사용자 수 계산 (최근 5분 이내 활동)"""
+    """현재 접속중인 사용자 수 계산 (수정: 현재 사용자의 로그인 시간 갱신 포함)"""
     try:
+        # 현재 사용자의 로그인 시간을 갱신
+        current_user_id = session.get('user_id')
+        if current_user_id:
+            current_user = User.query.get(current_user_id)
+            if current_user:
+                current_user.update_last_login()
+        
         # 5분 이내 로그인한 사용자를 접속중으로 간주
         five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
         online_count = User.query.filter(
@@ -66,16 +71,45 @@ def get_online_users():
         return 0
 
 def add_user_online_status(users):
-    """사용자 목록에 접속 상태 추가"""
+    """사용자 목록에 접속 상태 추가 (수정: 현재 사용자 접속 상태 우선 처리)"""
     try:
+        # 현재 사용자 ID
+        current_user_id = session.get('user_id')
+        
+        # 5분 이내 로그인한 사용자를 접속중으로 간주
         five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
+        
         for user in users:
-            # 최근 5분 이내 로그인한 경우 접속중으로 표시
+            user_id = user.get('id')
+            
+            # 현재 사용자는 항상 접속중으로 표시
+            if user_id == current_user_id:
+                user['is_online'] = True
+                continue
+            
+            # 다른 사용자들은 로그인 시간 기준으로 판단
             if user.get('last_login'):
-                last_login_dt = datetime.fromisoformat(user['last_login'].replace('Z', '+00:00'))
-                user['is_online'] = last_login_dt >= five_minutes_ago
+                try:
+                    last_login_str = user['last_login']
+                    # ISO 형식 파싱 처리
+                    if last_login_str.endswith('Z'):
+                        last_login_dt = datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
+                    else:
+                        last_login_dt = datetime.fromisoformat(last_login_str)
+                    
+                    # UTC 기준으로 변환
+                    if last_login_dt.tzinfo is None:
+                        last_login_dt = last_login_dt.replace(tzinfo=pytz.UTC)
+                    else:
+                        last_login_dt = last_login_dt.astimezone(pytz.UTC).replace(tzinfo=None)
+                    
+                    user['is_online'] = last_login_dt >= five_minutes_ago
+                except Exception as e:
+                    print(f"로그인 시간 파싱 오류: {e}")
+                    user['is_online'] = False
             else:
                 user['is_online'] = False
+        
         return users
     except Exception as e:
         print(f"접속 상태 추가 오류: {e}")
@@ -341,13 +375,14 @@ def delete_user(user_id):
 @admin_required
 @handle_api_errors
 def get_system_stats():
-    """시스템 통계 조회 (접속자 수 포함)"""
+    """시스템 통계 조회 (비활성 사용자 통계 추가)"""
     try:
         # 사용자 통계
         total_users = User.query.count()
         active_users = User.query.filter_by(is_active=True).count()
+        inactive_users = User.query.filter_by(is_active=False).count()
         admin_users = User.query.filter_by(is_admin=True).count()
-        online_users = get_online_users()  # 접속자 수 추가
+        online_users = get_online_users()  # 현재 접속자 수
         
         # 최근 로그 통계 (24시간)
         yesterday = datetime.utcnow() - timedelta(days=1)
@@ -367,9 +402,9 @@ def get_system_stats():
             'users': {
                 'total': total_users,
                 'active': active_users,
-                'inactive': total_users - active_users,
+                'inactive': inactive_users,  # 비활성 사용자 추가
                 'admins': admin_users,
-                'online': online_users  # 접속자 수 추가
+                'online': online_users
             },
             'logs': {
                 'recent_24h': recent_logs,
@@ -397,8 +432,14 @@ def get_system_stats():
 @admin_required
 @handle_api_errors
 def get_recent_logs():
-    """최근 로그 조회 (한국시간 적용)"""
+    """최근 로그 조회 (사용자명 표시, 한국시간 적용)"""
     try:
+        # 최근 로그와 사용자 정보를 함께 조회
+        recent_logs_query = db.session.query(SystemLog, User.username).outerjoin(
+            User, SystemLog.message.like(f'%사용자%')
+        ).order_by(SystemLog.timestamp.desc()).limit(20)
+        
+        # 단순하게 최근 로그만 조회하고 메시지에서 사용자명 추출
         recent_logs = SystemLog.query.order_by(SystemLog.timestamp.desc()).limit(20).all()
         
         logs_data = []
@@ -409,13 +450,28 @@ def get_recent_logs():
                 timestamp_str = kst_time.isoformat()
             else:
                 timestamp_str = None
+            
+            # 메시지에서 사용자 ID 추출하여 사용자명으로 변경
+            message = log.message
+            if '사용자 ' in message and message.count('사용자 ') > 0:
+                # 메시지에서 "사용자 1", "사용자 2" 등을 실제 사용자명으로 변경
+                import re
+                user_id_pattern = r'사용자 (\d+)'
+                matches = re.findall(user_id_pattern, message)
+                for user_id in matches:
+                    try:
+                        user = User.query.get(int(user_id))
+                        if user:
+                            message = message.replace(f'사용자 {user_id}', f'{user.username}')
+                    except:
+                        pass
                 
             logs_data.append({
                 'id': log.id,
                 'timestamp': timestamp_str,
                 'level': log.level,
                 'category': log.category,
-                'message': log.message,
+                'message': message,
                 'ip_address': log.ip_address
             })
         
@@ -429,28 +485,24 @@ def get_recent_logs():
 @admin_required
 @handle_api_errors
 def cleanup_logs():
-    """시스템 로그 정리 (30일 이전 삭제)"""
+    """시스템 로그 정리 (수정: 모든 로그 삭제)"""
     try:
-        # 30일 이전 로그 삭제
-        cutoff_date = datetime.utcnow() - timedelta(days=30)
+        # 모든 시스템 로그 삭제
+        deleted_logs_count = SystemLog.query.delete()
         
-        # 실제 삭제 실행
-        deleted_count = SystemLog.query.filter(SystemLog.timestamp < cutoff_date).delete(synchronize_session=False)
-        
-        # 설정 변경 이력도 정리 (90일 이전)
-        config_cutoff = datetime.utcnow() - timedelta(days=90)
-        config_deleted = ConfigHistory.query.filter(ConfigHistory.changed_at < config_cutoff).delete(synchronize_session=False)
+        # 모든 설정 변경 이력 삭제
+        deleted_configs_count = ConfigHistory.query.delete()
         
         db.session.commit()
         
-        log_admin_event('INFO', 'ADMIN', f'로그 정리 완료: 로그 {deleted_count}개, 설정이력 {config_deleted}개 삭제 - 관리자: {session.get("username")}')
+        log_admin_event('INFO', 'ADMIN', f'모든 로그 정리 완료: 로그 {deleted_logs_count}개, 설정이력 {deleted_configs_count}개 삭제 - 관리자: {session.get("username")}')
         
         return success_response(
             data={
-                'deleted_logs': deleted_count,
-                'deleted_configs': config_deleted
+                'deleted_logs': deleted_logs_count,
+                'deleted_configs': deleted_configs_count
             },
-            message=f'로그 정리 완료: {deleted_count}개 로그, {config_deleted}개 설정 이력 삭제'
+            message=f'모든 로그 정리 완료: {deleted_logs_count}개 로그, {deleted_configs_count}개 설정 이력 삭제'
         )
         
     except Exception as e:
@@ -462,7 +514,7 @@ def cleanup_logs():
 @admin_required
 @handle_api_errors
 def get_config_change_detail(config_id):
-    """설정 변경 상세 정보 조회 (한국시간 적용)"""
+    """설정 변경 상세 정보 조회 (한국시간 적용, 사용자명 표시)"""
     try:
         config_change = ConfigHistory.query.get(config_id)
         if not config_change:

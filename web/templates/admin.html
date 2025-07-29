@@ -68,11 +68,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6>관리자</h6>
-                            <h3 class="text-warning">{{ admin_data.stats.admin_users }}</h3>
+                            <h6>비활성 사용자</h6>
+                            <h3 class="text-secondary">{{ admin_data.stats.inactive_users | default(0) }}</h3>
                         </div>
-                        <div class="stats-icon text-warning">
-                            <i class="bi bi-shield-check"></i>
+                        <div class="stats-icon text-secondary">
+                            <i class="bi bi-person-x"></i>
                         </div>
                     </div>
                 </div>
