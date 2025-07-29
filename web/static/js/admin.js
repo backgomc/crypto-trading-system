@@ -170,7 +170,7 @@ function displayUsers(users) {
                     <button class="btn btn-outline-warning" onclick="resetPassword(${user.id}, '${user.username}')" title="비밀번호 리셋">
                         <i class="bi bi-key"></i>
                     </button>
-                    ${!isCurrentUser ? `
+                    ${(!isCurrentUser && !user.is_admin) ? `
                     <button class="btn btn-outline-danger" onclick="deleteUser(${user.id}, '${user.username}')" title="삭제">
                         <i class="bi bi-trash"></i>
                     </button>

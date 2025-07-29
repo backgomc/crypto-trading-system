@@ -50,20 +50,23 @@ def log_admin_event(level, category, message):
         print(f"관리자 로그 저장 실패: {e}")
 
 def get_online_users():
-    """현재 접속중인 사용자 수 계산 (수정: 현재 사용자의 로그인 시간 갱신 포함)"""
     try:
-        # 현재 사용자의 로그인 시간을 갱신
+        # 모든 접속중인 사용자의 로그인 시간을 갱신하는 로직 필요
+        # 또는 세션 기반으로 실시간 접속자 추적
+        
+        # 현재 사용자의 로그인 시간 갱신
         current_user_id = session.get('user_id')
         if current_user_id:
             current_user = User.query.get(current_user_id)
             if current_user:
                 current_user.update_last_login()
+                db.session.commit()
         
-        # 5분 이내 로그인한 사용자를 접속중으로 간주
-        five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
+        # 1분 이내 로그인한 사용자를 접속중으로 간주 (더 짧게)
+        one_minute_ago = datetime.utcnow() - timedelta(minutes=1)
         online_count = User.query.filter(
             User.is_active == True,
-            User.last_login >= five_minutes_ago
+            User.last_login >= one_minute_ago
         ).count()
         return online_count
     except Exception as e:
