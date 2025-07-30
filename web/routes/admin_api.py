@@ -94,18 +94,7 @@ def add_user_online_status(users):
             if user.get('last_login'):
                 try:
                     last_login_str = user['last_login']
-                    # ISO 형식 파싱 처리
-                    if last_login_str.endswith('Z'):
-                        last_login_dt = datetime.fromisoformat(last_login_str.replace('Z', '+00:00'))
-                    else:
-                        last_login_dt = datetime.fromisoformat(last_login_str)
-                    
-                    # UTC 기준으로 변환
-                    if last_login_dt.tzinfo is None:
-                        last_login_dt = last_login_dt.replace(tzinfo=pytz.UTC)
-                    else:
-                        last_login_dt = last_login_dt.astimezone(pytz.UTC).replace(tzinfo=None)
-                    
+                    last_login_dt = datetime.fromisoformat(last_login_str.replace('Z', ''))
                     user['is_online'] = last_login_dt >= five_minutes_ago
                 except Exception as e:
                     print(f"로그인 시간 파싱 오류: {e}")
