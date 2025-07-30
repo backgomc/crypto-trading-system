@@ -218,14 +218,15 @@ function formatKoreanDateTime(dateString) {
     
     try {
         const date = new Date(dateString);
-        // 한국시간으로 변환하여 표시
+        
+        // 대시보드의 updateTime()과 완전히 동일한 방식
         return date.toLocaleString('ko-KR', {
-            timeZone: 'Asia/Seoul',
+            year: 'numeric',
             month: '2-digit',
             day: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            second: '2-digit'
         });
     } catch (error) {
         return '날짜 오류';
