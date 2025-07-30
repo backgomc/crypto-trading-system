@@ -447,12 +447,8 @@ def get_recent_logs():
         
         logs_data = []
         for log in recent_logs:
-            # UTC → 한국시간 변환
-            if log.timestamp:
-                kst_time = log.timestamp.replace(tzinfo=pytz.UTC).astimezone(KST)
-                timestamp_str = kst_time.isoformat()
-            else:
-                timestamp_str = None
+            # 시간
+            timestamp_str = log.timestamp.isoformat() if log.timestamp else None
             
             # 메시지에서 사용자 ID 추출하여 사용자명으로 변경
             message = log.message
