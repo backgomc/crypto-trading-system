@@ -48,21 +48,21 @@ async function updateCurrentUserLoginTime() {
 }
 
 // 현재 사용자 ID 가져오기 (수정)
-async function getCurrentUserId() {
+async function getCurrentUsername() {
     try {
         const response = await fetch('/api/status');
         const result = await response.json();
         
-        if (result.user_id) {
-            currentUserId = parseInt(result.user_id);
+        if (result.username) {
+            currentUsername = result.username;
         } else {
-            // session에서 직접 가져오기 시도
-            currentUserId = parseInt(document.body.dataset.userId) || null;
+            // 백업: session 기반 DOM에서 직접 가져오기
+            currentUsername = document.body.dataset.username || null;
         }
-        
-        console.log('현재 사용자 ID:', currentUserId);
+
+        console.log('현재 사용자 username:', currentUsername);
     } catch (error) {
-        console.error('현재 사용자 ID 조회 실패:', error);
+        console.error('현재 사용자 조회 실패:', error);
     }
 }
 
