@@ -491,14 +491,10 @@
     color: #ffffff;
 }
 
-/* 사용자명 데이터만 왼쪽 여백 (헤더 제외) */
-#usersTable tbody td:first-child {
-    padding-left: 24px;
-}
-
-#usersTable th:not(:first-child),
-#usersTable td:not(:first-child):not(:last-child) {
-    text-align: center; /* 가운데 정렬 */
+/* 테이블 모든 셀 가운데 정렬 */
+#usersTable th,
+#usersTable td {
+    text-align: center;
 }
 
 #usersTable td:last-child {
