@@ -132,8 +132,8 @@ function displayUsers(users) {
     
     tbody.innerHTML = users.map(user => {
         const isOnline = user.is_online || false;
-        const lastLoginText = user.last_login ? 
-            formatKoreanDateTime(user.last_login) : '로그인 기록 없음';
+        const lastLoginText = user.last_login || '로그인 기록 없음';
+        const createdAtText = user.created_at || '없음';
         
         // 정확한 타입 비교
         const isCurrentUser = user.username === currentUsername;
@@ -162,7 +162,7 @@ function displayUsers(users) {
                 </span>
             </td>
             <td>
-                <small class="text-muted">${user.created_at || '없음'}</small>
+                <small class="text-muted">${createdAtText}</small>
             </td>
             <td>
                 <small class="text-muted">${lastLoginText}</small>
