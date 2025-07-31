@@ -60,12 +60,9 @@ def get_online_users():
         return 0
 
 def add_user_online_status(users):
-    """사용자 목록에 접속 상태 추가 (수정: 현재 사용자 접속 상태 우선 처리)"""
+    """사용자 목록에 접속 상태 추가"""
     try:
-        # 현재 사용자 ID
         current_user_id = session.get('user_id')
-        
-        # 1분 이내 로그인한 사용자를 접속중으로 간주
         one_minute_ago = get_kst_now() - timedelta(minutes=1)
         
         for user in users:
@@ -76,16 +73,15 @@ def add_user_online_status(users):
                 user['is_online'] = True
                 continue
             
-            # 다른 사용자들은 로그인 시간 기준으로 판단
-            if user.get('last_active'):
-                try:
-                    last_active_str = user['last_active']
-                    last_active_dt = datetime.fromisoformat(last_active_str.replace('Z', ''))
-                    user['is_online'] = last_active_dt >= one_minute_ago
-                except Exception as e:
-                    print(f"로그인 시간 파싱 오류: {e}")
+            # 다른 사용자들은 DB에서 직접 조회해서 판단
+            try:
+                db_user = User.query.get(user_id)
+                if db_user and db_user.last_active:
+                    user['is_online'] = db_user.last_active >= one_minute_ago
+                else:
                     user['is_online'] = False
-            else:
+            except Exception as e:
+                print(f"사용자 {user_id} 접속 상태 확인 오류: {e}")
                 user['is_online'] = False
         
         return users
