@@ -109,13 +109,15 @@ function displayStats(stats) {
         total: document.querySelector('.stats-card:nth-child(1) h3'),
         active: document.querySelector('.stats-card:nth-child(2) h3'),
         admin: document.querySelector('.stats-card:nth-child(3) h3'),
-        inactive: document.querySelector('.stats-card:nth-child(4) h3') // 비활성 사용자로 변경
+        inactive: document.querySelector('.stats-card:nth-child(4) h3'), // 비활성 사용자로 변경
+        online: document.querySelector('.stats-card:nth-child(5) h3') // ✅ 현재 접속자 추가!
     };
     
     if (elements.total) elements.total.textContent = stats.users?.total || 0;
     if (elements.active) elements.active.textContent = stats.users?.active || 0;
     if (elements.admin) elements.admin.textContent = stats.users?.admins || 0;
     if (elements.inactive) elements.inactive.textContent = stats.users?.inactive || 0;
+    if (elements.online) elements.online.textContent = stats.users?.online || 0; // ✅ 실시간 반영
 }
 
 // 사용자 목록 표시 (수정: 로그인 시간 한국시간 표시, 삭제 버튼 수정)
@@ -354,6 +356,8 @@ function animateCards() {
 // 사용자 목록 새로고침 (수정: 확인창 제거)
 async function refreshUsers() {
     console.log('사용자 목록 새로고침 실행');
+    // 현재 사용자 활동 시간 먼저 갱신
+    await updateCurrentUserLoginTime();    
     await loadAllData();
     // 확인창 제거 - 조용히 새로고침
 }

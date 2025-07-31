@@ -80,7 +80,7 @@ def add_user_online_status(users):
         current_user_id = session.get('user_id')
         
         # 5분 이내 로그인한 사용자를 접속중으로 간주
-        five_minutes_ago = datetime.utcnow() - timedelta(minutes=5)
+        one_minute_ago = datetime.utcnow() - timedelta(minutes=1)
         
         for user in users:
             user_id = user.get('id')
@@ -95,7 +95,7 @@ def add_user_online_status(users):
                 try:
                     last_login_str = user['last_login']
                     last_login_dt = datetime.fromisoformat(last_login_str.replace('Z', ''))
-                    user['is_online'] = last_login_dt >= five_minutes_ago
+                    user['is_online'] = last_login_dt >= one_minute_ago
                 except Exception as e:
                     print(f"로그인 시간 파싱 오류: {e}")
                     user['is_online'] = False
