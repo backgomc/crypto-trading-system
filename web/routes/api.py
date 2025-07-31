@@ -4,7 +4,7 @@
 from flask import Blueprint, request, session, jsonify
 from functools import wraps
 from datetime import datetime
-import json
+import json, copy
 from config.models import User, UserConfig, SystemLog, ConfigHistory, db, get_kst_now
 
 api_bp = Blueprint('api', __name__)
@@ -271,14 +271,15 @@ def update_config():
             return api_error('config 데이터가 필요합니다', 'INVALID_REQUEST', 400)
         
         new_config = data['config']
-        current_config = load_user_config(user_id)
+        previous_config = load_user_config(user_id)  # ✅ 저장 전 설정값 백업
+        current_config = copy.deepcopy(previous_config)  # ✅ 이후 병합용 (깊은 복사 권장)
         
         # 부분 업데이트
         for section, section_data in new_config.items():
             if section in current_config:
                 current_config[section].update(section_data)
             else:
-                current_config[section] = section_data
+                current_config[section] = section_data                
         
         # 유효성 검사
         is_valid, errors = validate_config(current_config)
@@ -297,14 +298,14 @@ def update_config():
             log_system_event('INFO', 'API', f'설정 업데이트: 사용자 {user_id}')
             
             # ✅ 설정 이력 저장
-            history = ConfigHistory(
+            ConfigHistory.log_change(
                 user_id=user_id,
-                config_type='자동매매 설정',
-                config_data=json.dumps(current_config, ensure_ascii=False),
-                created_at=get_kst_now()
+                config_key='전체 설정',
+                old_value=previous_config,
+                new_value=current_config,
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent', '')
             )
-            db.session.add(history)
-            db.session.commit()
 
             return api_success(
                 data={'config': current_config},
