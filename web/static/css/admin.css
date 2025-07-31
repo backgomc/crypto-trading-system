@@ -371,29 +371,6 @@
     border-left-color: #17a2b8;
 }
 
-/* 스크롤바 커스터마이징 */
-.config-history::-webkit-scrollbar,
-.log-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.config-history::-webkit-scrollbar-track,
-.log-container::-webkit-scrollbar-track {
-    background: #333333;
-    border-radius: 3px;
-}
-
-.config-history::-webkit-scrollbar-thumb,
-.log-container::-webkit-scrollbar-thumb {
-    background: #667eea;
-    border-radius: 3px;
-}
-
-.config-history::-webkit-scrollbar-thumb:hover,
-.log-container::-webkit-scrollbar-thumb:hover {
-    background: #764ba2;
-}
-
 /* 반응형 */
 @media (max-width: 768px) {
     .page-header {
