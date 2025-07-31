@@ -179,7 +179,26 @@
         });
     </script>
     
-    <!-- 페이지별 JavaScript -->
+    <!-- Ping 클라이언트 (로그인 사용자만) -->
+    {% if current_user.logged_in %}
+    <script>
+    // 30초마다 ping 전송
+    function sendPing() {
+        fetch('/api/ping', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).catch(err => console.warn('Ping 실패:', err));
+    }
+
+    // 페이지 로드 후 ping 시작
+    document.addEventListener('DOMContentLoaded', function() {
+        sendPing(); // 즉시 1회 실행
+        setInterval(sendPing, 30000); // 30초마다 반복
+    });
+    </script>
+    {% endif %}
     {% block extra_js %}{% endblock %}
 </body>
 </html>

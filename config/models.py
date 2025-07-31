@@ -5,37 +5,78 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
+import pytz
 
 db = SQLAlchemy()
 
+def get_kst_now():
+    """한국시간 반환"""
+    import pytz
+    kst = pytz.timezone('Asia/Seoul')
+    return datetime.now(kst).replace(tzinfo=None)
+
 class User(db.Model):
-    """사용자 모델"""
-    __tablename__ = 'users'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password_hash = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    last_login = db.Column(db.DateTime, nullable=True)
-    is_active = db.Column(db.Boolean, default=True)
-    is_admin = db.Column(db.Boolean, default=False)
-    
-    def set_password(self, password):
-        """비밀번호 해시화"""
-        self.password_hash = generate_password_hash(password)
-    
-    def check_password(self, password):
-        """비밀번호 확인"""
-        return check_password_hash(self.password_hash, password)
-    
-    def update_last_login(self):
-        """마지막 로그인 시간 업데이트"""
-        self.last_login = datetime.utcnow()
-        db.session.commit()
-    
-    def __repr__(self):
-        return f'<User {self.username}>'
+   """사용자 모델"""
+   __tablename__ = 'users'
+   
+   id = db.Column(db.Integer, primary_key=True)
+   username = db.Column(db.String(80), unique=True, nullable=False)
+   password_hash = db.Column(db.String(120), nullable=False)
+   email = db.Column(db.String(120), unique=True, nullable=False)  # 필수 입력으로 변경
+   created_at = db.Column(db.DateTime, default=get_kst_now)  # 한국시간으로 변경
+   last_login = db.Column(db.DateTime, nullable=True)
+   last_active = db.Column(db.DateTime, nullable=True)  # ping 방식용 마지막 활동 시간 추가
+   is_active = db.Column(db.Boolean, default=True)
+   is_admin = db.Column(db.Boolean, default=False)
+   
+   def set_password(self, password):
+       """비밀번호 해시화"""
+       self.password_hash = generate_password_hash(password)
+   
+   def check_password(self, password):
+       """비밀번호 확인"""
+       return check_password_hash(self.password_hash, password)
+   
+   def update_last_login(self):
+       """마지막 로그인 시간 업데이트 (한국시간)"""
+       self.last_login = get_kst_now()
+       db.session.commit()
+   
+   def update_last_active(self):
+       """마지막 활동 시간 업데이트 (ping용, 한국시간)"""
+       self.last_active = get_kst_now()
+       db.session.commit()
+   
+   def is_online(self, threshold_minutes=1):
+       """접속 상태 확인 (ping 방식 - 1분 임계값)"""
+       if not self.last_active:
+           return False
+       from datetime import timedelta
+       threshold = get_kst_now() - timedelta(minutes=threshold_minutes)
+       return self.last_active >= threshold
+   
+   @classmethod
+   def get_online_count(cls, threshold_minutes=1):
+       """현재 접속자 수 조회 (1분 임계값)"""
+       from datetime import timedelta
+       threshold = get_kst_now() - timedelta(minutes=threshold_minutes)
+       return cls.query.filter(
+           cls.is_active == True,
+           cls.last_active >= threshold
+       ).count()
+   
+   @classmethod
+   def get_online_users(cls, threshold_minutes=1):
+       """현재 접속 중인 사용자 목록 (1분 임계값)"""
+       from datetime import timedelta
+       threshold = get_kst_now() - timedelta(minutes=threshold_minutes)
+       return cls.query.filter(
+           cls.is_active == True,
+           cls.last_active >= threshold
+       ).all()
+   
+   def __repr__(self):
+       return f'<User {self.username}>'
 
 class TradingLog(db.Model):
     """매매 기록 모델"""

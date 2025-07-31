@@ -4,8 +4,8 @@
 from flask import Blueprint, request, session, jsonify
 from functools import wraps
 from datetime import datetime, timedelta
-import pytz
-from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db
+import pytz, re
+from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db, get_kst_now
 from api.utils import (
     error_response, success_response, 
     validate_request_data, handle_api_errors,
@@ -63,10 +63,10 @@ def get_online_users():
                 db.session.commit()
         
         # 1분 이내 로그인한 사용자를 접속중으로 간주 (더 짧게)
-        one_minute_ago = datetime.utcnow() - timedelta(minutes=1)
+        one_minute_ago = get_kst_now() - timedelta(minutes=1)
         online_count = User.query.filter(
             User.is_active == True,
-            User.last_login >= one_minute_ago
+            User.last_active >= one_minute_ago  # last_active로 변경
         ).count()
         return online_count
     except Exception as e:
@@ -79,8 +79,8 @@ def add_user_online_status(users):
         # 현재 사용자 ID
         current_user_id = session.get('user_id')
         
-        # 5분 이내 로그인한 사용자를 접속중으로 간주
-        one_minute_ago = datetime.utcnow() - timedelta(minutes=1)
+        # 1분 이내 로그인한 사용자를 접속중으로 간주
+        one_minute_ago = get_kst_now() - timedelta(minutes=1)
         
         for user in users:
             user_id = user.get('id')
@@ -91,11 +91,11 @@ def add_user_online_status(users):
                 continue
             
             # 다른 사용자들은 로그인 시간 기준으로 판단
-            if user.get('last_login'):
+            if user.get('last_active'):
                 try:
-                    last_login_str = user['last_login']
-                    last_login_dt = datetime.fromisoformat(last_login_str.replace('Z', ''))
-                    user['is_online'] = last_login_dt >= one_minute_ago
+                    last_active_str = user['last_active']
+                    last_active_dt = datetime.fromisoformat(last_active_str.replace('Z', ''))
+                    user['is_online'] = last_active_dt >= one_minute_ago
                 except Exception as e:
                     print(f"로그인 시간 파싱 오류: {e}")
                     user['is_online'] = False
@@ -128,7 +128,8 @@ def get_all_users():
                 'is_active': user.is_active,
                 'is_admin': user.is_admin,
                 'created_at': user.created_at.isoformat() if user.created_at else None,
-                'last_login': user.last_login.isoformat() if user.last_login else None
+                'last_login': user.last_login.isoformat() if user.last_login else None,
+                'last_active': user.last_active.isoformat() if user.last_active else None
             })
         
         # 접속 상태 추가
@@ -145,6 +146,36 @@ def get_all_users():
         log_admin_event('ERROR', 'ADMIN', f'사용자 목록 조회 실패: {e}')
         return error_response('사용자 목록 조회 중 오류가 발생했습니다.', 'DATABASE_ERROR', 500)
 
+@admin_api_bp.route('/api/admin/check-username/<username>', methods=['GET'])
+@admin_required
+@handle_api_errors
+def check_username_availability(username):
+    """사용자명 중복체크"""
+    try:
+        # 사용자명 유효성 검사
+        if not username or len(username.strip()) < 3:
+            return error_response('사용자명은 3자 이상이어야 합니다.', 'VALIDATION_ERROR', 400)
+        
+        username_clean = username.strip()
+        
+        # 중복 체크
+        existing_user = User.query.filter_by(username=username_clean).first()
+        is_available = existing_user is None
+        
+        log_admin_event('INFO', 'ADMIN', f'사용자명 중복체크: {username_clean} (사용가능: {is_available})')
+        
+        return success_response(
+            data={
+                'username': username_clean,
+                'available': is_available
+            },
+            message='사용자명 중복체크 완료'
+        )
+        
+    except Exception as e:
+        log_admin_event('ERROR', 'ADMIN', f'사용자명 중복체크 실패: {e}')
+        return error_response('중복체크 중 오류가 발생했습니다.', 'CHECK_ERROR', 500)
+    
 @admin_api_bp.route('/api/admin/users', methods=['POST'])
 @admin_required
 @handle_api_errors
@@ -154,8 +185,8 @@ def create_user():
         # 요청 데이터 검증
         data, error = validate_request_data(
             request,
-            required_fields=['username', 'password'],
-            optional_fields=['email', 'is_admin']
+            required_fields=['username', 'password', 'email'],  # 이메일 필수로 변경
+            optional_fields=['is_admin']
         )
         if error:
             return error
@@ -169,6 +200,17 @@ def create_user():
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             return error_response('이미 존재하는 사용자명입니다.', 'USER_EXISTS', 400)
+        
+        # 이메일 검증 로직
+        import re
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            return error_response('올바른 이메일 형식이 아닙니다.', 'VALIDATION_ERROR', 400)
+
+        # 이메일 중복 체크
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            return error_response('이미 사용 중인 이메일입니다.', 'EMAIL_EXISTS', 400)        
         
         # 사용자명 유효성 검사
         username_clean, error_msg = validate_string(username, min_length=3, max_length=30)

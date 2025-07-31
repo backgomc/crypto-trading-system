@@ -126,7 +126,7 @@ def admin():
         print(f"🔍 DEBUG: recent_configs count = {len(recent_configs)}")
         
         # 전체 사용자 목록 (관리용)
-        all_users = User.query.order_by(User.created_at.desc()).all()
+        all_users = User.query.order_by(User.created_at.asc()).all()
         print(f"🔍 DEBUG: all_users count = {len(all_users)}")
         
         admin_data = {
@@ -134,7 +134,8 @@ def admin():
                 'total_users': total_users,
                 'active_users': active_users,
                 'admin_users': admin_users,
-                'inactive_users': total_users - active_users
+                'inactive_users': total_users - active_users,
+                'online_users': User.get_online_count()
             },
             'recent_users': recent_users,
             'recent_logs': recent_logs,

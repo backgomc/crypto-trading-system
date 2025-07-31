@@ -53,10 +53,11 @@ async function getCurrentUserId() {
         const response = await fetch('/api/status');
         const result = await response.json();
         
-        if (result.username) {
+        if (result.user_id) {
+            currentUserId = parseInt(result.user_id);
             currentUsername = result.username;
         } else {
-            // 백업: session 기반 DOM에서 직접 가져오기
+            currentUserId = null;
             currentUsername = document.body.dataset.username || null;
         }
 
@@ -135,7 +136,7 @@ function displayUsers(users) {
             formatKoreanDateTime(user.last_login) : '로그인 기록 없음';
         
         // 정확한 타입 비교
-        const isCurrentUser = parseInt(user.id) === parseInt(currentUserId);
+        const isCurrentUser = user.username === currentUsername;
         
         return `
         <tr>
@@ -361,34 +362,137 @@ async function refreshUsers() {
     // 확인창 제거 - 조용히 새로고침
 }
 
-// 새 사용자 추가 (수정: 관리자 권한 창 제거, 오류 수정)
+// 새 사용자 추가 (모달 사용)
 async function addUser() {
-    const username = prompt('새 사용자명을 입력하세요:');
-    if (!username || !username.trim()) return;
+    // 모달 열기
+    const modal = new bootstrap.Modal(document.getElementById('addUserModal'));
+    modal.show();
     
-    const password = prompt('초기 비밀번호를 입력하세요 (최소 6자):');
-    if (!password || password.length < 6) {
-        showToast('error', '비밀번호는 최소 6자 이상이어야 합니다.');
+    // 폼 초기화
+    document.getElementById('addUserForm').reset();
+    document.getElementById('usernameCheck').textContent = '';
+    document.getElementById('newUsername').classList.remove('is-valid', 'is-invalid');
+    document.getElementById('confirmNewPassword').classList.remove('is-invalid');
+    
+    // 포커스 설정
+    setTimeout(() => {
+        document.getElementById('newUsername').focus();
+    }, 500);
+}
+
+// 사용자명 중복체크
+async function checkUsername() {
+    const username = document.getElementById('newUsername').value.trim();
+    const checkDiv = document.getElementById('usernameCheck');
+    const usernameInput = document.getElementById('newUsername');
+    
+    if (!username) {
+        checkDiv.textContent = '사용자명을 입력하세요.';
+        checkDiv.className = 'form-text text-danger';
         return;
     }
     
-    const email = prompt('이메일 주소를 입력하세요 (선택사항, 취소 가능):');
+    try {
+        const result = await apiCall(`/api/admin/check-username/${username}`);
+        if (result && result.success) {
+            if (result.data.available) {
+                checkDiv.textContent = '✅ 사용 가능한 사용자명입니다.';
+                checkDiv.className = 'form-text text-success';
+                usernameInput.classList.remove('is-invalid');
+                usernameInput.classList.add('is-valid');
+            } else {
+                checkDiv.textContent = '❌ 이미 사용 중인 사용자명입니다.';
+                checkDiv.className = 'form-text text-danger';
+                usernameInput.classList.remove('is-valid');
+                usernameInput.classList.add('is-invalid');
+            }
+        }
+    } catch (error) {
+        checkDiv.textContent = '중복체크 중 오류가 발생했습니다.';
+        checkDiv.className = 'form-text text-danger';
+    }
+}
+
+// 사용자 생성 실행
+async function createUser() {
+    const username = document.getElementById('newUsername').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    const email = document.getElementById('newEmail').value.trim();
     
-    // 관리자 권한 창 제거 - 기본값은 일반 사용자
+    // 유효성 검사
+    if (!username) {
+        showToast('error', '사용자명을 입력하세요.');
+        document.getElementById('newUsername').focus();
+        return;
+    }
+    
+    if (!password) {
+        showToast('error', '비밀번호를 입력하세요.');
+        document.getElementById('newPassword').focus();
+        return;
+    }
+    
+    if (password.length < 6) {
+        showToast('error', '비밀번호는 최소 6자 이상이어야 합니다.');
+        document.getElementById('newPassword').focus();
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showToast('error', '비밀번호가 일치하지 않습니다.');
+        document.getElementById('confirmNewPassword').focus();
+        return;
+    }
+    
+    if (!email) {
+        showToast('error', '이메일을 입력하세요.');
+        document.getElementById('newEmail').focus();
+        return;
+    }
+    
+    // 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showToast('error', '올바른 이메일 형식을 입력하세요.');
+        document.getElementById('newEmail').focus();
+        return;
+    }
+    
     const data = {
-        username: username.trim(),
+        username: username,
         password: password,
-        email: email?.trim() || null,
-        is_admin: false // 기본값: 일반 사용자
+        email: email,
+        is_admin: false
     };
-    
-    console.log('사용자 생성 요청:', data);
     
     const result = await apiCall('/api/admin/users', 'POST', data);
     if (result && result.success) {
         showToast('success', result.message || '사용자가 생성되었습니다.');
-        await loadAllData(); // 즉시 새로고침
+        
+        // 모달 닫기
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
+        modal.hide();
+        
+        await loadAllData();
     }
+}
+
+// 관리자 로그 필터링
+function filterLogs() {
+    const excludeAdmin = document.getElementById('excludeAdminLogs').checked;
+    const logRows = document.querySelectorAll('#logsTable tbody tr');
+    
+    logRows.forEach(row => {
+        const message = row.cells[2]?.textContent || '';
+        const isAdminLog = message.includes('관리자:') || message.includes('admin') || message.includes('관리자 ');
+        
+        if (excludeAdmin && isAdminLog) {
+            row.style.display = 'none';
+        } else {
+            row.style.display = '';
+        }
+    });
 }
 
 // 사용자 편집
@@ -576,6 +680,7 @@ async function clearLogs() {
 
 // 비밀번호 확인 실시간 체크
 function setupPasswordValidation() {
+    // 기존 코드 (비밀번호 리셋용)
     const newPasswordInput = document.getElementById('newPassword');
     const confirmPasswordInput = document.getElementById('confirmPassword');
     
@@ -594,6 +699,26 @@ function setupPasswordValidation() {
     
     if (newPasswordInput) newPasswordInput.addEventListener('input', checkPasswordMatch);
     if (confirmPasswordInput) confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+    
+    // ✅ 여기에 추가: 사용자 추가 모달용
+    const addNewPasswordInput = document.getElementById('newPassword');
+    const addConfirmPasswordInput = document.getElementById('confirmNewPassword');
+    
+    function checkAddPasswordMatch() {
+        if (!addNewPasswordInput || !addConfirmPasswordInput) return;
+        
+        const newPassword = addNewPasswordInput.value;
+        const confirmPassword = addConfirmPasswordInput.value;
+        
+        if (confirmPassword && newPassword !== confirmPassword) {
+            addConfirmPasswordInput.classList.add('is-invalid');
+        } else {
+            addConfirmPasswordInput.classList.remove('is-invalid');
+        }
+    }
+    
+    if (addNewPasswordInput) addNewPasswordInput.addEventListener('input', checkAddPasswordMatch);
+    if (addConfirmPasswordInput) addConfirmPasswordInput.addEventListener('input', checkAddPasswordMatch);
 }
 
 // Enter 키 이벤트 처리

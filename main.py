@@ -62,6 +62,15 @@ def create_app():
             # 테이블 생성
             db.create_all()
             print("✅ 데이터베이스 테이블 생성 완료")
+
+            # ✅ 여기에 추가: last_active 컬럼 추가
+            try:
+                db.engine.execute("ALTER TABLE users ADD COLUMN last_active DATETIME")
+                print("✅ last_active 컬럼 추가 완료")
+            except Exception as alter_error:
+                # 이미 컬럼이 존재하는 경우 무시
+                if "duplicate column name" not in str(alter_error).lower():
+                    print(f"⚠️ 컬럼 추가 실패 (무시 가능): {alter_error}")            
             
             # 환경변수에서 관리자 계정 정보 가져오기
             admin_username = os.getenv('ADMIN_USERNAME', 'admin')

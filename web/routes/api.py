@@ -462,6 +462,39 @@ def apply_config_preset(preset_type):
         return api_error('프리셋 적용 중 오류가 발생했습니다', 'CONFIG_ERROR', 500)
 
 # ============================================================================
+# Ping API (접속 상태 관리)
+# ============================================================================
+
+@api_bp.route('/ping', methods=['POST'])
+@api_required
+def user_ping():
+    """사용자 ping (30초마다 호출되어 접속 상태 유지)"""
+    try:
+        user_id = session.get('user_id')
+        if not user_id:
+            return api_error('사용자 정보를 찾을 수 없습니다', 'USER_NOT_FOUND', 401)
+
+        user = User.query.get(user_id)
+        if not user:
+            return api_error('사용자를 찾을 수 없습니다', 'USER_NOT_FOUND', 404)
+        
+        # 마지막 활동 시간 업데이트 (한국시간)
+        user.update_last_active()
+        
+        return api_success(
+            data={
+                'user_id': user_id,
+                'username': user.username,
+                'last_active': user.last_active.isoformat() if user.last_active else None
+            },
+            message='ping 성공'
+        )
+        
+    except Exception as e:
+        print(f"Ping 오류: {e}")
+        return api_error('ping 처리 중 오류가 발생했습니다', 'PING_ERROR', 500)
+    
+# ============================================================================
 # 시스템 API 엔드포인트들
 # ============================================================================
 
