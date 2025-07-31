@@ -28,8 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // 비밀번호 실시간 체크 설정
     setupPasswordValidation();
     
-    // 10초마다 통계 자동 새로고침 (접속자 수 실시간 반영)
+    // 10초마다 통계 자동 새로고침 (접속자 수, 사용자 접속 상태 실시간 반영)
     setInterval(loadStats, 10000);
+    setInterval(loadUsers, 10000);
 });
 
 // 현재 사용자 로그인 시간 갱신
