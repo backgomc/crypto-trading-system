@@ -5,15 +5,30 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
-import pytz
+from datetime import datetime
+from pytz import timezone
 
 db = SQLAlchemy()
 
 def get_kst_now():
-    """한국시간 반환"""
+    """현재 한국시간 반환"""
+    kst = timezone('Asia/Seoul')
+    return datetime.now(kst).replace(tzinfo=None)
+
+def to_kst_string(dt):
+    """datetime → 한국시간 문자열로 변환: 2025. 08. 01. 오전 08:37:46"""
+    if not dt:
+        return None
     import pytz
     kst = pytz.timezone('Asia/Seoul')
-    return datetime.now(kst).replace(tzinfo=None)
+    dt_kst = dt.astimezone(kst) if dt.tzinfo else kst.localize(dt)
+
+    hour = dt_kst.strftime('%I')  # 12시간제
+    minute = dt_kst.strftime('%M')
+    second = dt_kst.strftime('%S')
+    meridiem = '오전' if dt_kst.hour < 12 else '오후'
+
+    return dt_kst.strftime(f'%Y. %m. %d. {meridiem} {hour}:%M:%S')
 
 class User(db.Model):
    """사용자 모델"""

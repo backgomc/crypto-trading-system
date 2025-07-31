@@ -5,7 +5,7 @@ from flask import Blueprint, request, session, jsonify
 from functools import wraps
 from datetime import datetime, timedelta
 import pytz, re
-from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db, get_kst_now
+from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db, get_kst_now, to_kst_string
 from api.utils import (
     error_response, success_response, 
     validate_request_data, handle_api_errors,
@@ -127,9 +127,9 @@ def get_all_users():
                 'email': user.email,
                 'is_active': user.is_active,
                 'is_admin': user.is_admin,
-                'created_at': user.created_at.isoformat() if user.created_at else None,
-                'last_login': user.last_login.isoformat() if user.last_login else None,
-                'last_active': user.last_active.isoformat() if user.last_active else None
+                'created_at': to_kst_string(user.created_at),
+                'last_login': to_kst_string(user.last_login),
+                'last_active': to_kst_string(user.last_active)
             })
         
         # 접속 상태 추가
@@ -554,11 +554,7 @@ def get_config_change_detail(config_id):
         user = User.query.get(config_change.user_id)
         
         # UTC → 한국시간 변환
-        if config_change.changed_at:
-            kst_time = config_change.changed_at.replace(tzinfo=pytz.UTC).astimezone(KST)
-            changed_at_str = kst_time.isoformat()
-        else:
-            changed_at_str = None
+        changed_at_str = to_kst_string(config_change.changed_at)
         
         detail = {
             'id': config_change.id,
