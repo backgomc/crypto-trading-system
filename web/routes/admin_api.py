@@ -117,7 +117,7 @@ def add_user_online_status(users):
 def get_all_users():
     """모든 사용자 목록 조회 (접속 상태 포함)"""
     try:
-        users = User.query.order_by(User.created_at.desc()).all()
+        users = User.query.order_by(User.created_at.asc()).all()
         
         users_data = []
         for user in users:

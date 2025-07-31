@@ -126,7 +126,7 @@ function displayUsers(users) {
     if (!tbody) return;
     
     if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">사용자 데이터가 없습니다.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">사용자 데이터가 없습니다.</td></tr>';
         return;
     }
     
@@ -160,6 +160,9 @@ function displayUsers(users) {
                     <i class="bi bi-circle-fill me-1" style="font-size: 0.6rem;"></i>
                     ${isOnline ? '접속중' : '오프라인'}
                 </span>
+            </td>
+            <td>
+                <small class="text-muted">${user.created_at || '없음'}</small>
             </td>
             <td>
                 <small class="text-muted">${lastLoginText}</small>
