@@ -29,7 +29,7 @@
     <!-- 페이지별 CSS -->
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body data-current-user="{{ session.get('user_id') }}"></body>
     <!-- 헤더 -->
     <header class="top-header">
         <div class="container-fluid">
