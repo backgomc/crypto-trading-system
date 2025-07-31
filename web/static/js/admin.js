@@ -48,7 +48,7 @@ async function updateCurrentUserLoginTime() {
 }
 
 // 현재 사용자 ID 가져오기 (수정)
-async function getCurrentUsername() {
+async function getCurrentUserId() {
     try {
         const response = await fetch('/api/status');
         const result = await response.json();
