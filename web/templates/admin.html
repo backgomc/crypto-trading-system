@@ -163,14 +163,14 @@
                                     </td>
                                     <td>
                                         {% if user.created_at %}
-                                        <small class="text-muted">{{ user.created_at.strftime('%Y-%m-%d') }}</small>
+                                        <small class="text-muted">{{ user.created_at }}</small>
                                         {% else %}
                                         <small class="text-muted">없음</small>
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if user.last_login %}
-                                        <small class="text-muted">{{ user.last_login.strftime('%m/%d %H:%M') }}</small>
+                                        <small class="text-muted">{{ user.last_login }}</small>
                                         {% else %}
                                         <small class="text-muted">없음</small>
                                         {% endif %}
