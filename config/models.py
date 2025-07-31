@@ -83,7 +83,7 @@ class TradingLog(db.Model):
     __tablename__ = 'trading_logs'
     
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=get_kst_now)
     action = db.Column(db.String(50), nullable=False)  # 'buy', 'sell', 'long', 'short'
     symbol = db.Column(db.String(20), nullable=False, default='BTCUSDT')
     price = db.Column(db.Float, nullable=False)
@@ -101,7 +101,7 @@ class SystemLog(db.Model):
     __tablename__ = 'system_logs'
     
     id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=get_kst_now)
     level = db.Column(db.String(20), nullable=False)  # 'INFO', 'WARNING', 'ERROR'
     category = db.Column(db.String(50), nullable=False)  # 'LOGIN', 'TRADING', 'SYSTEM'
     message = db.Column(db.Text, nullable=False)
@@ -124,8 +124,8 @@ class UserConfig(db.Model):
     config_key = db.Column(db.String(100), nullable=False, index=True)
     config_value = db.Column(db.Text, nullable=False)
     config_type = db.Column(db.String(20), default='json', nullable=False)  # json, string, number, boolean
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = db.Column(db.DateTime, default=get_kst_now, nullable=False)
+    updated_at = db.Column(db.DateTime, default=get_kst_now, onupdate=get_kst_now, nullable=False)
     
     # 복합 인덱스: 사용자별 설정 키는 유일
     __table_args__ = (db.UniqueConstraint('user_id', 'config_key', name='uq_user_config'),)
@@ -185,7 +185,7 @@ class UserConfig(db.Model):
             db.session.add(config)
         
         config.set_value(value)
-        config.updated_at = datetime.utcnow()
+        config.updated_at = get_kst_now()
         db.session.commit()
         return config
     
@@ -212,7 +212,7 @@ class TradingState(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
     state_key = db.Column(db.String(100), nullable=False, index=True)
     state_value = db.Column(db.Text)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=get_kst_now, onupdate=get_kst_now, nullable=False)
     
     # 복합 인덱스: 사용자별 상태 키는 유일
     __table_args__ = (db.UniqueConstraint('user_id', 'state_key', name='uq_user_state'),)
@@ -244,7 +244,7 @@ class TradingState(db.Model):
         else:
             state.state_value = str(value) if value is not None else None
         
-        state.updated_at = datetime.utcnow()
+        state.updated_at = get_kst_now()
         db.session.commit()
         return state
     
@@ -274,7 +274,7 @@ class ConfigHistory(db.Model):
     config_key = db.Column(db.String(100), nullable=False, index=True)
     old_value = db.Column(db.Text)
     new_value = db.Column(db.Text)
-    changed_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    changed_at = db.Column(db.DateTime, default=get_kst_now, nullable=False)
     ip_address = db.Column(db.String(45))
     user_agent = db.Column(db.String(200))
     
