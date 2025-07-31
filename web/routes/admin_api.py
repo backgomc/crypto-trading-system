@@ -47,18 +47,7 @@ def log_admin_event(level, category, message):
         print(f"관리자 로그 저장 실패: {e}")
 
 def get_online_users():
-    try:
-        # 모든 접속중인 사용자의 로그인 시간을 갱신하는 로직 필요
-        # 또는 세션 기반으로 실시간 접속자 추적
-        
-        # 현재 사용자의 로그인 시간 갱신
-        current_user_id = session.get('user_id')
-        if current_user_id:
-            current_user = User.query.get(current_user_id)
-            if current_user:
-                current_user.update_last_login()
-                db.session.commit()
-        
+    try:       
         # 1분 이내 로그인한 사용자를 접속중으로 간주 (더 짧게)
         one_minute_ago = get_kst_now() - timedelta(minutes=1)
         online_count = User.query.filter(
