@@ -5,7 +5,7 @@ from flask import Blueprint, request, session, jsonify
 from functools import wraps
 from datetime import datetime
 import json
-from config.models import User, SystemLog, UserConfig, db
+from config.models import User, UserConfig, SystemLog, ConfigHistory, db, get_kst_now
 
 api_bp = Blueprint('api', __name__)
 
@@ -296,6 +296,16 @@ def update_config():
         if success:
             log_system_event('INFO', 'API', f'설정 업데이트: 사용자 {user_id}')
             
+            # ✅ 설정 이력 저장
+            history = ConfigHistory(
+                user_id=user_id,
+                config_type='자동매매 설정',
+                config_data=json.dumps(current_config, ensure_ascii=False),
+                created_at=get_kst_now()
+            )
+            db.session.add(history)
+            db.session.commit()
+
             return api_success(
                 data={'config': current_config},
                 message='설정이 성공적으로 업데이트되었습니다'
