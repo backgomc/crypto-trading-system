@@ -5,7 +5,7 @@ from flask import Blueprint, request, session, jsonify
 from functools import wraps
 from datetime import datetime, timedelta
 import pytz, re
-from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db, get_kst_now, to_kst_string
+from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db, get_kst_now, to_kst_string, format_kst_string
 from api.utils import (
     error_response, success_response, 
     validate_request_data, handle_api_errors,
@@ -113,9 +113,9 @@ def get_all_users():
                 'email': user.email,
                 'is_active': user.is_active,
                 'is_admin': user.is_admin,
-                'created_at': to_kst_string(user.created_at),
-                'last_login': to_kst_string(user.last_login),
-                'last_active': to_kst_string(user.last_active)
+                'created_at': format_kst_string(user.created_at),
+                'last_login': format_kst_string(user.last_login),
+                'last_active': format_kst_string(user.last_active)
             })
         
         # 접속 상태 추가

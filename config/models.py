@@ -15,6 +15,13 @@ def get_kst_now():
     kst = timezone('Asia/Seoul')
     return datetime.now(kst).replace(tzinfo=None)
 
+def format_kst_string(dt):
+    """이미 한국시간인 datetime을 문자열로 포맷팅"""
+    if not dt:
+        return None
+    
+    return dt.strftime('%Y. %m. %d. %p %I:%M:%S').replace('AM', '오전').replace('PM', '오후')
+
 def to_kst_string(dt):
     """datetime → 한국시간 문자열로 변환"""
     if not dt:
