@@ -115,7 +115,13 @@ function displayStats(stats) {
     if (elements.total) elements.total.textContent = stats.users?.total || 0;
     if (elements.active) elements.active.textContent = stats.users?.active || 0;
     if (elements.inactive) elements.inactive.textContent = stats.users?.inactive || 0;
-    if (elements.online) elements.online.textContent = stats.users?.online || 0; // ✅ 실시간 반영
+    //if (elements.online) elements.online.textContent = stats.users?.online || 0; // ✅ 실시간 반영
+    if (elements.online) {
+    console.log("✅ online element 선택됨", elements.online);
+        elements.online.textContent = stats.users?.online || 0;
+    } else {
+        console.warn("❌ online element 선택 실패: .stats-card:nth-child(4) h3 없음");
+    }
 }
 
 // 사용자 목록 표시 (수정: 로그인 시간 한국시간 표시, 삭제 버튼 수정)
