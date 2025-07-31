@@ -491,6 +491,29 @@
     color: #ffffff;
 }
 
+/* 사용자명 데이터만 왼쪽 여백 (헤더 제외) */
+#usersTable tbody td:first-child {
+    padding-left: 24px;
+}
+
+#usersTable th:not(:first-child),
+#usersTable td:not(:first-child):not(:last-child) {
+    text-align: center; /* 가운데 정렬 */
+}
+
+#usersTable td:last-child {
+    text-align: center; /* 관리 버튼도 가운데 */
+}
+
+/* 테이블 전체 여백을 카드 헤더와 맞춤 */
+.table-responsive {
+    margin: 0 !important;
+}
+
+#usersTable {
+    margin-bottom: 0;
+}
+
 .stats-card:nth-child(1) { animation-delay: 0.1s; }
 .stats-card:nth-child(2) { animation-delay: 0.2s; }
 .stats-card:nth-child(3) { animation-delay: 0.3s; }
