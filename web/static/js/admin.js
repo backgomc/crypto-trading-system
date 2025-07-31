@@ -106,16 +106,14 @@ async function loadRecentLogs() {
 // 통계 표시 (수정: 비활성 사용자로 변경)
 function displayStats(stats) {
     const elements = {
-        total: document.querySelector('.stats-card:nth-child(1) h3'),
-        active: document.querySelector('.stats-card:nth-child(2) h3'),
-        admin: document.querySelector('.stats-card:nth-child(3) h3'),
-        inactive: document.querySelector('.stats-card:nth-child(4) h3'), // 비활성 사용자로 변경
-        online: document.querySelector('.stats-card:nth-child(5) h3') // ✅ 현재 접속자 추가!
+        total: document.querySelector('.stats-card:nth-child(1) h3'),   // 전체 사용자
+        active: document.querySelector('.stats-card:nth-child(2) h3'),  // 활성 사용자
+        inactive: document.querySelector('.stats-card:nth-child(3) h3'),// 비활성 사용자
+        online: document.querySelector('.stats-card:nth-child(4) h3')   // 현재 접속자 수 ✅ 여기가 핵심!
     };
-    
+
     if (elements.total) elements.total.textContent = stats.users?.total || 0;
     if (elements.active) elements.active.textContent = stats.users?.active || 0;
-    if (elements.admin) elements.admin.textContent = stats.users?.admins || 0;
     if (elements.inactive) elements.inactive.textContent = stats.users?.inactive || 0;
     if (elements.online) elements.online.textContent = stats.users?.online || 0; // ✅ 실시간 반영
 }
