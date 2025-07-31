@@ -105,23 +105,18 @@ async function loadRecentLogs() {
 
 // 통계 표시 (수정: 비활성 사용자로 변경)
 function displayStats(stats) {
+    const cards = document.querySelectorAll('.stats-card');
     const elements = {
-        total: document.querySelector('.stats-card:nth-child(1) h3'),   // 전체 사용자
-        active: document.querySelector('.stats-card:nth-child(2) h3'),  // 활성 사용자
-        inactive: document.querySelector('.stats-card:nth-child(3) h3'),// 비활성 사용자
-        online: document.querySelector('.stats-card:nth-child(4) h3')   // 현재 접속자 수 ✅ 여기가 핵심!
+        total: cards[0]?.querySelector('h3'),
+        active: cards[1]?.querySelector('h3'),
+        inactive: cards[2]?.querySelector('h3'),
+        online: cards[3]?.querySelector('h3') // ✅ 이게 진짜 안전하고 정확
     };
 
     if (elements.total) elements.total.textContent = stats.users?.total || 0;
     if (elements.active) elements.active.textContent = stats.users?.active || 0;
     if (elements.inactive) elements.inactive.textContent = stats.users?.inactive || 0;
-    //if (elements.online) elements.online.textContent = stats.users?.online || 0; // ✅ 실시간 반영
-    if (elements.online) {
-    console.log("✅ online element 선택됨", elements.online);
-        elements.online.textContent = stats.users?.online || 0;
-    } else {
-        console.warn("❌ online element 선택 실패: .stats-card:nth-child(4) h3 없음");
-    }
+    if (elements.online) elements.online.textContent = stats.users?.online || 0; // ✅ 실시간 반영
 }
 
 // 사용자 목록 표시 (수정: 로그인 시간 한국시간 표시, 삭제 버튼 수정)
