@@ -419,8 +419,8 @@ async function checkUsername() {
 // 사용자 생성 실행
 async function createUser() {
     const username = document.getElementById('newUsername').value.trim();
-    const password = document.getElementById('newPassword').value;
-    const confirmPassword = document.getElementById('confirmNewPassword').value;
+    const password = document.getElementById('addPassword').value;
+    const confirmPassword = document.getElementById('addConfirmPassword').value;
     const email = document.getElementById('newEmail').value.trim();
     
     // 유효성 검사
@@ -704,8 +704,8 @@ function setupPasswordValidation() {
     if (confirmPasswordInput) confirmPasswordInput.addEventListener('input', checkPasswordMatch);
     
     // ✅ 여기에 추가: 사용자 추가 모달용
-    const addNewPasswordInput = document.getElementById('newPassword');
-    const addConfirmPasswordInput = document.getElementById('confirmNewPassword');
+    const addNewPasswordInput = document.getElementById('addPassword');
+    const addConfirmPasswordInput = document.getElementById('addConfirmPassword');
     
     function checkAddPasswordMatch() {
         if (!addNewPasswordInput || !addConfirmPasswordInput) return;
