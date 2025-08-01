@@ -5,6 +5,10 @@
 let isLoading = false;
 let allUsers = [];
 let currentUserId = null;
+let currentLogPage = 1;
+let logsPerPage = 50;
+let allLogData = [];
+let filteredLogData = [];
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
@@ -200,17 +204,17 @@ function displayRecentLogs(logs) {
     }
     
     tbody.innerHTML = logs.map(log => `
-        <tr>
-            <td>
+        <tr class="log-item log-${log.level.toLowerCase()}" data-category="${log.category}">
+            <td class="text-center" style="width: 80px;">
                 <span class="badge ${getBadgeClass(log.level)}">
                     ${log.level}
                 </span>
             </td>
-            <td>
+            <td class="text-center" style="width: 80px;">
                 <small class="text-muted">${log.category}</small>
             </td>
-            <td>${log.message}</td>
-            <td>
+            <td class="log-message">${log.message}</td>
+            <td class="text-center" style="width: 90px;">
                 <small class="text-muted">
                     ${formatKoreanDateTime(log.timestamp)}
                 </small>
@@ -250,6 +254,7 @@ function restoreFilterState() {
         document.getElementById('excludeAdminLogs').checked = savedState === 'true';
         filterLogs(); // 저장된 상태로 즉시 필터링
     }
+    updateLogCount(); // 개수 업데이트 추가
 }
 
 // 로그 레벨별 배지 클래스
@@ -328,6 +333,56 @@ function showToast(type, message) {
         const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
         alert(`${icon} ${message}`);
     }
+}
+
+// 확인 모달 표시 (부트스트랩 모달 사용)
+function showConfirmModal(title, message) {
+    return new Promise((resolve) => {
+        // 기존 모달 제거
+        const existingModal = document.getElementById('confirmModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // 모달 HTML 생성
+        const modalHtml = `
+            <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${message}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="button" class="btn btn-danger" id="confirmBtn">확인</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        
+        // 확인 버튼 클릭
+        document.getElementById('confirmBtn').onclick = () => {
+            modal.hide();
+            resolve(true);
+        };
+        
+        // 모달 숨김 시 false 반환
+        document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => {
+            document.getElementById('confirmModal').remove();
+            resolve(false);
+        });
+        
+        modal.show();
+    });
 }
 
 // 시간 업데이트
@@ -498,9 +553,11 @@ function filterLogs() {
     const logRows = document.querySelectorAll('#logsTable tbody tr');
     
     logRows.forEach(row => {
-        const message = row.cells[2]?.textContent || '';
-        // 관리자 계정명 "nah3207"로 필터링
-        const isAdminLog = message.includes('nah3207');
+        const categoryCell = row.cells[1];
+        if (!categoryCell) return;
+        
+        const category = categoryCell.textContent.trim();
+        const isAdminLog = category === 'ADMIN' || category === 'LOGIN';
         
         if (excludeAdmin && isAdminLog) {
             row.style.display = 'none';
@@ -511,6 +568,38 @@ function filterLogs() {
     
     // 체크박스 상태 저장
     localStorage.setItem('excludeAdminLogs', excludeAdmin);
+    
+    // 로그 개수 업데이트
+    updateLogCount();
+}
+
+// 로그 개수 업데이트
+function updateLogCount() {
+    const logCount = document.getElementById('logCount');
+    if (logCount) {
+        const visibleRows = document.querySelectorAll('#logsTable tbody tr:not([style*="display: none"])');
+        const totalRows = document.querySelectorAll('#logsTable tbody tr').length;
+        logCount.textContent = `총 ${totalRows}개 로그 (${visibleRows.length}개 표시)`;
+    }
+}
+
+// 더 많은 로그 로드
+function loadMoreLogs() {
+    currentLogPage++;
+    loadRecentLogs();
+    updateLogCount();
+}
+
+// 로그 새로고침
+async function refreshLogs() {
+    try {
+        await loadRecentLogs();
+        showToast('success', '로그를 새로고침했습니다.');
+        updateLogCount();
+    } catch (error) {
+        console.error('로그 새로고침 실패:', error);
+        showToast('error', '로그 새로고침에 실패했습니다.');
+    }
 }
 
 // 사용자 편집
@@ -681,15 +770,21 @@ IP 주소: ${data.ip_address || 'N/A'}
 
 // 시스템 로그 정리 (수정: 모든 로그 삭제)
 async function clearLogs() {
-    showConfirm('로그 정리', '모든 시스템 로그를 삭제하시겠습니까?\n\n📋 모든 시스템 로그가 삭제됩니다.\n📝 모든 설정 변경 이력도 함께 삭제됩니다.\n\n⚠️ 이 작업은 되돌릴 수 없습니다.', async function(confirmed) {
-        if (!confirmed) return;
-        
-        const result = await apiCall('/api/admin/logs/cleanup', 'POST');
+    // 부트스트랩 모달을 사용한 확인
+    if (!await showConfirmModal('로그 삭제 확인', '정말로 모든 로그를 삭제하시겠습니까?<br>이 작업은 되돌릴 수 없습니다.')) {
+        return;
+    }
+    
+    try {
+        const result = await apiCall('/api/admin/logs', 'DELETE');
         if (result && result.success) {
             showToast('success', result.message || '모든 로그가 삭제되었습니다.');
             await loadAllData();
         }
-    });
+    } catch (error) {
+        console.error('로그 삭제 실패:', error);
+        showToast('error', '로그 삭제에 실패했습니다.');
+    }
 }
 
 // ============================================================================

@@ -245,9 +245,9 @@
                     <h5 class="mb-0">
                         <i class="bi bi-journal-text me-2"></i>시스템 로그
                     </h5>
-                    <div class="d-flex gap-2 align-items-center">
-                        <div class="form-check form-check-sm">
-                            <input class="form-check-input" type="checkbox" id="excludeAdminLogs" checked onchange="filterLogs()">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="form-check d-flex align-items-center">
+                            <input class="form-check-input me-2" type="checkbox" id="excludeAdminLogs" checked onchange="filterLogs()">
                             <label class="form-check-label text-sm" for="excludeAdminLogs">관리자 제외</label>
                         </div>
                         <button class="btn btn-outline-secondary btn-sm" onclick="clearLogs()" title="로그 정리">
@@ -256,12 +256,12 @@
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    <div class="log-container">
+                    <div class="log-container" style="max-height: 600px; overflow-y: auto;">
                         <table class="table table-dark table-sm mb-0" id="logsTable">
                             <tbody>
                                 {% for log in admin_data.recent_logs %}
-                                <tr class="log-item log-{{ log.level.lower() }}">
-                                    <td>
+                                <tr class="log-item log-{{ log.level.lower() }}" data-category="{{ log.category }}">
+                                    <td class="text-center" style="width: 80px;">
                                         <span class="log-level badge 
                                             {% if log.level == 'ERROR' %}bg-danger
                                             {% elif log.level == 'WARNING' %}bg-warning text-dark
@@ -270,16 +270,16 @@
                                             {{ log.level }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center" style="width: 80px;">
                                         <small class="log-category text-muted">{{ log.category }}</small>
                                     </td>
-                                    <td>{{ log.message }}</td>
-                                    <td>
+                                    <td class="log-message">{{ log.message }}</td>
+                                    <td class="text-center" style="width: 90px;">
                                         <small class="log-time text-muted">{{ log.timestamp.strftime('%m/%d %H:%M') }}</small>
                                     </td>
                                 </tr>
                                 {% else %}
-                                <tr>
+                                <tr id="emptyLogRow">
                                     <td colspan="4" class="text-center text-muted py-3">
                                         시스템 로그가 없습니다.
                                     </td>
@@ -287,6 +287,22 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                    </div>
+                    <!-- 페이징 컨트롤 -->
+                    <div class="card-footer bg-dark border-secondary p-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted" id="logCount">
+                                총 {{ admin_data.recent_logs|length }}개 로그
+                            </small>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-outline-secondary btn-sm" id="loadMoreBtn" onclick="loadMoreLogs()" style="display: none;">
+                                    <i class="bi bi-arrow-down me-1"></i>더보기
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="refreshLogs()">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
