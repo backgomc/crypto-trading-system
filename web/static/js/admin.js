@@ -74,6 +74,7 @@ async function loadAllData() {
         await loadStats();
         await loadUsers();
         await loadRecentLogs();
+        restoreFilterState();
     } catch (error) {
         console.error('데이터 로드 오류:', error);
         showToast('error', '데이터 로드 중 오류가 발생했습니다.');
@@ -239,6 +240,15 @@ function formatKoreanDateTime(dateString) {
         });
     } catch (error) {
         return '날짜 오류';
+    }
+}
+
+// 페이지 로드 시 체크박스 상태 복원 (loadAllData() 함수 끝에 추가)
+function restoreFilterState() {
+    const savedState = localStorage.getItem('excludeAdminLogs');
+    if (savedState !== null) {
+        document.getElementById('excludeAdminLogs').checked = savedState === 'true';
+        filterLogs(); // 저장된 상태로 즉시 필터링
     }
 }
 
@@ -489,7 +499,8 @@ function filterLogs() {
     
     logRows.forEach(row => {
         const message = row.cells[2]?.textContent || '';
-        const isAdminLog = message.includes('관리자:') || message.includes('admin') || message.includes('관리자 ');
+        // 관리자 계정명 "nah3207"로 필터링
+        const isAdminLog = message.includes('nah3207');
         
         if (excludeAdmin && isAdminLog) {
             row.style.display = 'none';
@@ -497,6 +508,9 @@ function filterLogs() {
             row.style.display = '';
         }
     });
+    
+    // 체크박스 상태 저장
+    localStorage.setItem('excludeAdminLogs', excludeAdmin);
 }
 
 // 사용자 편집
