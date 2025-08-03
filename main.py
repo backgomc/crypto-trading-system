@@ -56,7 +56,7 @@ def create_app():
     from web.routes import register_routes
     register_routes(app)
 
-    # ✅ 세션 유효성 검사 미들웨어 추가
+    # ✅ 세션 유효성 검사 미들웨어 수정
     @app.before_request
     def check_session_validity():
         """모든 요청 전에 세션 유효성 검사"""
@@ -79,25 +79,16 @@ def create_app():
                 # DB에서 세션 확인
                 db_session = UserSession.get_active_session(session_id)
                 if not db_session:
-                    # 세션이 무효하면 강제 로그아웃
+                    # ✅ 세션이 무효하면 팝업 URL로 리다이렉트
                     session.clear()
-                    # AJAX 요청인지 확인
-                    if request.headers.get('Content-Type') == 'application/json' or request.is_json:
-                        from flask import jsonify
-                        return jsonify({
-                            'success': False,
-                            'error': '세션이 만료되었습니다. 다시 로그인해주세요.',
-                            'code': 'SESSION_EXPIRED'
-                        }), 401
-                    else:
-                        return redirect(url_for('auth.login'))
+                    return redirect(url_for('auth.login', popup='session_expired'))
                 else:
                     # 세션 활동 시간 업데이트
                     UserSession.update_activity(session_id)
             else:
                 # session_id가 없으면 로그아웃
                 session.clear()
-                return redirect(url_for('auth.login'))    
+                return redirect(url_for('auth.login', popup='session_invalid'))  
     
     # 애플리케이션 컨텍스트에서 DB 초기화
     with app.app_context():

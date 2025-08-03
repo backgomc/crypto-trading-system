@@ -26,13 +26,16 @@ def log_system_event(level, category, message):
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """로그인 페이지"""
-    # 이미 로그인된 경우 세션 유효성 검사
-    if session.get('logged_in'):
+    # ✅ 팝업 파라미터 확인
+    popup_type = request.args.get('popup')
+    show_popup = popup_type in ['session_expired', 'session_invalid']
+    
+    # 이미 로그인된 경우 세션 유효성 검사 (팝업 제외)
+    if session.get('logged_in') and not show_popup:
         session_id = session.get('session_id')
         if session_id and UserSession.get_active_session(session_id):
             return redirect(url_for('pages.dashboard'))
         else:
-            # 세션이 무효하면 로그아웃 처리
             session.clear()
     
     if request.method == 'POST':
@@ -129,7 +132,7 @@ def login():
                 log_system_event('WARNING', 'LOGIN', f'로그인 실패: 잘못된 인증 정보 - {username}')
             return render_template('login.html', error=error_msg)
     
-    return render_template('login.html')
+    return render_template('login.html', show_popup=show_popup, popup_type=popup_type)
 
 @auth_bp.route('/logout')
 def logout():
