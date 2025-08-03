@@ -19,6 +19,16 @@ async function apiCall(url, method = 'GET', data = null) {
         }
 
         const response = await fetch(url, options);
+        
+        // ✅ 401 에러 체크 추가
+        if (response.status === 401) {
+            const result = await response.json().catch(() => ({}));
+            if (result.code === 'AUTH_REQUIRED' || result.code === 'SESSION_EXPIRED') {
+                showSessionExpiredModal();
+                return;
+            }
+        }
+        
         const result = await response.json();
 
         if (!response.ok) {
@@ -437,47 +447,3 @@ function confirmLogin() {
         loginForm.submit();
     }
 }
-
-// ============================================================================
-// API 호출 401 에러 처리 개선
-// ============================================================================
-
-// 기존 apiCall 함수 수정
-const originalApiCall = apiCall;
-window.apiCall = async function(url, method = 'GET', data = null) {
-    try {
-        const options = {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        };
-        
-        if (data) {
-            options.body = JSON.stringify(data);
-        }
-
-        const response = await fetch(url, options);
-        
-        // ✅ 401 에러 체크 추가
-        if (response.status === 401) {
-            const result = await response.json().catch(() => ({}));
-            if (result.code === 'SESSION_EXPIRED' || result.error?.includes('세션')) {
-                showSessionExpiredModal();
-                return;
-            }
-        }
-        
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error || `HTTP ${response.status}: 요청 처리 중 오류가 발생했습니다.`);
-        }
-
-        return result;
-    } catch (error) {
-        console.error('API 호출 오류:', error);
-        showToast('error', error.message || '네트워크 오류가 발생했습니다.');
-        throw error;
-    }
-};

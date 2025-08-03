@@ -212,6 +212,31 @@
         </div>
     </div>
 
+    <!-- ✅ 모달 HTML 추가 (base.html과 동일) -->
+    <div class="modal fade" id="duplicateLoginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>중복 로그인 발생
+                    </h5>
+                </div>
+                <div class="modal-body text-light">
+                    <p>이미 다른 곳에서 접속 중입니다.</p>
+                    <p class="mb-0">기존 세션을 종료하고 로그인하시겠습니까?</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" onclick="cancelLogin()">
+                        <i class="bi bi-x-lg me-1"></i>취소
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmLogin()">
+                        <i class="bi bi-check-lg me-1"></i>확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // 현재 시간 표시
