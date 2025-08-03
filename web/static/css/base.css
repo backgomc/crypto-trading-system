@@ -269,7 +269,7 @@ p, span, div {
 /* 모바일 반응형 */
 .mobile-menu-btn {
     color: #ffffff;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     background: none;
     border: none;
     padding: 8px;
@@ -282,83 +282,83 @@ p, span, div {
 }
 
 @media (max-width: 768px) {
-   /* 헤더 간소화 */
-   .top-header {
-       padding: 8px 16px !important;
-       height: 56px !important;
-   }
-   
-   .logo {
-       font-size: 1.1rem !important;
-       font-weight: 600 !important;
-       text-decoration: none;
-   }
-   
-   .logo .brand-icon {
-       font-size: 1.3rem;
-       margin-right: 6px;
-   }
-   
-   .logo .brand-text {
-       display: none !important; /* "비트코인 자동매매 시스템" 숨김 */
-   }
-   
-   .user-info {
-       font-size: 0.8rem;
-   }
+  /* 헤더 간소화 */
+  .top-header {
+      padding: 8px 16px !important;
+      height: 56px !important;
+  }
+  
+  .logo {
+      font-size: 1.1rem !important;
+      font-weight: 600 !important;
+      text-decoration: none;
+  }
+  
+  .logo .brand-icon {
+      font-size: 1.3rem;
+      margin-right: 6px;
+  }
+  
+  .logo .brand-text {
+      display: none !important; /* "비트코인 자동매매 시스템" 숨김 */
+  }
+  
+  .user-info {
+      font-size: 0.8rem;
+  }
 
-   /* 모바일에서 로그아웃 버튼 아이콘만 표시 */
-    .logout-btn {
-        padding: 8px 10px !important; /* 패딩 축소 */
-        min-width: auto !important;
-        display: flex !important; /* 플렉스 레이아웃 추가 */
-        align-items: center !important; /* 세로 중앙 정렬 */
-        justify-content: center !important; /* 가로 중앙 정렬 */
-    }
+  /* 모바일에서 햄버거 버튼 아이콘 크기 증가 */
+  .mobile-menu-btn {
+      display: block;
+      font-size: 1.5rem !important; /* 크기 증가 */
+  }
 
-   .logout-text {
-       display: none !important; /* 모바일에서 텍스트 숨김 */
-   }
+  /* 모바일에서 로그아웃 버튼 아이콘만 표시 */
+  .logout-btn {
+      padding: 8px 10px !important; /* 패딩 축소 */
+      min-width: auto !important;
+      text-align: center !important; /* 아이콘 중앙 정렬 */
+  }
 
-   /* 사이드바 (헤더 높이 64px → 56px로 수정, 폭 축소) */
-   .sidebar {
-       position: fixed;
-       left: -240px; /* 모바일에서도 폭 축소 */
-       width: 240px; /* 모바일 폭 축소 */
-       z-index: 1000;
-       transition: left 0.3s ease;
-       height: calc(100vh - 56px); /* 56px로 변경 */
-       top: 56px; /* 56px로 변경 */
-   }
-   
-   .sidebar.show {
-       left: 0;
-   }
-   
-   .sidebar-overlay {
-       position: fixed;
-       top: 56px; /* 56px로 변경 */
-       left: 0;
-       width: 100%;
-       height: calc(100vh - 56px); /* 56px로 변경 */
-       background-color: rgba(0,0,0,0.7);
-       z-index: 999;
-       display: none;
-       transition: opacity 0.3s ease;
-   }
-   
-   .sidebar-overlay.show {
-       display: block;
-   }
-   
-   .main-content {
-       margin-left: 0;
-       padding: 16px;
-   }
-   
-   .mobile-menu-btn {
-       display: block;
-   }
+  .logout-text {
+      display: none !important; /* 모바일에서 텍스트 숨김 */
+  }
+
+  /* 사이드바 (헤더 높이 64px → 56px로 수정, 폭 축소) */
+  .sidebar {
+      position: fixed;
+      left: -240px; /* 모바일에서도 폭 축소 */
+      width: 240px; /* 모바일 폭 축소 */
+      z-index: 1000;
+      transition: left 0.3s ease;
+      height: calc(100vh - 56px); /* 56px로 변경 */
+      top: 56px; /* 56px로 변경 */
+  }
+  
+  .sidebar.show {
+      left: 0;
+  }
+  
+  .sidebar-overlay {
+      position: fixed;
+      top: 56px; /* 56px로 변경 */
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 56px); /* 56px로 변경 */
+      background-color: rgba(0,0,0,0.7);
+      z-index: 999;
+      display: none;
+      transition: opacity 0.3s ease;
+  }
+  
+  .sidebar-overlay.show {
+      display: block;
+  }
+  
+  .main-content {
+      margin-left: 0;
+      padding: 16px;
+  }
 }
 
 @media (min-width: 769px) {
