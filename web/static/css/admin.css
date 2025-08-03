@@ -584,25 +584,179 @@
     .form-check-label {
         font-size: 0.9rem !important;
     }
-}
 
-/* 초소형 화면 (360px 이하) */
-@media (max-width: 360px) {
-    .stats-card h3 {
-        font-size: 1.1rem;
+    /* 사용자 관리 테이블 - 카드형으로 변경 */
+    #usersTable thead {
+        display: none; /* 테이블 헤더 숨기기 */
     }
     
-    .stats-icon i {
-        font-size: 1.5rem;
+    #usersTable tbody {
+        display: block;
     }
     
-    .main-card .card-header {
-        padding: 10px 12px;
-    }
-    
-    .main-card .card-body {
+    #usersTable tbody tr {
+        display: block;
+        background: #2a2a2a;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        margin-bottom: 12px;
         padding: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
+    
+    #usersTable tbody tr:hover {
+        background: #333333;
+    }
+    
+    #usersTable tbody td {
+        display: block;
+        border: none;
+        padding: 4px 0;
+        text-align: left !important;
+    }
+    
+    /* 각 셀에 라벨 추가 */
+    #usersTable tbody td:nth-child(1)::before { 
+        content: "사용자: ";
+        font-weight: bold;
+        color: #aaa;
+        display: inline-block;
+        width: 60px;
+    }
+    
+    #usersTable tbody td:nth-child(2)::before { 
+        content: "상태: ";
+        font-weight: bold;
+        color: #aaa;
+        display: inline-block;
+        width: 60px;
+    }
+    
+    #usersTable tbody td:nth-child(3)::before { 
+        content: "권한: ";
+        font-weight: bold;
+        color: #aaa;
+        display: inline-block;
+        width: 60px;
+    }
+    
+    #usersTable tbody td:nth-child(4)::before { 
+        content: "접속: ";
+        font-weight: bold;
+        color: #aaa;
+        display: inline-block;
+        width: 60px;
+    }
+    
+    #usersTable tbody td:nth-child(5)::before { 
+        content: "생성일: ";
+        font-weight: bold;
+        color: #aaa;
+        display: inline-block;
+        width: 60px;
+    }
+    
+    #usersTable tbody td:nth-child(6)::before { 
+        content: "로그인: ";
+        font-weight: bold;
+        color: #aaa;
+        display: inline-block;
+        width: 60px;
+    }
+    
+    #usersTable tbody td:nth-child(7) {
+        text-align: center !important;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #404040;
+    }
+    
+    #usersTable tbody td:nth-child(7)::before { 
+        content: "";
+    }
+    
+    /* 시스템 로그 테이블 - 카드형으로 변경 */
+    #logsTable thead {
+        display: none;
+    }
+    
+    #logsTable tbody {
+        display: block;
+    }
+    
+    #logsTable tbody tr {
+        display: block;
+        background: #2a2a2a;
+        border: 1px solid #404040;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    #logsTable tbody tr:hover {
+        background: #333333;
+    }
+    
+    #logsTable tbody td {
+        display: block;
+        border: none;
+        padding: 2px 0;
+        text-align: left !important;
+    }
+    
+    /* 로그 레벨과 카테고리를 같은 줄에 */
+    #logsTable tbody td:nth-child(1),
+    #logsTable tbody td:nth-child(2) {
+        display: inline-block;
+        width: 48%;
+        margin-right: 2%;
+    }
+    
+    #logsTable tbody td:nth-child(1)::before { 
+        content: "레벨: ";
+        font-weight: bold;
+        color: #aaa;
+        font-size: 0.8rem;
+    }
+    
+    #logsTable tbody td:nth-child(2)::before { 
+        content: "분류: ";
+        font-weight: bold;
+        color: #aaa;
+        font-size: 0.8rem;
+    }
+    
+    #logsTable tbody td:nth-child(3) {
+        margin: 6px 0;
+        padding: 6px 0;
+        border-top: 1px solid #404040;
+        border-bottom: 1px solid #404040;
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+    
+    #logsTable tbody td:nth-child(3)::before { 
+        content: "내용: ";
+        font-weight: bold;
+        color: #aaa;
+        font-size: 0.8rem;
+        display: block;
+        margin-bottom: 4px;
+    }
+    
+    #logsTable tbody td:nth-child(4) {
+        text-align: right !important;
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 4px;
+    }
+    
+    #logsTable tbody td:nth-child(4)::before { 
+        content: "시간: ";
+        font-weight: bold;
+        color: #aaa;
+    }    
 }
 
 /* 애니메이션 */
