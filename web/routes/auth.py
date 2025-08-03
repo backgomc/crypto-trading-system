@@ -39,6 +39,7 @@ def login():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         remember_me = request.form.get('remember_me') == 'on'
+        force_login = request.form.get('force_login') == 'true'  # ✅ 추가
         
         # 입력 유효성 검사
         if not username or not password:
@@ -60,7 +61,10 @@ def login():
             
             if invalidated_count > 0:
                 print(f"🔍 디버그: 중복 로그인 감지 - 로그 기록 시도")
-                log_system_event('INFO', 'LOGIN', f'중복 로그인 감지: {username} - {invalidated_count}개 기존 세션 무효화')
+                if force_login:
+                    log_system_event('INFO', 'LOGIN', f'강제 로그인: {username} - {invalidated_count}개 기존 세션 무효화')
+                else:
+                    log_system_event('INFO', 'LOGIN', f'중복 로그인 감지: {username} - {invalidated_count}개 기존 세션 무효화')
             
             # ✅ 새 세션 ID 생성
             new_session_id = secrets.token_hex(32)

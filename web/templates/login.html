@@ -198,7 +198,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // 현재 시간 표시
         function updateTime() {
@@ -218,15 +218,64 @@
         setInterval(updateTime, 1000);
         updateTime();
         
-        // 로그인 폼 제출 시 로딩 표시
-        document.getElementById('loginForm').addEventListener('submit', function() {
-            const btn = document.querySelector('.btn-login');
-            const loginText = document.querySelector('.login-text');
-            const loading = document.querySelector('.loading');
+        // ✅ 로그인 폼 제출 시 기존 세션 체크 추가
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            const forceLogin = this.querySelector('input[name="force_login"]');
             
-            btn.disabled = true;
-            loginText.style.display = 'none';
-            loading.style.display = 'inline';
+            // 강제 로그인이 아닌 경우에만 세션 체크
+            if (!forceLogin) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value.trim();
+                if (!username) return;
+                
+                // 로딩 표시
+                const btn = document.querySelector('.btn-login');
+                const loginText = document.querySelector('.login-text');
+                const loading = document.querySelector('.loading');
+                
+                btn.disabled = true;
+                loginText.style.display = 'none';
+                loading.style.display = 'inline';
+                
+                try {
+                    const response = await fetch('/api/check-session', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username: username })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success && result.data.has_active_session) {
+                        // 로딩 해제
+                        btn.disabled = false;
+                        loginText.style.display = 'inline';
+                        loading.style.display = 'none';
+                        
+                        // 기존 세션이 있으면 확인 모달 표시
+                        showDuplicateLoginModal();
+                    } else {
+                        // 기존 세션이 없으면 바로 로그인
+                        this.submit();
+                    }
+                } catch (error) {
+                    console.error('세션 체크 오류:', error);
+                    // 오류 시 그냥 로그인 진행
+                    this.submit();
+                }
+            } else {
+                // 강제 로그인인 경우 로딩 표시만
+                const btn = document.querySelector('.btn-login');
+                const loginText = document.querySelector('.login-text');
+                const loading = document.querySelector('.loading');
+                
+                btn.disabled = true;
+                loginText.style.display = 'none';
+                loading.style.display = 'inline';
+            }
         });
         
         // 엔터키 이벤트 처리
@@ -246,6 +295,46 @@
                 this.parentElement.style.transform = 'scale(1)';
             });
         });
+
+        // ✅ 세션 관리 모달 함수들 추가
+        function showDuplicateLoginModal() {
+            const modal = new bootstrap.Modal(document.getElementById('duplicateLoginModal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+        }
+
+        function cancelLogin() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('duplicateLoginModal'));
+            modal.hide();
+            
+            // 폼 리셋
+            document.getElementById('loginForm').reset();
+            
+            // 로딩 해제
+            const btn = document.querySelector('.btn-login');
+            const loginText = document.querySelector('.login-text');
+            const loading = document.querySelector('.loading');
+            
+            btn.disabled = false;
+            loginText.style.display = 'inline';
+            loading.style.display = 'none';
+        }
+
+        function confirmLogin() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('duplicateLoginModal'));
+            modal.hide();
+            
+            // 강제 로그인 플래그 설정 후 폼 제출
+            const loginForm = document.getElementById('loginForm');
+            const forceInput = document.createElement('input');
+            forceInput.type = 'hidden';
+            forceInput.name = 'force_login';
+            forceInput.value = 'true';
+            loginForm.appendChild(forceInput);
+            loginForm.submit();
+        }
     </script>
 </body>
 </html>

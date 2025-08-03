@@ -372,3 +372,112 @@ document.addEventListener('DOMContentLoaded', function() {
     // API 상태 체크 (선택적)
     debugAPI();
 });
+
+// ============================================================================
+// 세션 관리 함수들
+// ============================================================================
+
+/**
+ * 세션 만료 모달 표시
+ */
+function showSessionExpiredModal() {
+    const modal = new bootstrap.Modal(document.getElementById('sessionExpiredModal'), {
+        backdrop: 'static',
+        keyboard: false
+    });
+    modal.show();
+}
+
+/**
+ * 세션 만료 확인 처리
+ */
+function handleSessionExpired() {
+    window.location.href = '/login?message=session_expired';
+}
+
+/**
+ * 중복 로그인 확인 모달 표시
+ */
+function showDuplicateLoginModal() {
+    const modal = new bootstrap.Modal(document.getElementById('duplicateLoginModal'), {
+        backdrop: 'static',
+        keyboard: false
+    });
+    modal.show();
+}
+
+/**
+ * 로그인 취소
+ */
+function cancelLogin() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('duplicateLoginModal'));
+    modal.hide();
+    // 로그인 폼 초기화
+    const loginForm = document.querySelector('#loginForm');
+    if (loginForm) {
+        loginForm.reset();
+    }
+}
+
+/**
+ * 강제 로그인 확인
+ */
+function confirmLogin() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('duplicateLoginModal'));
+    modal.hide();
+    
+    // 강제 로그인 플래그 설정 후 폼 제출
+    const loginForm = document.querySelector('#loginForm');
+    if (loginForm) {
+        const forceInput = document.createElement('input');
+        forceInput.type = 'hidden';
+        forceInput.name = 'force_login';
+        forceInput.value = 'true';
+        loginForm.appendChild(forceInput);
+        loginForm.submit();
+    }
+}
+
+// ============================================================================
+// API 호출 401 에러 처리 개선
+// ============================================================================
+
+// 기존 apiCall 함수 수정
+const originalApiCall = apiCall;
+window.apiCall = async function(url, method = 'GET', data = null) {
+    try {
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        };
+        
+        if (data) {
+            options.body = JSON.stringify(data);
+        }
+
+        const response = await fetch(url, options);
+        
+        // ✅ 401 에러 체크 추가
+        if (response.status === 401) {
+            const result = await response.json().catch(() => ({}));
+            if (result.code === 'SESSION_EXPIRED' || result.error?.includes('세션')) {
+                showSessionExpiredModal();
+                return;
+            }
+        }
+        
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || `HTTP ${response.status}: 요청 처리 중 오류가 발생했습니다.`);
+        }
+
+        return result;
+    } catch (error) {
+        console.error('API 호출 오류:', error);
+        showToast('error', error.message || '네트워크 오류가 발생했습니다.');
+        throw error;
+    }
+};

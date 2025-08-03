@@ -505,6 +505,36 @@ def user_ping():
         print(f"Ping 오류: {e}")
         return api_error('ping 처리 중 오류가 발생했습니다', 'PING_ERROR', 500)
     
+@api_bp.route('/check-session', methods=['POST'])
+def check_existing_session():
+    """로그인 전 기존 세션 확인 (로그인 불필요)"""
+    try:
+        data = request.get_json()
+        if not data or 'username' not in data:
+            return api_error('사용자명이 필요합니다', 'INVALID_REQUEST', 400)
+        
+        username = data['username'].strip()
+        
+        # 사용자 조회
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return api_success(data={'has_active_session': False})
+        
+        # 활성 세션 확인
+        from config.models import UserSession
+        active_sessions = UserSession.query.filter_by(user_id=user.id, is_active=True).count()
+        
+        return api_success(
+            data={
+                'has_active_session': active_sessions > 0,
+                'active_sessions_count': active_sessions
+            }
+        )
+        
+    except Exception as e:
+        print(f"세션 체크 오류: {e}")
+        return api_error('세션 확인 중 오류가 발생했습니다', 'SESSION_CHECK_ERROR', 500)    
+    
 # ============================================================================
 # 시스템 API 엔드포인트들
 # ============================================================================
