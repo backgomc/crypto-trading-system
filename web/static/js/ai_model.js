@@ -16,31 +16,12 @@ let isTraining = false;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🤖 AI 모델 관리 페이지 초기화');
     
-    initTimeUpdate();
     loadCurrentModel();
     loadModelHistory();
     loadTrainingParams();
     
     console.log('✅ AI 모델 페이지 초기화 완료');
 });
-
-// ============================================================================
-// 시간 업데이트
-// ============================================================================
-
-function initTimeUpdate() {
-    updateCurrentTime();
-    setInterval(updateCurrentTime, 1000);
-}
-
-function updateCurrentTime() {
-    const now = new Date();
-    const timeString = formatDateTime(now);
-    const timeElement = document.getElementById('currentTime');
-    if (timeElement) {
-        timeElement.textContent = timeString;
-    }
-}
 
 // ============================================================================
 // AI 모델 정보 로드
