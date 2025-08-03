@@ -20,6 +20,11 @@
     font-weight: 500;
 }
 
+.current-time i {
+    color: #667eea;
+    margin-right: 0.25rem;
+}
+
 /* 상태 카드들 */
 .status-card {
     background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
