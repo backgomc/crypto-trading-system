@@ -498,7 +498,25 @@ def get_recent_logs():
                 'ip_address': log.ip_address
             })
         
-        return success_response(data=logs_data, message='최근 로그 조회 성공')
+        return success_response(
+            data={
+                'logs': logs_data,
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total': pagination.total,
+                    'pages': pagination.pages,
+                    'has_next': pagination.has_next,
+                    'has_prev': pagination.has_prev
+                }
+            },
+            meta={
+                'total': pagination.total,
+                'has_next': pagination.has_next,
+                'has_prev': pagination.has_prev
+            },
+            message='최근 로그 조회 성공'
+        )
         
     except Exception as e:
         log_admin_event('ERROR', 'ADMIN', f'최근 로그 조회 실패: {e}')
