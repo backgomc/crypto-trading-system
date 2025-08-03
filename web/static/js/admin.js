@@ -104,43 +104,47 @@ async function loadUsers() {
 
 // 최근 로그 로드 (수정: 페이징 및 필터링 개선)
 async function loadRecentLogs(isFirstLoad = false) {
-    if (isLoadingLogs) return;
-    isLoadingLogs = true;
-    
-    try {
-        const excludeAdmin = document.getElementById('excludeAdminLogs')?.checked || false;
-        const page = isFirstLoad ? 1 : currentLogPage;
-        
-        // URL 파라미터 구성
-        const params = new URLSearchParams({
-            page: page,
-            per_page: logsPerPage,
-            exclude_admin: excludeAdmin
-        });
-        
-        const result = await apiCall(`/api/admin/logs/recent?${params}`);
-        
-        if (result && result.data) {
-            const logs = result.data.logs || result.data;
-            
-            if (isFirstLoad) {
-                currentLogPage = 1;
-                displayRecentLogs(logs, true);
-            } else {
-                displayRecentLogs(logs, false);
-            }
-            
-            // 더보기 버튼 표시 여부 결정 (수정)
-            hasMoreLogs = result.meta ? result.meta.has_next : logs.length >= logsPerPage;
-            updateLoadMoreButton();
-            updateLogCount(result.meta ? result.meta.total : logs.length);
-        }
-    } catch (error) {
-        console.error('로그 로드 실패:', error);
-        showToast('error', '로그 로드에 실패했습니다.');
-    } finally {
-        isLoadingLogs = false;
-    }
+   if (isLoadingLogs) return;
+   isLoadingLogs = true;
+   
+   // 즉시 버튼 상태 업데이트
+   updateLoadMoreButton();
+   
+   try {
+       const excludeAdmin = document.getElementById('excludeAdminLogs')?.checked || false;
+       const page = isFirstLoad ? 1 : currentLogPage;
+       
+       // URL 파라미터 구성
+       const params = new URLSearchParams({
+           page: page,
+           per_page: logsPerPage,
+           exclude_admin: excludeAdmin
+       });
+       
+       const result = await apiCall(`/api/admin/logs/recent?${params}`);
+       
+       if (result && result.data) {
+           const logs = result.data.logs || result.data;
+           
+           if (isFirstLoad) {
+               currentLogPage = 1;
+               displayRecentLogs(logs, true);
+           } else {
+               displayRecentLogs(logs, false);
+           }
+           
+           // 더보기 버튼 표시 여부 결정 (수정)
+           hasMoreLogs = result.meta ? result.meta.has_next : logs.length >= logsPerPage;
+           updateLogCount(result.meta ? result.meta.total : logs.length);
+       }
+   } catch (error) {
+       console.error('로그 로드 실패:', error);
+       showToast('error', '로그 로드에 실패했습니다.');
+       hasMoreLogs = false; // 에러 시 더보기 버튼 숨김
+   } finally {
+       isLoadingLogs = false;
+       updateLoadMoreButton(); // finally에서 버튼 상태 업데이트
+   }
 }
 
 // 통계 표시 (수정: 비활성 사용자로 변경)
