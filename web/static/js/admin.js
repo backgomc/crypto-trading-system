@@ -405,6 +405,10 @@ function updateTime() {
 
 // 카드 애니메이션
 function animateCards() {
+    let animationExecuted = false;
+    if (animationExecuted) return;
+    animationExecuted = true;
+
     const cards = document.querySelectorAll('.stats-card, .main-card');
     cards.forEach((card, index) => {
         card.style.opacity = '0';
