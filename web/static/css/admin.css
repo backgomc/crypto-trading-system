@@ -498,12 +498,12 @@
         align-self: flex-end;
     }
     
-    /* 통계 카드 2x2 그리드로 변경 */
+    /* 통계 카드 2x2 그리드로 변경 - 개선됨 */
     .stats-row {
         display: grid !important;
         grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 16px;
+        gap: 6px;
+        margin-bottom: 12px;
     }
     
     .stats-card {
@@ -511,20 +511,20 @@
     }
     
     .stats-card .card-body {
-        padding: 12px;
+        padding: 10px;
     }
     
     .stats-card h6 {
-        font-size: 0.7rem;
-        margin-bottom: 4px;
+        font-size: 0.65rem;
+        margin-bottom: 2px;
     }
     
     .stats-card h3 {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
     }
     
     .stats-icon i {
-        font-size: 1.8rem;
+        font-size: 2rem;
     }
     
     /* 메인 카드 간격 줄이기 */
@@ -585,9 +585,9 @@
         font-size: 0.9rem !important;
     }
 
-    /* 사용자 관리 테이블 - 카드형으로 변경 */
+    /* 사용자 관리 테이블 - 카드형으로 변경 (배경색 개선) */
     #usersTable thead {
-        display: none; /* 테이블 헤더 숨기기 */
+        display: none;
     }
     
     #usersTable tbody {
@@ -596,7 +596,7 @@
     
     #usersTable tbody tr {
         display: block;
-        background: #2a2a2a;
+        background: #1e1e1e;
         border: 1px solid #404040;
         border-radius: 8px;
         margin-bottom: 12px;
@@ -605,7 +605,7 @@
     }
     
     #usersTable tbody tr:hover {
-        background: #333333;
+        background: #252525;
     }
     
     #usersTable tbody td {
@@ -675,7 +675,7 @@
         content: "";
     }
     
-    /* 시스템 로그 테이블 - 카드형으로 변경 */
+    /* 시스템 로그 테이블 - 카드형으로 변경 (배경색 개선, 레벨/분류 한 줄) */
     #logsTable thead {
         display: none;
     }
@@ -686,7 +686,7 @@
     
     #logsTable tbody tr {
         display: block;
-        background: #2a2a2a;
+        background: #1e1e1e;
         border: 1px solid #404040;
         border-radius: 8px;
         margin-bottom: 8px;
@@ -695,7 +695,7 @@
     }
     
     #logsTable tbody tr:hover {
-        background: #333333;
+        background: #252525;
     }
     
     #logsTable tbody td {
@@ -705,12 +705,13 @@
         text-align: left !important;
     }
     
-    /* 로그 레벨과 카테고리를 같은 줄에 */
+    /* 로그 레벨과 카테고리를 같은 줄에 - 라벨과 데이터 한 줄로 */
     #logsTable tbody td:nth-child(1),
     #logsTable tbody td:nth-child(2) {
         display: inline-block;
         width: 48%;
         margin-right: 2%;
+        font-size: 0.85rem;
     }
     
     #logsTable tbody td:nth-child(1)::before { 
@@ -718,6 +719,7 @@
         font-weight: bold;
         color: #aaa;
         font-size: 0.8rem;
+        margin-right: 4px;
     }
     
     #logsTable tbody td:nth-child(2)::before { 
@@ -725,6 +727,7 @@
         font-weight: bold;
         color: #aaa;
         font-size: 0.8rem;
+        margin-right: 4px;
     }
     
     #logsTable tbody td:nth-child(3) {
@@ -756,6 +759,7 @@
         content: "시간: ";
         font-weight: bold;
         color: #aaa;
+        margin-right: 4px;
     }    
 }
 
