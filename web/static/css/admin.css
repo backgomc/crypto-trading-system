@@ -1,5 +1,5 @@
 /* 파일 경로: web/static/css/admin.css */
-/* 코드명: 관리자 페이지 전용 스타일 (다크 테마) */
+/* 코드명: 관리자 페이지 전용 스타일 (다크 테마, 모바일 최적화) */
 
 /* 페이지 헤더 */
 .page-header {
@@ -141,6 +141,7 @@
     border-color: #404040;
 }
 
+/* 아웃라인 버튼 스타일 통합 */
 .btn-outline-primary {
     border-color: #667eea;
     color: #667eea;
@@ -218,30 +219,11 @@
     background-color: rgba(255,255,255,0.02);
 }
 
-/* 시스템 로그 - 개선됨 */
+/* 시스템 로그 */
 .log-container {
     max-height: 600px;
     overflow-y: auto;
     padding: 0;
-}
-
-/* 로그 컨테이너 스크롤바 스타일링 */
-.log-container::-webkit-scrollbar {
-    width: 6px;
-}
-
-.log-container::-webkit-scrollbar-track {
-    background: #2a2a2a;
-    border-radius: 3px;
-}
-
-.log-container::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 3px;
-}
-
-.log-container::-webkit-scrollbar-thumb:hover {
-    background: #777;
 }
 
 /* 로그 테이블 스타일 개선 */
@@ -251,6 +233,12 @@
     text-align: center;
 }
 
+/* 시스템 로그 4번째 컬럼 너비 늘리기 */
+#logsTable td:nth-child(4) {
+    min-width: 130px;
+    white-space: nowrap;
+}
+
 /* 로그 메시지 텍스트 정렬 */
 .log-message {
     text-align: left;
@@ -258,18 +246,35 @@
     padding: 8px 12px;
 }
 
-/* 체크박스 스타일 개선 */
-.form-check {
-    margin-bottom: 0;
+/* 관리자 제외 체크박스 크기 키우기 */
+.form-check-input {
+    width: 1.3em !important;
+    height: 1.3em !important;
+    margin-top: 0 !important;
+    background-color: #2d2d2d;
+    border-color: #444444;
 }
 
-.form-check-input {
-    margin-top: 0;
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
 .form-check-label {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 1rem !important;
+    margin-left: 0.4rem;
     margin-bottom: 0;
     line-height: 1.2;
+}
+
+.form-check {
+    margin-bottom: 0;
 }
 
 /* 로그 레벨별 배경색 */
@@ -287,15 +292,6 @@
 
 /* 로그 아이템 애니메이션 효과 */
 .log-item {
-    transition: background-color 0.2s ease;
-}
-
-.log-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-/* 기존 로그 스타일 (호환성 유지) */
-.log-item {
     padding: 12px 16px;
     border-bottom: 1px solid #333333;
     transition: all 0.3s ease;
@@ -305,6 +301,11 @@
     border-bottom: none;
 }
 
+.log-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 로그 헤더 및 세부 스타일 */
 .log-header {
     display: flex;
     justify-content: space-between;
@@ -328,7 +329,7 @@
     font-size: 0.75rem;
 }
 
-/* 로그 레벨별 스타일 (기존) */
+/* 로그 레벨별 테두리 스타일 */
 .log-error {
     border-left: 3px solid #dc3545;
 }
@@ -339,6 +340,29 @@
 
 .log-info {
     border-left: 3px solid #17a2b8;
+}
+
+/* 스크롤바 커스터마이징 통합 */
+.log-container::-webkit-scrollbar,
+.config-history::-webkit-scrollbar {
+    width: 6px;
+}
+
+.log-container::-webkit-scrollbar-track,
+.config-history::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 3px;
+}
+
+.log-container::-webkit-scrollbar-thumb,
+.config-history::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+.log-container::-webkit-scrollbar-thumb:hover,
+.config-history::-webkit-scrollbar-thumb:hover {
+    background: #777;
 }
 
 /* 모달 다크 테마 */
@@ -383,25 +407,6 @@
     color: #aaaaaa;
 }
 
-.form-check-input {
-    background-color: #2d2d2d;
-    border-color: #444444;
-}
-
-.form-check-input:checked {
-    background-color: #667eea;
-    border-color: #667eea;
-}
-
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
-
-.form-check-label {
-    color: #ffffff;
-    font-weight: 500;
-}
-
 /* 알림 */
 .alert {
     border: none;
@@ -427,68 +432,176 @@
     border-left-color: #17a2b8;
 }
 
-/* 스크롤바 커스터마이징 */
-.config-history::-webkit-scrollbar {
-    display: none;
+/* 사용자명 검증 상태 */
+.form-control.is-valid {
+    border-color: #28a745;
 }
 
-.config-history::-webkit-scrollbar-track {
-    background: #333333;
-    border-radius: 3px;
+.form-control.is-invalid {
+    border-color: #dc3545;
 }
 
-.config-history::-webkit-scrollbar-thumb {
-    background: #667eea;
-    border-radius: 3px;
+/* 테이블 정렬 */
+#usersTable th,
+#usersTable td {
+    text-align: center;
 }
 
-.config-history::-webkit-scrollbar-thumb:hover {
-    background: #764ba2;
+#usersTable td:last-child {
+    text-align: center;
 }
 
-/* 반응형 */
+.table-responsive {
+    margin: 0 !important;
+}
+
+#usersTable {
+    margin-bottom: 0;
+}
+
+/* 회원가입 모달 스타일 */
+.form-check-sm {
+    font-size: 0.875rem;
+}
+
+.form-check-sm .form-check-input {
+    width: 1rem;
+    height: 1rem;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+/* 반응형 - 모바일 최적화 개선 */
 @media (max-width: 768px) {
+    /* 컨테이너 패딩 줄이기 */
+    .container-fluid {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+    
+    /* 페이지 헤더 간소화 */
     .page-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
+        gap: 8px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
     }
     
     .page-header h2 {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
     }
     
     .admin-badge {
         align-self: flex-end;
     }
     
+    /* 통계 카드 2x2 그리드로 변경 */
+    .stats-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .stats-card {
+        margin-bottom: 0 !important;
+    }
+    
     .stats-card .card-body {
-        padding: 16px;
+        padding: 12px;
+    }
+    
+    .stats-card h6 {
+        font-size: 0.7rem;
+        margin-bottom: 4px;
+    }
+    
+    .stats-card h3 {
+        font-size: 1.3rem;
+    }
+    
+    .stats-icon i {
+        font-size: 1.8rem;
+    }
+    
+    /* 메인 카드 간격 줄이기 */
+    .main-card {
+        margin-bottom: 16px !important;
     }
     
     .main-card .card-header {
-        padding: 16px 20px;
+        padding: 12px 16px;
+    }
+    
+    .main-card .card-header h5 {
+        font-size: 1rem;
     }
     
     .main-card .card-body {
-        padding: 20px;
+        padding: 16px;
     }
     
+    /* 테이블 폰트 크기 줄이기 */
     .table-responsive {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
     
+    .table-dark td,
+    .table-dark th {
+        padding: 8px 6px;
+    }
+    
+    /* 버튼 크기 줄이기 */
     .btn-group-sm .btn {
-        padding: 2px 6px;
-        font-size: 0.75rem;
+        padding: 2px 4px;
+        font-size: 0.7rem;
     }
     
+    /* 로그 컨테이너 높이 줄이기 */
     .log-container {
-        max-height: 400px;
+        max-height: 300px;
     }
     
     .config-history {
-        max-height: 300px;
+        max-height: 250px;
+    }
+    
+    /* 시스템 로그 테이블 모바일 최적화 */
+    #logsTable td:nth-child(4) {
+        min-width: 80px;
+        font-size: 0.75rem;
+    }
+    
+    /* 체크박스 모바일에서 크기 조정 */
+    .form-check-input {
+        width: 1.1em !important;
+        height: 1.1em !important;
+    }
+    
+    .form-check-label {
+        font-size: 0.9rem !important;
+    }
+}
+
+/* 초소형 화면 (360px 이하) */
+@media (max-width: 360px) {
+    .stats-card h3 {
+        font-size: 1.1rem;
+    }
+    
+    .stats-icon i {
+        font-size: 1.5rem;
+    }
+    
+    .main-card .card-header {
+        padding: 10px 12px;
+    }
+    
+    .main-card .card-body {
+        padding: 12px;
     }
 }
 
@@ -510,59 +623,6 @@
 
 .stats-card h3.text-danger {
     color: #dc3545 !important;
-}
-
-/* 회원가입 모달 스타일 */
-.form-check-sm {
-    font-size: 0.875rem;
-}
-
-.form-check-sm .form-check-input {
-    width: 1rem;
-    height: 1rem;
-}
-
-.text-sm {
-    font-size: 0.875rem;
-}
-
-/* 사용자명 검증 상태 */
-.form-control.is-valid {
-    border-color: #28a745;
-}
-
-.form-control.is-invalid {
-    border-color: #dc3545;
-}
-
-/* 중복체크 버튼 */
-.btn-outline-info {
-    border-color: #17a2b8;
-    color: #17a2b8;
-}
-
-.btn-outline-info:hover {
-    background-color: #17a2b8;
-    color: #ffffff;
-}
-
-/* 테이블 모든 셀 가운데 정렬 */
-#usersTable th,
-#usersTable td {
-    text-align: center;
-}
-
-#usersTable td:last-child {
-    text-align: center; /* 관리 버튼도 가운데 */
-}
-
-/* 테이블 전체 여백을 카드 헤더와 맞춤 */
-.table-responsive {
-    margin: 0 !important;
-}
-
-#usersTable {
-    margin-bottom: 0;
 }
 
 .stats-card:nth-child(1) { animation-delay: 0.1s; }
