@@ -20,6 +20,12 @@
     font-weight: 600;
 }
 
+.current-time {
+    color: #aaaaaa;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
 /* 통계 카드 */
 .stats-card {
     background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
@@ -489,6 +495,10 @@
         margin-bottom: 20px;
         padding-bottom: 12px;
     }
+
+    .current-time {
+        font-size: 0.8rem;
+    }    
     
     .page-header h2 {
         font-size: 1.3rem;
