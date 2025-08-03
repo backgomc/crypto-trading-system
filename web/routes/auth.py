@@ -33,10 +33,8 @@ def login():
    # 이미 로그인된 경우 처리
    if session.get('logged_in') and not show_popup:
        session_id = session.get('session_id')
-       if session_id:
-           from config.models import UserSession
-           if UserSession.get_active_session(session_id):
-               return redirect(url_for('pages.dashboard'))
+       if session_id and UserSession.get_active_session(session_id):  # ✅ 중복 import 제거
+           return redirect(url_for('pages.dashboard'))
        # 세션이 무효하면 클리어만 하고 로그인 페이지 표시
        session.clear()
    
