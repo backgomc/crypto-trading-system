@@ -498,12 +498,12 @@
         align-self: flex-end;
     }
     
-    /* 통계 카드 2x2 그리드로 변경 - 개선됨 */
+    /* 통계 카드 2x2 그리드로 변경 */
     .stats-row {
         display: grid !important;
         grid-template-columns: 1fr 1fr;
-        gap: 6px;
-        margin-bottom: 12px;
+        gap: 3px;
+        margin-bottom: 8px !important;
     }
     
     .stats-card {
@@ -542,6 +542,12 @@
     
     .main-card .card-body {
         padding: 16px;
+    }
+    
+    /* 테이블 배경색 변경 */
+    .table-dark {
+        --bs-table-bg: #1e1e1e;
+        --bs-table-border-color: #333333;
     }
     
     /* 테이블 폰트 크기 줄이기 */
@@ -585,7 +591,7 @@
         font-size: 0.9rem !important;
     }
 
-    /* 사용자 관리 테이블 - 카드형으로 변경 (배경색 개선) */
+    /* 사용자 관리 테이블 - 카드형으로 변경 */
     #usersTable thead {
         display: none;
     }
@@ -596,7 +602,7 @@
     
     #usersTable tbody tr {
         display: block;
-        background: #1e1e1e;
+        background: transparent;
         border: 1px solid #404040;
         border-radius: 8px;
         margin-bottom: 12px;
@@ -605,7 +611,7 @@
     }
     
     #usersTable tbody tr:hover {
-        background: #252525;
+        background: rgba(255, 255, 255, 0.05);
     }
     
     #usersTable tbody td {
@@ -675,7 +681,7 @@
         content: "";
     }
     
-    /* 시스템 로그 테이블 - 카드형으로 변경 (배경색 개선, 레벨/분류 한 줄) */
+    /* 시스템 로그 테이블 - 카드형으로 변경 */
     #logsTable thead {
         display: none;
     }
@@ -686,7 +692,7 @@
     
     #logsTable tbody tr {
         display: block;
-        background: #1e1e1e;
+        background: transparent;
         border: 1px solid #404040;
         border-radius: 8px;
         margin-bottom: 8px;
@@ -695,7 +701,7 @@
     }
     
     #logsTable tbody tr:hover {
-        background: #252525;
+        background: rgba(255, 255, 255, 0.05);
     }
     
     #logsTable tbody td {
@@ -705,29 +711,30 @@
         text-align: left !important;
     }
     
-    /* 로그 레벨과 카테고리를 같은 줄에 - 라벨과 데이터 한 줄로 */
+    /* 로그 레벨과 카테고리를 같은 줄에 - 줄바꿈 방지 */
     #logsTable tbody td:nth-child(1),
     #logsTable tbody td:nth-child(2) {
         display: inline-block;
-        width: 48%;
-        margin-right: 2%;
+        width: 45%;
+        margin-right: 5%;
         font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     #logsTable tbody td:nth-child(1)::before { 
-        content: "레벨: ";
+        content: "레벨:";
         font-weight: bold;
         color: #aaa;
         font-size: 0.8rem;
-        margin-right: 4px;
     }
     
     #logsTable tbody td:nth-child(2)::before { 
-        content: "분류: ";
+        content: "분류:";
         font-weight: bold;
         color: #aaa;
         font-size: 0.8rem;
-        margin-right: 4px;
     }
     
     #logsTable tbody td:nth-child(3) {
@@ -756,10 +763,9 @@
     }
     
     #logsTable tbody td:nth-child(4)::before { 
-        content: "시간: ";
+        content: "시간:";
         font-weight: bold;
         color: #aaa;
-        margin-right: 4px;
     }    
 }
 
