@@ -78,7 +78,7 @@ async function loadAllData() {
         await loadStats();
         await loadUsers();
         restoreFilterState(); // 먼저 체크박스 상태 복원
-        await loadRecentLogs(true); // 그 다음 로그 로드
+        await loadRecentLogs(true, true); // 그 다음 로그 로드
     } catch (error) {
         console.error('데이터 로드 오류:', error);
         showToast('error', '데이터 로드 중 오류가 발생했습니다.');
@@ -530,18 +530,24 @@ function animateCards() {
 // 사용자 목록 새로고침 (수정: 확인창 제거)
 async function refreshUsers() {
     console.log('사용자 목록 새로고침 실행');
-    // 현재 사용자 활동 시간 먼저 갱신
     await updateCurrentUserLoginTime();    
-
+    
     // 수동 새로고침이므로 기존 apiCall 사용 (로그 남김)
     const result = await apiCall('/api/admin/users');
     if (result && result.data) {
         allUsers = result.data.users || result.data;
         displayUsers(allUsers);
     }
-        
-    await loadAllData();
-    // 확인창 제거 - 조용히 새로고침
+    
+    // 통계도 함께 새로고침 (수동)
+    const statsResult = await apiCall('/api/admin/stats');
+    if (statsResult && statsResult.data) {
+        displayStats(statsResult.data);
+    }
+    
+    // ✅ 로그 조회는 자동갱신으로 처리 (로그 안 남김)
+    restoreFilterState();
+    await loadRecentLogs(true, true); // isAutoRefresh = true
 }
 
 // 새 사용자 추가 (모달 사용)
