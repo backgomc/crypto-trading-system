@@ -339,13 +339,6 @@
             }
         });
         
-        // 엔터키 이벤트 처리
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('loginForm').submit();
-            }
-        });
-        
         // 포커스 이벤트
         document.querySelectorAll('.form-control').forEach(input => {
             input.addEventListener('focus', function() {
