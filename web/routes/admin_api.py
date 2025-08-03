@@ -448,15 +448,26 @@ def get_system_stats():
 @admin_required
 @handle_api_errors
 def get_recent_logs():
-    """최근 로그 조회 (사용자명 표시, 한국시간 적용)"""
+    """최근 로그 조회 (페이징, 관리자 필터링 지원)"""
     try:
-        # 최근 로그와 사용자 정보를 함께 조회
-        recent_logs_query = db.session.query(SystemLog, User.username).outerjoin(
-            User, SystemLog.message.like(f'%사용자%')
-        ).order_by(SystemLog.timestamp.desc()).limit(20)
+        # 파라미터 받기
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 20))
+        exclude_admin = request.args.get('exclude_admin', 'false').lower() == 'true'
         
-        # 단순하게 최근 로그만 조회하고 메시지에서 사용자명 추출
-        recent_logs = SystemLog.query.order_by(SystemLog.timestamp.desc()).limit(20).all()
+        # 기본 쿼리
+        query = SystemLog.query
+        
+        # 관리자 로그 제외 필터링
+        if exclude_admin:
+            query = query.filter(~SystemLog.message.contains('nah3207'))
+        
+        # 페이지네이션 적용
+        pagination = query.order_by(SystemLog.timestamp.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        recent_logs = pagination.items
         
         logs_data = []
         for log in recent_logs:

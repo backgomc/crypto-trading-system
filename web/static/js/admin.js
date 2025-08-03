@@ -1,14 +1,14 @@
 // 파일 경로: web/static/js/admin.js
-// 코드명: 관리자 페이지 JavaScript 로직 (모든 문제점 완전 수정)
+// 코드명: 관리자 페이지 JavaScript 로직 (시스템 로그 문제점 완전 수정)
 
 // 전역 변수
 let isLoading = false;
 let allUsers = [];
 let currentUserId = null;
 let currentLogPage = 1;
-let logsPerPage = 50;
-let allLogData = [];
-let filteredLogData = [];
+let logsPerPage = 20;
+let hasMoreLogs = false;
+let isLoadingLogs = false;
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
@@ -77,7 +77,7 @@ async function loadAllData() {
     try {
         await loadStats();
         await loadUsers();
-        await loadRecentLogs();
+        await loadRecentLogs(true); // 첫 로드
         restoreFilterState();
     } catch (error) {
         console.error('데이터 로드 오류:', error);
@@ -102,11 +102,42 @@ async function loadUsers() {
     }
 }
 
-// 최근 로그 로드
-async function loadRecentLogs() {
-    const result = await apiCall('/api/admin/logs/recent');
-    if (result && result.data) {
-        displayRecentLogs(result.data);
+// 최근 로그 로드 (수정: 페이징 및 필터링 개선)
+async function loadRecentLogs(isFirstLoad = false) {
+    if (isLoadingLogs) return;
+    isLoadingLogs = true;
+    
+    try {
+        const excludeAdmin = document.getElementById('excludeAdminLogs')?.checked || false;
+        const page = isFirstLoad ? 1 : currentLogPage;
+        
+        // URL 파라미터 구성
+        const params = new URLSearchParams({
+            page: page,
+            per_page: logsPerPage,
+            exclude_admin: excludeAdmin
+        });
+        
+        const result = await apiCall(`/api/admin/logs/recent?${params}`);
+        
+        if (result && result.data) {
+            if (isFirstLoad) {
+                currentLogPage = 1;
+                displayRecentLogs(result.data.logs || result.data, true);
+            } else {
+                displayRecentLogs(result.data.logs || result.data, false);
+            }
+            
+            // 더보기 버튼 표시 여부 결정
+            hasMoreLogs = result.meta ? result.meta.has_next : (result.data.logs || result.data).length >= logsPerPage;
+            updateLoadMoreButton();
+            updateLogCount(result.meta ? result.meta.total : null);
+        }
+    } catch (error) {
+        console.error('로그 로드 실패:', error);
+        showToast('error', '로그 로드에 실패했습니다.');
+    } finally {
+        isLoadingLogs = false;
     }
 }
 
@@ -193,17 +224,23 @@ function displayUsers(users) {
     }).join('');
 }
 
-// 최근 로그 표시 (사용자명으로 표시)
-function displayRecentLogs(logs) {
+// 최근 로그 표시 (수정: 더보기 기능 개선)
+function displayRecentLogs(logs, isFirstLoad = true) {
     const tbody = document.querySelector('#logsTable tbody');
     if (!tbody) return;
     
-    if (logs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">로그 데이터가 없습니다.</td></tr>';
+    if (logs.length === 0 && isFirstLoad) {
+        tbody.innerHTML = '<tr id="emptyLogRow"><td colspan="4" class="text-center text-muted py-3">로그 데이터가 없습니다.</td></tr>';
         return;
     }
     
-    tbody.innerHTML = logs.map(log => `
+    // 빈 로그 행 제거
+    const emptyRow = document.getElementById('emptyLogRow');
+    if (emptyRow) {
+        emptyRow.remove();
+    }
+    
+    const newRows = logs.map(log => `
         <tr class="log-item log-${log.level.toLowerCase()}" data-category="${log.category}">
             <td class="text-center" style="width: 80px;">
                 <span class="badge ${getBadgeClass(log.level)}">
@@ -221,6 +258,45 @@ function displayRecentLogs(logs) {
             </td>
         </tr>
     `).join('');
+    
+    if (isFirstLoad) {
+        tbody.innerHTML = newRows;
+    } else {
+        tbody.insertAdjacentHTML('beforeend', newRows);
+    }
+}
+
+// 더보기 버튼 업데이트
+function updateLoadMoreButton() {
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
+        if (hasMoreLogs && !isLoadingLogs) {
+            loadMoreBtn.style.display = 'inline-block';
+            loadMoreBtn.disabled = false;
+            loadMoreBtn.innerHTML = '<i class="bi bi-arrow-down me-1"></i>더보기';
+        } else if (isLoadingLogs) {
+            loadMoreBtn.style.display = 'inline-block';
+            loadMoreBtn.disabled = true;
+            loadMoreBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>로딩...';
+        } else {
+            loadMoreBtn.style.display = 'none';
+        }
+    }
+}
+
+// 로그 개수 업데이트 (수정: 총 개수 표시)
+function updateLogCount(totalCount = null) {
+    const logCount = document.getElementById('logCount');
+    if (logCount) {
+        const visibleRows = document.querySelectorAll('#logsTable tbody tr:not(#emptyLogRow)');
+        const displayedCount = visibleRows.length;
+        
+        if (totalCount !== null) {
+            logCount.textContent = `총 ${totalCount}개 로그 (${displayedCount}개 표시)`;
+        } else {
+            logCount.textContent = `${displayedCount}개 로그 표시`;
+        }
+    }
 }
 
 // 한국시간 포맷 함수 (수정)
@@ -252,9 +328,7 @@ function restoreFilterState() {
     const savedState = localStorage.getItem('excludeAdminLogs');
     if (savedState !== null) {
         document.getElementById('excludeAdminLogs').checked = savedState === 'true';
-        filterLogs(); // 저장된 상태로 즉시 필터링
     }
-    updateLogCount(); // 개수 업데이트 추가
 }
 
 // 로그 레벨별 배지 클래스
@@ -551,53 +625,32 @@ async function createUser() {
     }
 }
 
-// 관리자 로그 필터링
+// 관리자 로그 필터링 (수정: 서버에서 필터링)
 function filterLogs() {
     const excludeAdmin = document.getElementById('excludeAdminLogs').checked;
-    const logRows = document.querySelectorAll('#logsTable tbody tr');
-    
-    logRows.forEach(row => {
-        const message = row.cells[2]?.textContent || '';
-        // 관리자 계정명 "nah3207"로 필터링
-        const isAdminLog = message.includes('nah3207');
-        
-        if (excludeAdmin && isAdminLog) {
-            row.style.display = 'none';
-        } else {
-            row.style.display = '';
-        }
-    });
     
     // 체크박스 상태 저장
     localStorage.setItem('excludeAdminLogs', excludeAdmin);
     
-    // 로그 개수 업데이트
-    updateLogCount();
+    // 서버에서 필터링된 로그 다시 로드
+    currentLogPage = 1;
+    loadRecentLogs(true);
 }
 
-// 로그 개수 업데이트
-function updateLogCount() {
-    const logCount = document.getElementById('logCount');
-    if (logCount) {
-        const visibleRows = document.querySelectorAll('#logsTable tbody tr:not([style*="display: none"])');
-        const totalRows = document.querySelectorAll('#logsTable tbody tr').length;
-        logCount.textContent = `총 ${totalRows}개 로그 (${visibleRows.length}개 표시)`;
-    }
-}
-
-// 더 많은 로그 로드
-function loadMoreLogs() {
+// 더 많은 로그 로드 (수정)
+async function loadMoreLogs() {
+    if (isLoadingLogs || !hasMoreLogs) return;
+    
     currentLogPage++;
-    loadRecentLogs();
-    updateLogCount();
+    await loadRecentLogs(false);
 }
 
-// 로그 새로고침
+// 로그 새로고침 (수정: 확인창 제거)
 async function refreshLogs() {
     try {
-        await loadRecentLogs();
-        showToast('success', '로그를 새로고침했습니다.');
-        updateLogCount();
+        currentLogPage = 1;
+        await loadRecentLogs(true);
+        // 확인창 제거 - 조용히 새로고침
     } catch (error) {
         console.error('로그 새로고침 실패:', error);
         showToast('error', '로그 새로고침에 실패했습니다.');
