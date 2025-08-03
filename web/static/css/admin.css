@@ -610,10 +610,8 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     
-    /* 사용자 관리 호버 배경색 통일 */
-    #usersTable tbody tr:hover,
-    #usersTable tbody tr:hover td {
-        background: rgba(255, 255, 255, 0.05) !important;
+    #usersTable tbody tr:hover {
+        background: rgba(255, 255, 255, 0.05);
     }
     
     #usersTable tbody td {
@@ -621,7 +619,6 @@
         border: none;
         padding: 4px 0;
         text-align: left !important;
-        background: transparent !important;
     }
     
     /* 각 셀에 라벨 추가 */
@@ -684,17 +681,6 @@
         content: "";
     }
     
-    /* 사용자 관리 버튼 크기 키우기 */
-    #usersTable .btn-group-sm .btn {
-        padding: 6px 8px !important;
-        font-size: 0.85rem !important;
-        margin: 0 2px;
-    }
-    
-    #usersTable .btn-group-sm .btn i {
-        font-size: 1rem !important;
-    }
-    
     /* 시스템 로그 테이블 - 카드형으로 변경 */
     #logsTable thead {
         display: none;
@@ -714,10 +700,8 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     
-    /* 시스템 로그 호버 배경색 통일 */
-    #logsTable tbody tr:hover,
-    #logsTable tbody tr:hover td {
-        background: rgba(255, 255, 255, 0.05) !important;
+    #logsTable tbody tr:hover {
+        background: rgba(255, 255, 255, 0.05);
     }
     
     #logsTable tbody td {
@@ -725,32 +709,32 @@
         border: none;
         padding: 2px 0;
         text-align: left !important;
-        background: transparent !important;
     }
     
-    /* 로그 레벨과 카테고리를 같은 줄에 - 너비 조정으로 데이터 보이게 */
+    /* 로그 레벨과 카테고리를 같은 줄에 - 줄바꿈 방지 */
     #logsTable tbody td:nth-child(1),
     #logsTable tbody td:nth-child(2) {
         display: inline-block;
-        width: 35%;
-        margin-right: 2%;
-        font-size: 0.8rem;
+        width: 45%;
+        margin-right: 5%;
+        font-size: 0.85rem;
         white-space: nowrap;
-        overflow: visible;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     #logsTable tbody td:nth-child(1)::before { 
         content: "레벨:";
         font-weight: bold;
         color: #aaa;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
     }
     
     #logsTable tbody td:nth-child(2)::before { 
         content: "분류:";
         font-weight: bold;
         color: #aaa;
-        font-size: 0.75rem;
+        font-size: 0.8rem;
     }
     
     #logsTable tbody td:nth-child(3) {
