@@ -50,21 +50,33 @@ def login():
         user = User.query.filter_by(username=username).first()
         
         if user and user.check_password(password) and user.is_active:
+            # ✅ 디버깅: 기존 세션 확인
+            existing_sessions = UserSession.query.filter_by(user_id=user.id, is_active=True).all()
+            print(f"🔍 디버그: 사용자 {user.username}의 기존 활성 세션 개수: {len(existing_sessions)}")
+            
             # ✅ 중복 로그인 방지: 기존 세션 무효화
             invalidated_count = UserSession.invalidate_user_sessions(user.id)
+            print(f"🔍 디버그: 무효화된 세션 개수: {invalidated_count}")
+            
             if invalidated_count > 0:
+                print(f"🔍 디버그: 중복 로그인 감지 - 로그 기록 시도")
                 log_system_event('INFO', 'LOGIN', f'중복 로그인 감지: {username} - {invalidated_count}개 기존 세션 무효화')
             
             # ✅ 새 세션 ID 생성
             new_session_id = secrets.token_hex(32)
+            print(f"🔍 디버그: 새 세션 ID 생성: {new_session_id}")
             
             # ✅ DB에 세션 저장
-            UserSession.create_session(
-                user_id=user.id,
-                session_id=new_session_id,
-                ip_address=request.remote_addr,
-                user_agent=request.headers.get('User-Agent', '')
-            )
+            try:
+                new_session = UserSession.create_session(
+                    user_id=user.id,
+                    session_id=new_session_id,
+                    ip_address=request.remote_addr,
+                    user_agent=request.headers.get('User-Agent', '')
+                )
+                print(f"🔍 디버그: 새 세션 생성 완료: {new_session.id}")
+            except Exception as e:
+                print(f"❌ 디버그: 세션 생성 실패: {e}")
             
             # 로그인 성공 - 세션 설정
             session.permanent = remember_me
