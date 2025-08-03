@@ -317,6 +317,7 @@
                         
                         // 기존 세션이 있으면 확인 모달 표시
                         showDuplicateLoginModal();
+                        return;
                     } else {
                         // 기존 세션이 없으면 바로 로그인
                         this.submit();
