@@ -285,7 +285,7 @@ p, span, div {
    /* 헤더 간소화 */
    .top-header {
        padding: 8px 16px !important;
-       height: 60px !important;
+       height: 62px !important;
    }
    
    .logo {
@@ -309,7 +309,7 @@ p, span, div {
 
    /* 모바일에서 로그아웃 버튼 아이콘만 표시 */
    .logout-btn {
-       padding: 8px 10px !important; /* 패딩 축소 */
+       padding: 6px 8px !important; /* 패딩 축소 */
        min-width: auto !important;
    }
 
