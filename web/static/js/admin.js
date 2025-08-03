@@ -77,8 +77,8 @@ async function loadAllData() {
     try {
         await loadStats();
         await loadUsers();
-        await loadRecentLogs(true); // 첫 로드
-        restoreFilterState();
+        restoreFilterState(); // 먼저 체크박스 상태 복원
+        await loadRecentLogs(true); // 그 다음 로그 로드
     } catch (error) {
         console.error('데이터 로드 오류:', error);
         showToast('error', '데이터 로드 중 오류가 발생했습니다.');
@@ -121,17 +121,19 @@ async function loadRecentLogs(isFirstLoad = false) {
         const result = await apiCall(`/api/admin/logs/recent?${params}`);
         
         if (result && result.data) {
+            const logs = result.data.logs || result.data;
+            
             if (isFirstLoad) {
                 currentLogPage = 1;
-                displayRecentLogs(result.data.logs || result.data, true);
+                displayRecentLogs(logs, true);
             } else {
-                displayRecentLogs(result.data.logs || result.data, false);
+                displayRecentLogs(logs, false);
             }
             
-            // 더보기 버튼 표시 여부 결정
-            hasMoreLogs = result.meta ? result.meta.has_next : (result.data.logs || result.data).length >= logsPerPage;
+            // 더보기 버튼 표시 여부 결정 (수정)
+            hasMoreLogs = result.meta ? result.meta.has_next : logs.length >= logsPerPage;
             updateLoadMoreButton();
-            updateLogCount(result.meta ? result.meta.total : null);
+            updateLogCount(result.meta ? result.meta.total : logs.length);
         }
     } catch (error) {
         console.error('로그 로드 실패:', error);
@@ -326,8 +328,14 @@ function formatKoreanDateTime(dateString) {
 // 페이지 로드 시 체크박스 상태 복원 (loadAllData() 함수 끝에 추가)
 function restoreFilterState() {
     const savedState = localStorage.getItem('excludeAdminLogs');
-    if (savedState !== null) {
-        document.getElementById('excludeAdminLogs').checked = savedState === 'true';
+    const checkbox = document.getElementById('excludeAdminLogs');
+    
+    if (savedState !== null && checkbox) {
+        checkbox.checked = savedState === 'true';
+    } else if (checkbox) {
+        // 기본값 설정 (체크됨)
+        checkbox.checked = true;
+        localStorage.setItem('excludeAdminLogs', 'true');
     }
 }
 
