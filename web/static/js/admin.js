@@ -310,9 +310,9 @@ function formatKoreanDateTime(dateString) {
     
     try {
         const date = new Date(dateString);
-        
+
         // 대시보드와 동일한 형식으로 표시
-        return koreanDate.toLocaleString('ko-KR', {
+        return date.toLocaleString('ko-KR', {
             year: 'numeric',
             month: '2-digit',
             day: '2-digit',
