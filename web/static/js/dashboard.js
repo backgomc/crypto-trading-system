@@ -6,7 +6,6 @@
 // ============================================================================
 
 let tradingViewWidget = null;
-let timeUpdateInterval = null;
 
 // ============================================================================
 // TradingView 차트 관리
@@ -37,15 +36,41 @@ function initTradingView(symbol = "BYBIT:BTCUSDT") {
                 enable_publishing: false,
                 allow_symbol_change: true,
                 container_id: "tradingview_chart",
+                
+                // 🔧 스키마 오류 해결 설정
                 studies: [],
                 hide_side_toolbar: false,
-                disabled_features: [],
                 details: false,
                 hotlist: false,
                 calendar: false,
                 mobile_friendly: true,
-                auto_scale: true
-                // hide_volume: true  <- 이 줄만 제거! (워닝 원인)
+                auto_scale: true,
+                hide_volume: true,
+                
+                // ⚡ 오류 방지 설정
+                disabled_features: [
+                    "use_localstorage_for_settings",
+                    "volume_force_overlay",
+                    "create_volume_indicator_by_default"
+                ],
+                enabled_features: [
+                    "hide_left_toolbar_by_default"
+                ],
+                
+                // 🎯 스키마 검증 우회
+                overrides: {
+                    "paneProperties.background": "#1e1e1e",
+                    "paneProperties.vertGridProperties.color": "#363636",
+                    "paneProperties.horzGridProperties.color": "#363636"
+                },
+                
+                // 📊 데이터 설정 개선
+                datafeed: undefined,  // 기본 데이터피드 사용
+                library_path: undefined,  // CDN 사용
+                
+                // 🔒 안전 설정
+                debug: false,
+                custom_css_url: undefined
             });
             
             console.log('✅ TradingView 위젯 초기화 완료');
@@ -97,38 +122,6 @@ function changeSymbol() {
     const selectedSymbol = selectElement.value;
     showToast('info', `차트를 ${selectedSymbol}로 변경 중...`);
     initTradingView(selectedSymbol);
-}
-
-// ============================================================================
-// 시간 업데이트
-// ============================================================================
-
-function updateTime() {
-    const now = new Date();
-    const timeString = now.toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-    const timeElement = document.getElementById('currentTime');
-    if (timeElement) {
-        timeElement.textContent = timeString;
-    }
-}
-
-function startTimeUpdate() {
-    updateTime();
-    timeUpdateInterval = setInterval(updateTime, 1000);
-}
-
-function stopTimeUpdate() {
-    if (timeUpdateInterval) {
-        clearInterval(timeUpdateInterval);
-        timeUpdateInterval = null;
-    }
 }
 
 // ============================================================================
@@ -355,9 +348,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // 페이지 애니메이션
     initPageAnimations();
     
-    // 시간 업데이트 시작
-    startTimeUpdate();
-    
     // 대시보드 데이터 로드
     loadDashboardData();
     
@@ -374,7 +364,6 @@ window.addEventListener('load', function() {
 
 // 페이지 언로드 시 정리
 window.addEventListener('beforeunload', function() {
-    stopTimeUpdate();
     if (tradingViewWidget) {
         tradingViewWidget = null;
     }
