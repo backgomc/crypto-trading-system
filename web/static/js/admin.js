@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 실시간 시간 업데이트
     updateTime();
-    setInterval(updateTime, 1000);
     
     // 페이지 로드 애니메이션
     animateCards();
@@ -468,33 +467,6 @@ function showConfirmModal(title, message) {
         });
         
         modal.show();
-    });
-}
-
-// 시간 업데이트
-function updateTime() {
-    const now = new Date();
-    const timeString = now.toLocaleString('ko-KR', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-    
-    // ID가 currentTime인 span 요소만 업데이트
-    const currentTimeSpan = document.getElementById('currentTime');
-    if (currentTimeSpan) {
-        currentTimeSpan.textContent = timeString;
-    }
-    
-    // 기존 방식도 유지 (다른 페이지 호환성)
-    const timeElements = document.querySelectorAll('.current-time');
-    timeElements.forEach(el => {
-        if (el && !el.querySelector('#currentTime')) {
-            el.textContent = timeString;
-        }
     });
 }
 

@@ -229,6 +229,50 @@ function validateAllNumberFields() {
 }
 
 // ============================================================================
+// 시간 업데이트 함수 (모든 페이지 공통)
+// ============================================================================
+
+function updateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    
+    // ID가 currentTime인 span 요소만 업데이트 (아이콘 보존)
+    const currentTimeSpan = document.getElementById('currentTime');
+    if (currentTimeSpan) {
+        currentTimeSpan.textContent = timeString;
+    }
+    
+    // 기존 방식도 유지 (다른 페이지 호환성)
+    const timeElements = document.querySelectorAll('.current-time');
+    timeElements.forEach(el => {
+        if (el && !el.querySelector('#currentTime')) {
+            el.textContent = timeString;
+        }
+    });
+}
+
+// 시간 업데이트 자동 시작
+function startTimeUpdates() {
+    updateTime(); // 즉시 1회 실행
+    setInterval(updateTime, 1000); // 1초마다 반복
+}
+
+// 페이지 로드 시 자동 시작
+document.addEventListener('DOMContentLoaded', function() {
+    // 기존 DOMContentLoaded 내용...
+    
+    // 시간 업데이트 시작
+    startTimeUpdates();
+});
+
+// ============================================================================
 // 시간 포맷팅 함수들
 // ============================================================================
 
