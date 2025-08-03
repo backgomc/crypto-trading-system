@@ -526,30 +526,37 @@ def get_recent_logs():
 @admin_required
 @handle_api_errors
 def cleanup_logs():
-    """시스템 로그 정리 (수정: 모든 로그 삭제)"""
+    """시스템 로그 정리 (수정: 개별 삭제로 변경)"""
     try:
-        # 모든 시스템 로그 삭제
-        deleted_logs_count = SystemLog.query.delete()
+        # 삭제할 로그 개수 먼저 조회
+        logs_count = SystemLog.query.count()
+        configs_count = ConfigHistory.query.count()
         
-        # 모든 설정 변경 이력 삭제
-        deleted_configs_count = ConfigHistory.query.delete()
+        # 개별 삭제 방식으로 변경
+        SystemLog.query.delete(synchronize_session=False)
+        ConfigHistory.query.delete(synchronize_session=False)
+        
+        # 커밋 전에 로그 기록 (새 로그가 추가됨)
+        admin_username = session.get("username", "unknown")
         
         db.session.commit()
         
-        log_admin_event('INFO', 'ADMIN', f'모든 로그 정리 완료: 로그 {deleted_logs_count}개, 설정이력 {deleted_configs_count}개 삭제 - 관리자: {session.get("username")}')
+        # 삭제 후 새로운 로그 추가
+        log_admin_event('INFO', 'ADMIN', f'모든 로그 정리 완료: 로그 {logs_count}개, 설정이력 {configs_count}개 삭제 - 관리자: {admin_username}')
         
         return success_response(
             data={
-                'deleted_logs': deleted_logs_count,
-                'deleted_configs': deleted_configs_count
+                'deleted_logs': logs_count,
+                'deleted_configs': configs_count
             },
-            message=f'모든 로그 정리 완료: {deleted_logs_count}개 로그, {deleted_configs_count}개 설정 이력 삭제'
+            message=f'모든 로그 정리 완료: {logs_count}개 로그, {configs_count}개 설정 이력 삭제'
         )
         
     except Exception as e:
         db.session.rollback()
+        print(f"로그 정리 오류: {e}")  # 디버그용
         log_admin_event('ERROR', 'ADMIN', f'로그 정리 실패: {e}')
-        return error_response('로그 정리 중 오류가 발생했습니다.', 'DATABASE_ERROR', 500)
+        return error_response(f'로그 정리 중 오류가 발생했습니다: {str(e)}', 'DATABASE_ERROR', 500)
 
 @admin_api_bp.route('/api/admin/config/<int:config_id>', methods=['GET'])
 @admin_required
