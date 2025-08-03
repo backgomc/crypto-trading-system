@@ -33,13 +33,18 @@ def admin_required(f):
 def log_admin_event(level, category, message):
     """관리자 작업 로깅"""
     try:
+        current_time = get_kst_now()
+        print(f"🕐 로그 생성 시간: {current_time}")
+        print(f"🕐 시스템 시간: {datetime.now()}")
+        print(f"🕐 UTC 시간: {datetime.utcnow()}")
+
         log_entry = SystemLog(
             level=level,
             category=category,
             message=message,
             ip_address=request.remote_addr,
             user_agent=request.headers.get('User-Agent', '')[:200],
-            #timestamp=get_kst_now()
+            timestamp=current_time
         )
         db.session.add(log_entry)
         db.session.commit()
