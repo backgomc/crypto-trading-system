@@ -818,21 +818,24 @@ IP 주소: ${data.ip_address || 'N/A'}
 
 // 시스템 로그 정리 (수정: 모든 로그 삭제)
 async function clearLogs() {
-    // 부트스트랩 모달을 사용한 확인
-    if (!await showConfirmModal('로그 삭제 확인', '정말로 모든 로그를 삭제하시겠습니까?<br>이 작업은 되돌릴 수 없습니다.')) {
-        return;
-    }
-    
-    try {
-        const result = await apiCall('/api/admin/logs/cleanup', 'POST'); // 경로와 메서드 수정
-        if (result && result.success) {
-            showToast('success', result.message || '모든 로그가 삭제되었습니다.');
-            await loadAllData();
+    showConfirm('로그 삭제 확인', '정말로 모든 로그를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.', async function(confirmed) {
+        if (!confirmed) return;
+        
+        try {
+            showLoading(true);
+            const result = await apiCall('/api/admin/logs/cleanup', 'POST');
+            
+            if (result && result.success) {
+                showToast('success', result.message || '모든 로그가 삭제되었습니다.');
+                await loadAllData();
+            }
+        } catch (error) {
+            console.error('로그 삭제 실패:', error);
+            showToast('error', '로그 삭제에 실패했습니다.');
+        } finally {
+            showLoading(false);
         }
-    } catch (error) {
-        console.error('로그 삭제 실패:', error);
-        showToast('error', '로그 삭제에 실패했습니다.');
-    }
+    });
 }
 
 // ============================================================================
