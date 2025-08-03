@@ -520,11 +520,21 @@ def check_existing_session():
         if not user:
             return api_success(data={'has_active_session': False})
         
-        # ✅ 관리자는 항상 로그인 허용
-        if user.is_admin:
-            return api_success(data={'has_active_session': False})        
+        # ✅ 디버깅 추가
+        print(f"🔍 디버그: 사용자 {username}")
+        print(f"🔍 디버그: user.is_admin = {user.is_admin}")
+        print(f"🔍 디버그: type(user.is_admin) = {type(user.is_admin)}")
+        print(f"🔍 디버그: user.is_admin == True: {user.is_admin == True}")
+        print(f"🔍 디버그: bool(user.is_admin): {bool(user.is_admin)}")
         
-        # 활성 세션 확인
+        # 관리자는 항상 로그인 허용
+        if user.is_admin:
+            print(f"🔍 디버그: {username}은 관리자 - 중복 로그인 허용")
+            return api_success(data={'has_active_session': False, 'is_admin': True})
+        
+        print(f"🔍 디버그: {username}은 일반 사용자로 처리됨")
+        
+        # 일반 사용자만 활성 세션 확인
         from config.models import UserSession
         active_sessions = UserSession.query.filter_by(user_id=user.id, is_active=True).count()
         
@@ -537,7 +547,7 @@ def check_existing_session():
         
     except Exception as e:
         print(f"세션 체크 오류: {e}")
-        return api_error('세션 확인 중 오류가 발생했습니다', 'SESSION_CHECK_ERROR', 500)    
+        return api_error('세션 확인 중 오류가 발생했습니다', 'SESSION_CHECK_ERROR', 500) 
     
 # ============================================================================
 # 시스템 API 엔드포인트들
