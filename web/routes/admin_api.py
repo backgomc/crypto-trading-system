@@ -287,6 +287,13 @@ def update_user(user_id):
             return success_response(message='변경된 사항이 없습니다.')
         
         db.session.commit()
+
+        # ✅ 여기에 추가: 비활성화 시 강제 로그아웃
+        if 'is_active' in data and not validate_boolean(data['is_active'])[0]:
+            from config.models import UserSession
+            invalidated_count = UserSession.invalidate_user_sessions(target_user.id)
+            if invalidated_count > 0:
+                log_admin_event('INFO', 'ADMIN', f'사용자 비활성화로 인한 강제 로그아웃: {target_user.username} - {invalidated_count}개 세션 무효화')        
         
         # 로그 기록
         changes_str = ', '.join(changes)

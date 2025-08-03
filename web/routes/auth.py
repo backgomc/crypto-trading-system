@@ -1,9 +1,10 @@
 # 파일 경로: web/routes/auth.py
-# 코드명: 인증 관련 라우터 (로그인/로그아웃)
+# 코드명: 인증 관련 라우터 (로그인/로그아웃) - 세션 관리 추가
 
 from flask import Blueprint, render_template, request, session, redirect, url_for
 from datetime import datetime, timedelta
-from config.models import User, SystemLog, db
+from config.models import User, SystemLog, UserSession, db
+import secrets
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -25,9 +26,14 @@ def log_system_event(level, category, message):
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """로그인 페이지"""
-    # 이미 로그인된 경우 대시보드로 리다이렉트
+    # 이미 로그인된 경우 세션 유효성 검사
     if session.get('logged_in'):
-        return redirect(url_for('pages.dashboard'))
+        session_id = session.get('session_id')
+        if session_id and UserSession.get_active_session(session_id):
+            return redirect(url_for('pages.dashboard'))
+        else:
+            # 세션이 무효하면 로그아웃 처리
+            session.clear()
     
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -44,12 +50,29 @@ def login():
         user = User.query.filter_by(username=username).first()
         
         if user and user.check_password(password) and user.is_active:
-            # 로그인 성공
+            # ✅ 중복 로그인 방지: 기존 세션 무효화
+            invalidated_count = UserSession.invalidate_user_sessions(user.id)
+            if invalidated_count > 0:
+                log_system_event('INFO', 'LOGIN', f'중복 로그인 감지: {username} - {invalidated_count}개 기존 세션 무효화')
+            
+            # ✅ 새 세션 ID 생성
+            new_session_id = secrets.token_hex(32)
+            
+            # ✅ DB에 세션 저장
+            UserSession.create_session(
+                user_id=user.id,
+                session_id=new_session_id,
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent', '')
+            )
+            
+            # 로그인 성공 - 세션 설정
             session.permanent = remember_me
             session['logged_in'] = True
             session['user_id'] = user.id
             session['username'] = user.username
             session['is_admin'] = user.is_admin
+            session['session_id'] = new_session_id  # ✅ 세션 ID 저장
             session['login_time'] = datetime.utcnow().isoformat()
             
             # 로그인 시간 업데이트
@@ -79,8 +102,12 @@ def login():
         
         else:
             # 로그인 실패
-            error_msg = '잘못된 사용자명 또는 비밀번호입니다.'
-            log_system_event('WARNING', 'LOGIN', f'로그인 실패: 잘못된 인증 정보 - {username}')
+            if user and not user.is_active:
+                error_msg = '비활성화된 계정입니다. 관리자에게 문의하세요.'
+                log_system_event('WARNING', 'LOGIN', f'로그인 실패: 비활성 계정 - {username}')
+            else:
+                error_msg = '잘못된 사용자명 또는 비밀번호입니다.'
+                log_system_event('WARNING', 'LOGIN', f'로그인 실패: 잘못된 인증 정보 - {username}')
             return render_template('login.html', error=error_msg)
     
     return render_template('login.html')
@@ -89,6 +116,11 @@ def login():
 def logout():
     """로그아웃"""
     username = session.get('username', 'Unknown')
+    session_id = session.get('session_id')
+    
+    # ✅ DB에서 세션 무효화
+    if session_id:
+        UserSession.invalidate_session(session_id)
     
     # 로그아웃 로그
     log_system_event('INFO', 'LOGIN', f'로그아웃: {username}')
@@ -97,3 +129,21 @@ def logout():
     session.clear()
     
     return redirect(url_for('auth.login'))
+
+# ✅ 세션 유효성 검사 미들웨어 함수
+def check_session_validity():
+    """세션 유효성 검사"""
+    if session.get('logged_in'):
+        session_id = session.get('session_id')
+        if session_id:
+            # DB에서 세션 확인
+            db_session = UserSession.get_active_session(session_id)
+            if db_session:
+                # 세션 활동 시간 업데이트
+                UserSession.update_activity(session_id)
+                return True
+            else:
+                # 세션이 무효하면 로그아웃 처리
+                session.clear()
+                return False
+    return False

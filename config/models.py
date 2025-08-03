@@ -344,6 +344,106 @@ class ConfigHistory(db.Model):
     def __repr__(self):
         return f'<ConfigHistory {self.config_key} changed for user {self.user_id}>'
 
+class UserSession(db.Model):
+    """사용자 세션 관리 모델"""
+    __tablename__ = 'user_sessions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    session_id = db.Column(db.String(255), nullable=False, unique=True, index=True)
+    ip_address = db.Column(db.String(45), nullable=True)
+    user_agent = db.Column(db.String(500), nullable=True)
+    created_at = db.Column(db.DateTime, default=get_kst_now, nullable=False)
+    last_activity = db.Column(db.DateTime, default=get_kst_now, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    
+    # 관계 설정
+    user = db.relationship('User', backref='sessions')
+    
+    @classmethod
+    def create_session(cls, user_id, session_id, ip_address=None, user_agent=None):
+        """새 세션 생성"""
+        session = cls(
+            user_id=user_id,
+            session_id=session_id,
+            ip_address=ip_address,
+            user_agent=user_agent[:500] if user_agent else None  # 길이 제한
+        )
+        db.session.add(session)
+        db.session.commit()
+        return session
+    
+    @classmethod
+    def get_active_session(cls, session_id):
+        """활성 세션 조회"""
+        return cls.query.filter_by(session_id=session_id, is_active=True).first()
+    
+    @classmethod
+    def invalidate_user_sessions(cls, user_id, except_session_id=None):
+        """사용자의 모든 세션 무효화 (현재 세션 제외 옵션)"""
+        query = cls.query.filter_by(user_id=user_id, is_active=True)
+        if except_session_id:
+            query = query.filter(cls.session_id != except_session_id)
+        
+        sessions = query.all()
+        for session in sessions:
+            session.is_active = False
+        
+        db.session.commit()
+        return len(sessions)
+    
+    @classmethod
+    def invalidate_session(cls, session_id):
+        """특정 세션 무효화"""
+        session = cls.query.filter_by(session_id=session_id, is_active=True).first()
+        if session:
+            session.is_active = False
+            db.session.commit()
+            return True
+        return False
+    
+    @classmethod
+    def update_activity(cls, session_id):
+        """세션 활동 시간 업데이트"""
+        session = cls.query.filter_by(session_id=session_id, is_active=True).first()
+        if session:
+            session.last_activity = get_kst_now()
+            db.session.commit()
+        return session
+    
+    @classmethod
+    def cleanup_expired_sessions(cls, hours=24):
+        """만료된 세션 정리 (24시간 이상 비활성)"""
+        from datetime import timedelta
+        cutoff_time = get_kst_now() - timedelta(hours=hours)
+        
+        expired_sessions = cls.query.filter(
+            cls.last_activity < cutoff_time,
+            cls.is_active == True
+        ).all()
+        
+        for session in expired_sessions:
+            session.is_active = False
+        
+        db.session.commit()
+        return len(expired_sessions)
+    
+    def to_dict(self):
+        """딕셔너리로 변환"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'session_id': self.session_id,
+            'ip_address': self.ip_address,
+            'user_agent': self.user_agent,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'last_activity': self.last_activity.isoformat() if self.last_activity else None,
+            'is_active': self.is_active
+        }
+    
+    def __repr__(self):
+        return f'<UserSession {self.session_id} for user {self.user_id}>'
+    
 # ============================================================================
 # 헬퍼 함수들
 # ============================================================================
