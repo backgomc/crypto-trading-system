@@ -39,7 +39,7 @@ def log_admin_event(level, category, message):
             message=message,
             ip_address=request.remote_addr,
             user_agent=request.headers.get('User-Agent', '')[:200],
-            timestamp=get_kst_now()
+            timestamp=to_kst_string()
         )
         db.session.add(log_entry)
         db.session.commit()
