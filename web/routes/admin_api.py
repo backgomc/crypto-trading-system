@@ -526,51 +526,43 @@ def get_recent_logs():
 @admin_required
 @handle_api_errors
 def cleanup_logs():
-    """시스템 로그 정리 (안전한 단계별 삭제)"""
+    """시스템 로그 정리 (SQL 직접 실행)"""
     try:
-        deleted_logs = 0
-        deleted_configs = 0
+        # 삭제할 개수 먼저 조회
+        logs_count = db.session.execute(db.text("SELECT COUNT(*) FROM system_logs")).scalar()
+        configs_count = db.session.execute(db.text("SELECT COUNT(*) FROM config_history")).scalar()
         
-        # SystemLog 단계별 삭제
-        while True:
-            logs_batch = SystemLog.query.limit(1000).all()
-            if not logs_batch:
-                break
-            
-            for log in logs_batch:
-                db.session.delete(log)
-                deleted_logs += 1
-            
-            db.session.commit()
+        # SQL로 직접 삭제
+        db.session.execute(db.text("DELETE FROM system_logs"))
+        db.session.execute(db.text("DELETE FROM config_history"))
         
-        # ConfigHistory 단계별 삭제
-        while True:
-            configs_batch = ConfigHistory.query.limit(1000).all()
-            if not configs_batch:
-                break
-            
-            for config in configs_batch:
-                db.session.delete(config)
-                deleted_configs += 1
-            
-            db.session.commit()
+        # 커밋
+        db.session.commit()
         
-        # 삭제 완료 로그
+        # 삭제 완료 로그 추가
         admin_username = session.get("username", "unknown")
-        log_admin_event('INFO', 'ADMIN', f'모든 로그 정리 완료: 로그 {deleted_logs}개, 설정이력 {deleted_configs}개 삭제 - 관리자: {admin_username}')
+        new_log = SystemLog(
+            level='INFO',
+            category='ADMIN',
+            message=f'모든 로그 정리 완료: 로그 {logs_count}개, 설정이력 {configs_count}개 삭제 - 관리자: {admin_username}',
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get('User-Agent', '')[:200]
+        )
+        db.session.add(new_log)
+        db.session.commit()
         
         return success_response(
             data={
-                'deleted_logs': deleted_logs,
-                'deleted_configs': deleted_configs
+                'deleted_logs': logs_count,
+                'deleted_configs': configs_count
             },
-            message=f'모든 로그 정리 완료: {deleted_logs}개 로그, {deleted_configs}개 설정 이력 삭제'
+            message=f'로그 정리 완료: {logs_count}개 로그, {configs_count}개 설정 이력 삭제'
         )
         
     except Exception as e:
         db.session.rollback()
         print(f"로그 정리 오류: {e}")
-        return error_response(f'로그 정리 중 오류가 발생했습니다: {str(e)}', 'DATABASE_ERROR', 500)
+        return error_response(f'로그 정리 실패: {str(e)}', 'DATABASE_ERROR', 500)
 
 @admin_api_bp.route('/api/admin/config/<int:config_id>', methods=['GET'])
 @admin_required
