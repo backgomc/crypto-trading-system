@@ -824,7 +824,7 @@ async function clearLogs() {
     }
     
     try {
-        const result = await apiCall('/api/admin/logs', 'DELETE');
+        const result = await apiCall('/api/admin/logs/cleanup', 'POST'); // 경로와 메서드 수정
         if (result && result.success) {
             showToast('success', result.message || '모든 로그가 삭제되었습니다.');
             await loadAllData();
