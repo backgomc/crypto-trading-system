@@ -21,6 +21,11 @@
     font-weight: 500;
 }
 
+.current-time i {
+    color: #667eea;
+    margin-right: 0.25rem;
+}
+
 /* 메인 카드 스타일 */
 .main-card {
     background-color: #1e1e1e;
