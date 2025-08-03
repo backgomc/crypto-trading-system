@@ -313,6 +313,11 @@ p, span, div {
        min-width: auto !important;
    }
 
+    /* 모바일에서 로그아웃 버튼 아이콘의 margin-right 제거 */
+    .logout-btn .bi-box-arrow-right {
+        margin-right: 0 !important;
+    }
+
    .logout-text {
        display: none !important; /* 모바일에서 텍스트 숨김 */
    }
