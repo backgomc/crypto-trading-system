@@ -497,6 +497,11 @@ def get_recent_logs():
                 'message': message,
                 'ip_address': log.ip_address
             })
+
+        # ✅ 여기에 추가: 자동 갱신이 아닌 경우에만 로그 남김
+        is_auto_refresh = request.headers.get('X-Auto-Refresh') == 'true'
+        if not is_auto_refresh:
+            log_admin_event('INFO', 'ADMIN', f'최근 로그 조회: {session.get("username")}')            
         
         return success_response(
             data={

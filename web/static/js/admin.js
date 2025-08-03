@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 10초마다 통계 자동 새로고침 (접속자 수, 사용자 접속 상태 실시간 반영)
     setInterval(loadStats, 10000);
     setInterval(loadUsers, 10000);
+    setInterval(() => loadRecentLogs(true, true), 10000);  // isAutoRefresh = true
 });
 
 // 현재 사용자 로그인 시간 갱신
@@ -86,7 +87,7 @@ async function loadAllData() {
 
 // 통계 데이터 로드
 async function loadStats() {
-    const result = await apiCall('/api/admin/stats');
+    const result = await apiCallAuto('/api/admin/stats');
     if (result && result.data) {
         displayStats(result.data);
     }
@@ -94,55 +95,91 @@ async function loadStats() {
 
 // 사용자 목록 로드
 async function loadUsers() {
-    const result = await apiCall('/api/admin/users');
+    const result = await apiCallAuto('/api/admin/users');
     if (result && result.data) {
         allUsers = result.data.users || result.data;
         displayUsers(allUsers);
     }
 }
 
-// 최근 로그 로드 (수정: 페이징 및 필터링 개선)
-async function loadRecentLogs(isFirstLoad = false) {
-   if (isLoadingLogs) return;
-   isLoadingLogs = true;
+// 자동 갱신용 API 호출 함수 (헤더로 구분)
+async function apiCallAuto(url, method = 'GET', data = null) {
+    try {
+        const options = {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Auto-Refresh': 'true'  // 자동 갱신 표시 헤더
+            },
+        };
+        
+        if (data) {
+            options.body = JSON.stringify(data);
+        }
+
+        const response = await fetch(url, options);
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || '요청 처리 중 오류가 발생했습니다.');
+        }
+
+        return result;
+        
+    } catch (error) {
+        console.error('자동 갱신 API 오류:', error);
+        return null;
+    }
+}
+
+// 최근 로그 로드 (자동 갱신 구분)
+async function loadRecentLogs(isFirstLoad = false, isAutoRefresh = false) {
+   if (isLoadingLogs && !isAutoRefresh) return;  // 자동 갱신은 로딩 중에도 허용
    
-   // 즉시 버튼 상태 업데이트
-   updateLoadMoreButton();
+   if (!isAutoRefresh) {
+       isLoadingLogs = true;
+       updateLoadMoreButton();
+   }
    
    try {
        const excludeAdmin = document.getElementById('excludeAdminLogs')?.checked || false;
        const page = isFirstLoad ? 1 : currentLogPage;
        
-       // URL 파라미터 구성
        const params = new URLSearchParams({
            page: page,
            per_page: logsPerPage,
            exclude_admin: excludeAdmin
        });
        
-       const result = await apiCall(`/api/admin/logs/recent?${params}`);
+       // 자동 갱신이면 자동 갱신용 API 사용
+       const result = isAutoRefresh 
+           ? await apiCallAuto(`/api/admin/logs/recent?${params}`)
+           : await apiCall(`/api/admin/logs/recent?${params}`);
        
        if (result && result.data) {
            const logs = result.data.logs || result.data;
            
-           if (isFirstLoad) {
+           if (isFirstLoad || isAutoRefresh) {
                currentLogPage = 1;
                displayRecentLogs(logs, true);
            } else {
                displayRecentLogs(logs, false);
            }
            
-           // 더보기 버튼 표시 여부 결정 (수정)
            hasMoreLogs = result.meta ? result.meta.has_next : logs.length >= logsPerPage;
            updateLogCount(result.meta ? result.meta.total : logs.length);
        }
    } catch (error) {
-       console.error('로그 로드 실패:', error);
-       showToast('error', '로그 로드에 실패했습니다.');
-       hasMoreLogs = false; // 에러 시 더보기 버튼 숨김
+       if (!isAutoRefresh) {  // 자동 갱신 에러는 조용히 처리
+           console.error('로그 로드 실패:', error);
+           showToast('error', '로그 로드에 실패했습니다.');
+       }
+       hasMoreLogs = false;
    } finally {
-       isLoadingLogs = false;
-       updateLoadMoreButton(); // finally에서 버튼 상태 업데이트
+       if (!isAutoRefresh) {
+           isLoadingLogs = false;
+           updateLoadMoreButton();
+       }
    }
 }
 
