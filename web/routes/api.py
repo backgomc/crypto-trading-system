@@ -505,7 +505,7 @@ def user_ping():
         print(f"Ping 오류: {e}")
         return api_error('ping 처리 중 오류가 발생했습니다', 'PING_ERROR', 500)
     
-@api_bp.route('/api/check-session', methods=['POST'])
+@api_bp.route('/check-session', methods=['POST'])
 def check_existing_session():
     """로그인 전 기존 세션 확인 (로그인 불필요)"""
     try:
