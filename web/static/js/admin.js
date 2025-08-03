@@ -532,6 +532,14 @@ async function refreshUsers() {
     console.log('사용자 목록 새로고침 실행');
     // 현재 사용자 활동 시간 먼저 갱신
     await updateCurrentUserLoginTime();    
+
+    // 수동 새로고침이므로 기존 apiCall 사용 (로그 남김)
+    const result = await apiCall('/api/admin/users');
+    if (result && result.data) {
+        allUsers = result.data.users || result.data;
+        displayUsers(allUsers);
+    }
+        
     await loadAllData();
     // 확인창 제거 - 조용히 새로고침
 }
@@ -676,7 +684,7 @@ async function loadMoreLogs() {
 async function refreshLogs() {
     try {
         currentLogPage = 1;
-        await loadRecentLogs(true);
+        await loadRecentLogs(true, false);
         // 확인창 제거 - 조용히 새로고침
     } catch (error) {
         console.error('로그 새로고침 실패:', error);

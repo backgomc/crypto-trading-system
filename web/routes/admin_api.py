@@ -117,7 +117,10 @@ def get_all_users():
         # 접속 상태 추가
         users_data = add_user_online_status(users_data)
         
-        log_admin_event('INFO', 'ADMIN', f'사용자 목록 조회: {session.get("username")}')
+        # ✅ 여기에 추가: 자동 갱신이 아닌 경우에만 로그 남김
+        is_auto_refresh = request.headers.get('X-Auto-Refresh') == 'true'
+        if not is_auto_refresh:
+            log_admin_event('INFO', 'ADMIN', f'사용자 목록 조회: {session.get("username")}')        
         
         return success_response(
             data={'users': users_data, 'total': len(users_data)},
@@ -434,6 +437,11 @@ def get_system_stats():
                 'uptime': 'N/A'  # TODO: 시스템 가동시간 조회
             }
         }
+
+        # ✅ 여기에 추가: 자동 갱신이 아닌 경우에만 로그 남김
+        is_auto_refresh = request.headers.get('X-Auto-Refresh') == 'true'
+        if not is_auto_refresh:
+            log_admin_event('INFO', 'ADMIN', f'시스템 통계 조회: {session.get("username")}')
         
         return success_response(
             data=stats,
