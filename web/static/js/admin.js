@@ -311,9 +311,6 @@ function formatKoreanDateTime(dateString) {
     try {
         const date = new Date(dateString);
         
-        // UTC 시간을 한국시간(UTC+9)으로 변환
-        const koreanDate = new Date(date.getTime() + (9 * 60 * 60 * 1000));
-        
         // 대시보드와 동일한 형식으로 표시
         return koreanDate.toLocaleString('ko-KR', {
             year: 'numeric',
