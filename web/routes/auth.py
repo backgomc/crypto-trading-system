@@ -101,8 +101,11 @@ def login():
             
             # 신규 사용자 설정 초기화 체크
             try:
-                from api.utils import init_user_config_if_needed
-                init_user_config_if_needed(user.id)
+                from config.models import init_user_config, get_user_full_config
+                # 기존 설정이 있는지 확인
+                existing_config = get_user_full_config(user.id)
+                if not existing_config or len(existing_config) == 0:
+                    init_user_config(user.id)
             except Exception as e:
                 print(f"사용자 설정 체크 오류: {e}")
             
