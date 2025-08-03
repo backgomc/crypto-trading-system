@@ -355,6 +355,7 @@ p, span, div {
    
    .mobile-menu-btn {
        display: block;
+       font-size: 1.5rem !important; /* 크기 증가 */
    }
 }
 
