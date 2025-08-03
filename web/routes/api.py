@@ -520,6 +520,10 @@ def check_existing_session():
         if not user:
             return api_success(data={'has_active_session': False})
         
+        # ✅ 관리자는 항상 로그인 허용
+        if user.is_admin:
+            return api_success(data={'has_active_session': False})        
+        
         # 활성 세션 확인
         from config.models import UserSession
         active_sessions = UserSession.query.filter_by(user_id=user.id, is_active=True).count()

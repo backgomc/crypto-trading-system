@@ -54,14 +54,18 @@ def login():
        user = User.query.filter_by(username=username).first()
        
        if user and user.check_password(password) and user.is_active:
-           # 기존 세션 무효화
-           invalidated_count = UserSession.invalidate_user_sessions(user.id)
-           
-           if invalidated_count > 0:
-               if force_login:
-                   log_system_event('INFO', 'LOGIN', f'강제 로그인: {username} - {invalidated_count}개 기존 세션 무효화')
-               else:
-                   log_system_event('INFO', 'LOGIN', f'중복 로그인 감지: {username} - {invalidated_count}개 기존 세션 무효화')
+           # ✅ 관리자가 아닌 경우에만 기존 세션 무효화
+           if not user.is_admin:
+               invalidated_count = UserSession.invalidate_user_sessions(user.id)
+               
+               if invalidated_count > 0:
+                   if force_login:
+                       log_system_event('INFO', 'LOGIN', f'강제 로그인: {username} - {invalidated_count}개 기존 세션 무효화')
+                   else:
+                       log_system_event('INFO', 'LOGIN', f'중복 로그인 감지: {username} - {invalidated_count}개 기존 세션 무효화')
+           else:
+               # 관리자는 중복 로그인 허용 로그
+               log_system_event('INFO', 'LOGIN', f'관리자 로그인: {username} - 중복 세션 허용')
            
            # 새 세션 생성
            new_session_id = secrets.token_hex(32)

@@ -75,6 +75,14 @@ def create_app():
         # 로그인된 사용자만 검사
         if session.get('logged_in'):
             session_id = session.get('session_id')
+
+            # ✅ 관리자는 세션 검증 완화
+            if session.get('is_admin'):
+                # 관리자는 DB 세션이 없어도 허용 (단, 활동 시간은 업데이트)
+                if session_id:
+                    UserSession.update_activity(session_id)
+                return
+                    
             if session_id:
                 # DB에서 세션 확인
                 db_session = UserSession.get_active_session(session_id)
