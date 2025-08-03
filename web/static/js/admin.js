@@ -553,11 +553,9 @@ function filterLogs() {
     const logRows = document.querySelectorAll('#logsTable tbody tr');
     
     logRows.forEach(row => {
-        const categoryCell = row.cells[1];
-        if (!categoryCell) return;
-        
-        const category = categoryCell.textContent.trim();
-        const isAdminLog = category === 'ADMIN' || category === 'LOGIN';
+        const message = row.cells[2]?.textContent || '';
+        // 관리자 계정명 "nah3207"로 필터링
+        const isAdminLog = message.includes('nah3207');
         
         if (excludeAdmin && isAdminLog) {
             row.style.display = 'none';
