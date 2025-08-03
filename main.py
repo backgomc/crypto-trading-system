@@ -63,9 +63,9 @@ def create_app():
         from flask import request, session, redirect, url_for
         from config.models import UserSession
         
-        # 제외할 경로들
-        excluded_paths = ['/login', '/logout', '/static/', '/health']
-        excluded_endpoints = ['auth.login', 'auth.logout', 'static', 'health_check']
+        # 제외할 경로들 (✅ /api/ 경로 추가)
+        excluded_paths = ['/login', '/logout', '/static/', '/health', '/api/check-session']
+        excluded_endpoints = ['auth.login', 'auth.logout', 'static', 'health_check', 'api.check_existing_session']
         
         # 제외 경로 체크
         if (request.endpoint in excluded_endpoints or 
@@ -79,16 +79,28 @@ def create_app():
                 # DB에서 세션 확인
                 db_session = UserSession.get_active_session(session_id)
                 if not db_session:
-                    # ✅ 세션이 무효하면 팝업 URL로 리다이렉트
+                    # ✅ 세션이 무효하면 클리어하고 리다이렉트
                     session.clear()
-                    return redirect(url_for('auth.login', popup='session_expired'))
+                    
+                    # AJAX 요청인지 확인
+                    if request.headers.get('Content-Type') == 'application/json':
+                        # JSON 응답으로 401 에러 반환
+                        from flask import jsonify
+                        return jsonify({
+                            'success': False,
+                            'error': '세션이 만료되었습니다',
+                            'code': 'SESSION_EXPIRED'
+                        }), 401
+                    else:
+                        # 일반 요청은 로그인 페이지로 리다이렉트
+                        return redirect(url_for('auth.login', popup='session_expired'))
                 else:
                     # 세션 활동 시간 업데이트
                     UserSession.update_activity(session_id)
             else:
                 # session_id가 없으면 로그아웃
                 session.clear()
-                return redirect(url_for('auth.login', popup='session_invalid'))  
+                return redirect(url_for('auth.login', popup='session_invalid'))
     
     # 애플리케이션 컨텍스트에서 DB 초기화
     with app.app_context():

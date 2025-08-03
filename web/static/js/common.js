@@ -20,16 +20,30 @@ async function apiCall(url, method = 'GET', data = null) {
 
         const response = await fetch(url, options);
         
-        // ✅ 401 에러 체크 추가
+        // ✅ 401 에러 처리 개선
         if (response.status === 401) {
-            const result = await response.json().catch(() => ({}));
-            if (result.code === 'AUTH_REQUIRED' || result.code === 'SESSION_EXPIRED') {
+            // HTML 응답일 수도 있으므로 안전하게 처리
+            try {
+                const result = await response.json();
+                if (result.code === 'AUTH_REQUIRED' || result.code === 'SESSION_EXPIRED') {
+                    showSessionExpiredModal();
+                    return;
+                }
+            } catch (jsonError) {
+                // JSON 파싱 실패 시에도 세션 만료로 처리
                 showSessionExpiredModal();
                 return;
             }
         }
         
-        const result = await response.json();
+        // ✅ JSON 응답 안전하게 파싱
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            // JSON이 아닌 응답(HTML 등)인 경우
+            throw new Error(`서버 응답 형식 오류 (HTTP ${response.status})`);
+        }
 
         if (!response.ok) {
             throw new Error(result.error || `HTTP ${response.status}: 요청 처리 중 오류가 발생했습니다.`);
