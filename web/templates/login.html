@@ -130,19 +130,6 @@
             }, 500); // 0.5초 후 표시
         });
         {% endif %}
-
-        // 계정 비활성화 모달 함수 추가
-        function showAccountDisabledModal() {
-            const modal = new bootstrap.Modal(document.getElementById('accountDisabledModal'), {
-                backdrop: 'static',
-                keyboard: false
-            });
-            modal.show();
-        }
-
-        function handleAccountDisabled() {
-            window.location.href = '/login';
-        }
     </script>
     <div class="container">
         <div class="login-container">
@@ -398,6 +385,20 @@
         function handleSessionExpired() {
             window.location.href = '/login';
         }
+
+
+        // 계정 비활성화 모달 함수 추가
+        function showAccountDisabledModal() {
+            const modal = new bootstrap.Modal(document.getElementById('accountDisabledModal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+        }
+
+        function handleAccountDisabled() {
+            window.location.href = '/login';
+        }        
 
         // ✅ 세션 관리 모달 함수들 추가
         function showDuplicateLoginModal() {
