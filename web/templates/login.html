@@ -115,20 +115,35 @@
     </style>
 </head>
 <body>
-    <!-- ✅ 팝업이 필요한 경우 자동 표시 -->
-    {% if show_popup %}
     <script>
+        // ✅ 팝업이 필요한 경우 자동 표시 (기존 코드 수정)
+        {% if show_popup %}
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(function() {
                 {% if popup_type == 'session_expired' %}
                 showSessionExpiredModal();
                 {% elif popup_type == 'session_invalid' %}
                 showSessionExpiredModal();
+                {% elif popup_type == 'account_disabled' %}
+                showAccountDisabledModal();
                 {% endif %}
             }, 500); // 0.5초 후 표시
         });
+        {% endif %}
+
+        // 계정 비활성화 모달 함수 추가
+        function showAccountDisabledModal() {
+            const modal = new bootstrap.Modal(document.getElementById('accountDisabledModal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
+        }
+
+        function handleAccountDisabled() {
+            window.location.href = '/login';
+        }
     </script>
-    {% endif %}    
     <div class="container">
         <div class="login-container">
             <div class="login-card">
@@ -251,6 +266,27 @@
                         <i class="bi bi-x-lg me-1"></i>취소
                     </button>
                     <button type="button" class="btn btn-danger" onclick="confirmLogin()">
+                        <i class="bi bi-check-lg me-1"></i>확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ 계정 비활성화 모달 추가 -->
+    <div class="modal fade" id="accountDisabledModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-warning">
+                        <i class="bi bi-exclamation-triangle me-2"></i>계정 비활성화
+                    </h5>
+                </div>
+                <div class="modal-body text-light">
+                    <p class="mb-0">관리자에 의해 계정이 비활성화되었습니다.</p>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-primary" onclick="handleAccountDisabled()">
                         <i class="bi bi-check-lg me-1"></i>확인
                     </button>
                 </div>

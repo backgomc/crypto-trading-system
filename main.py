@@ -82,7 +82,26 @@ def create_app():
                 if session_id:
                     UserSession.update_activity(session_id)
                 return
-                    
+            
+            # 추가: 사용자의 계정 활성화 상태 확인
+            user = User.query.get(session.get('user_id'))
+            if user and not user.is_active:
+                # 계정이 비활성화된 경우
+                session.clear()
+                
+                # AJAX 요청인지 확인
+                if request.headers.get('Content-Type') == 'application/json':
+                    # JSON 응답으로 401 에러 반환
+                    from flask import jsonify
+                    return jsonify({
+                        'success': False,
+                        'error': '계정이 비활성화되었습니다',
+                        'code': 'ACCOUNT_DISABLED'
+                    }), 401
+                else:
+                    # 일반 요청은 로그인 페이지로 리다이렉트
+                    return redirect(url_for('auth.login', popup='account_disabled'))
+                        
             if session_id:
                 # DB에서 세션 확인
                 db_session = UserSession.get_active_session(session_id)

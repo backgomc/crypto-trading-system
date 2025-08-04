@@ -121,7 +121,7 @@ def login():
         else:
             # 로그인 실패
             if user and not user.is_active:
-                error_msg = '비활성화된 계정입니다.\n관리자에게 문의하세요.'
+                error_msg = '비활성화된 계정입니다. 관리자에게 문의하세요.'
                 log_system_event('WARNING', 'LOGIN', f'로그인 실패: 비활성 계정 - {username}')
             else:
                 error_msg = '잘못된 사용자명 또는 비밀번호입니다.'
