@@ -7,7 +7,7 @@ import os
 from flask import Flask, session
 from datetime import timedelta
 from config.settings import load_trading_config, SECRET_KEY
-from config.models import db, User, SystemLog
+from config.models import db, User, SystemLog, get_kst_now
 
 def create_app():
     """Flask 앱 생성"""
