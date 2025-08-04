@@ -258,12 +258,12 @@
 }
 
 /* 관리자 제외 체크박스 크기 키우기 */
-.form-check-input {
+/* .form-check-input {
     width: 1.3em !important;
     height: 1.3em !important;
     margin-top: 0 !important;
     background-color: #2d2d2d;
-    border-color: #444444;
+    border-color: #444444; */
 }
 
 /* .form-check-input:checked {
@@ -271,9 +271,9 @@
     border-color: #667eea;
 } */
 
-.form-check-input:focus {
+/* .form-check-input:focus {
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
+} */
 
 .form-check-label {
     color: #ffffff;
