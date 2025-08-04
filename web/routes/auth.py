@@ -33,7 +33,7 @@ def login():
     # 이미 로그인된 경우 처리
     if session.get('logged_in') and not show_popup:
         session_id = session.get('session_id')
-        if session_id and UserSession.get_active_session(session_id):  # ✅ 중복 import 제거
+        if session_id and UserSession.get_active_session(session_id):
             return redirect(url_for('pages.dashboard'))
         # 세션이 무효하면 클리어만 하고 로그인 페이지 표시
         session.clear()
@@ -90,18 +90,15 @@ def login():
             session['is_admin'] = user.is_admin
             session['session_id'] = new_session_id
             session['login_time'] = datetime.utcnow().isoformat()
-            session['remember_me'] = remember_me
             
             # 로그인 시간 업데이트
             user.update_last_login()
             
             # 세션 유지 시간 설정
             if remember_me:
-                session.permanent_session_lifetime = timedelta(days=7)
-                log_system_event('INFO', 'LOGIN', f'로그인 상태 유지: {username} (7일, 활동시 갱신)')
+                session.permanent_session_lifetime = timedelta(days=30)
             else:
-                session.permanent_session_lifetime = timedelta(hours=4)
-                log_system_event('INFO', 'LOGIN', f'일반 로그인: {username} (4시간, 절대 만료)')
+                session.permanent_session_lifetime = timedelta(hours=8)
             
             # 로그인 성공 로그
             log_system_event('INFO', 'LOGIN', f'로그인 성공: {username}')

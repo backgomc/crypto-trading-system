@@ -60,15 +60,12 @@ def create_app():
     @app.before_request
     def check_session_validity():
         """모든 요청 전에 세션 유효성 검사"""
-        from flask import request, session, redirect, url_for, jsonify
+        from flask import request, session, redirect, url_for
         from config.models import UserSession
         
-        # 제외할 경로들
+        # 제외할 경로들 (✅ /api/ 경로 추가)
         excluded_paths = ['/login', '/logout', '/static/', '/health', '/api/check-session']
         excluded_endpoints = ['auth.login', 'auth.logout', 'static', 'health_check', 'api.check_existing_session']
-        
-        # ✅ ping 요청 확인
-        is_ping_request = request.endpoint == 'api.user_ping' or request.path == '/api/ping'
         
         # 제외 경로 체크
         if (request.endpoint in excluded_endpoints or 
@@ -78,12 +75,11 @@ def create_app():
         # 로그인된 사용자만 검사
         if session.get('logged_in'):
             session_id = session.get('session_id')
-            remember_me = session.get('remember_me', False)  # ✅ 로그인 모드 확인
-            
+
             # ✅ 관리자는 세션 검증 완화
             if session.get('is_admin'):
                 # 관리자는 DB 세션이 없어도 허용 (단, 활동 시간은 업데이트)
-                if session_id and not is_ping_request:
+                if session_id:
                     UserSession.update_activity(session_id)
                 return
                     
@@ -91,12 +87,13 @@ def create_app():
                 # DB에서 세션 확인
                 db_session = UserSession.get_active_session(session_id)
                 if not db_session:
-                    # 세션이 무효하면 클리어하고 리다이렉트
+                    # ✅ 세션이 무효하면 클리어하고 리다이렉트
                     session.clear()
                     
                     # AJAX 요청인지 확인
                     if request.headers.get('Content-Type') == 'application/json':
                         # JSON 응답으로 401 에러 반환
+                        from flask import jsonify
                         return jsonify({
                             'success': False,
                             'error': '세션이 만료되었습니다',
@@ -106,17 +103,12 @@ def create_app():
                         # 일반 요청은 로그인 페이지로 리다이렉트
                         return redirect(url_for('auth.login', popup='session_expired'))
                 else:
-                    # ✅ 조건부 세션 갱신
-                    if not is_ping_request:  # ping이 아니고
-                        if remember_me:      # 로그인 유지 모드일 때만
-                            UserSession.update_activity(session_id)
-                            # print(f"🔄 세션 갱신: {session.get('username')} (로그인 유지 모드)")
-                        # else:
-                       # print(f"⏰ 세션 갱신 안함: {session.get('username')} (일반 로그인 모드)")
-        else:
-            # session_id가 없으면 로그아웃
-            session.clear()
-            return redirect(url_for('auth.login', popup='session_invalid'))
+                    # 세션 활동 시간 업데이트
+                    UserSession.update_activity(session_id)
+            else:
+                # session_id가 없으면 로그아웃
+                session.clear()
+                return redirect(url_for('auth.login', popup='session_invalid'))
     
     # 애플리케이션 컨텍스트에서 DB 초기화
     with app.app_context():
