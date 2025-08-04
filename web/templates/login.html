@@ -125,6 +125,7 @@
                 {% elif popup_type == 'session_invalid' %}
                 showSessionExpiredModal();
                 {% elif popup_type == 'account_disabled' %}
+                console.log('Account disabled popup triggered'); // 디버깅용
                 showAccountDisabledModal();
                 {% endif %}
             }, 500); // 0.5초 후 표시
