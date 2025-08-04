@@ -5,7 +5,7 @@ from flask import Blueprint, request, session, jsonify
 from functools import wraps
 from datetime import datetime, timedelta
 import pytz, re
-from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db, get_kst_now, to_kst_string, format_kst_string
+from config.models import User, UserConfig, SystemLog, ConfigHistory, TradingState, db, get_kst_now, to_kst_string, format_kst_string, UserSession
 from api.utils import (
     error_response, success_response, 
     validate_request_data, handle_api_errors,
@@ -47,13 +47,17 @@ def log_admin_event(level, category, message):
         print(f"관리자 로그 저장 실패: {e}")
 
 def get_online_users():
-    try:       
-        # 1분 이내 로그인한 사용자를 접속중으로 간주 (더 짧게)
+    try:
+        # 1분 이내 last_active와 활성 세션이 있는 사용자를 접속중으로 간주
         one_minute_ago = get_kst_now() - timedelta(minutes=1)
-        online_count = User.query.filter(
-            User.is_active == True,
-            User.last_active >= one_minute_ago  # last_active로 변경
-        ).count()
+        online_count = db.session.query(User)\
+            .join(UserSession, User.id == UserSession.user_id)\
+            .filter(
+                User.is_active == True,
+                User.last_active >= one_minute_ago,
+                UserSession.is_active == True,
+                UserSession.last_ping >= one_minute_ago
+            ).distinct().count()
         return online_count
     except Exception as e:
         print(f"접속자 수 계산 오류: {e}")
@@ -73,16 +77,22 @@ def add_user_online_status(users):
                 user['is_online'] = True
                 continue
             
-            # 다른 사용자들은 DB에서 직접 조회해서 판단
-            try:
-                db_user = User.query.get(user_id)
-                if db_user and db_user.last_active:
-                    user['is_online'] = db_user.last_active >= one_minute_ago
-                else:
-                    user['is_online'] = False
-            except Exception as e:
-                print(f"사용자 {user_id} 접속 상태 확인 오류: {e}")
-                user['is_online'] = False
+            # 활성 세션과 last_active를 함께 확인
+            active_sessions = UserSession.query.filter(
+                UserSession.user_id == user_id,
+                UserSession.is_active == True,
+                UserSession.last_ping >= one_minute_ago
+            ).count()
+            
+            db_user = User.query.get(user_id)
+            
+            user['is_online'] = (
+                active_sessions > 0 and 
+                db_user and 
+                db_user.is_active and 
+                db_user.last_active and 
+                db_user.last_active >= one_minute_ago
+            )
         
         return users
     except Exception as e:
@@ -290,7 +300,6 @@ def update_user(user_id):
 
         # ✅ 여기에 추가: 비활성화 시 강제 로그아웃
         if 'is_active' in data and not validate_boolean(data['is_active'])[0]:
-            from config.models import UserSession
             invalidated_count = UserSession.invalidate_user_sessions(target_user.id)
             if invalidated_count > 0:
                 log_admin_event('INFO', 'ADMIN', f'사용자 비활성화로 인한 강제 로그아웃: {target_user.username} - {invalidated_count}개 세션 무효화')        
