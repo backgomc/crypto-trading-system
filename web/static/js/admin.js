@@ -212,6 +212,8 @@ function displayUsers(users) {
     const tbody = document.querySelector('#usersTable tbody');
     if (!tbody) return;
     
+    const currentUsername = document.body.dataset.currentUser;
+    
     if (users.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">사용자 데이터가 없습니다.</td></tr>';
         return;
@@ -221,7 +223,7 @@ function displayUsers(users) {
         <tr>
             <td>
                 <strong>${user.username}</strong>
-                ${user.id === parseInt(document.body.dataset.currentUserId) ? '<span class="badge bg-info ms-1">나</span>' : ''}
+                ${user.username === currentUsername ? '<span class="badge bg-info ms-1">나</span>' : ''}
                 ${user.email ? `<br><small class="text-muted">${user.email}</small>` : ''}
             </td>
             <td>
@@ -244,7 +246,7 @@ function displayUsers(users) {
                 <small class="text-muted">${user.created_at || '없음'}</small>
             </td>
             <td>
-                <small class="text-muted">${user.last_login || '없음'}</small>
+                <small class="text-muted">${user.last_login || '로그인 기록 없음'}</small>
             </td>
             <td class="text-center">
                 <div class="btn-group btn-group-sm">
@@ -254,7 +256,7 @@ function displayUsers(users) {
                     <button class="btn btn-outline-warning" onclick="resetPassword(${user.id}, '${user.username}')" title="비밀번호 리셋">
                         <i class="bi bi-key"></i>
                     </button>
-                    ${(user.id !== parseInt(document.body.dataset.currentUserId) && !user.is_admin) ? `
+                    ${(user.username !== currentUsername && !user.is_admin) ? `
                     <button class="btn btn-outline-danger" onclick="deleteUser(${user.id}, '${user.username}')" title="삭제">
                         <i class="bi bi-trash"></i>
                     </button>
