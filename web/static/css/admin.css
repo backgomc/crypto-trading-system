@@ -210,6 +210,12 @@
     font-weight: 600;
 }
 
+/* 상태 배지 색상 변경 */
+.badge.bg-secondary {  /* 비활성 상태의 배지 */
+    background-color: #dc3545 !important;  /* 붉은색으로 변경 */
+    color: #ffffff !important;
+}
+
 /* 설정 변경 이력 */
 .config-history {
     max-height: 400px;
@@ -257,23 +263,6 @@
     padding: 8px 12px;
 }
 
-/* 관리자 제외 체크박스 크기 키우기 */
-/* .form-check-input {
-    width: 1.3em !important;
-    height: 1.3em !important;
-    margin-top: 0 !important;
-    background-color: #2d2d2d;
-    border-color: #444444; */
-}
-
-/* .form-check-input:checked {
-    background-color: #667eea;
-    border-color: #667eea;
-} */
-
-/* .form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-} */
 
 .form-check-label {
     color: #ffffff;
