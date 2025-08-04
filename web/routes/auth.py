@@ -28,7 +28,7 @@ def login():
     """로그인 페이지"""
     # 팝업 파라미터 확인
     popup_type = request.args.get('popup')
-    show_popup = popup_type in ['session_expired', 'session_invalid']
+    show_popup = popup_type in ['session_expired', 'session_invalid', 'account_disabled']
     
     # 이미 로그인된 경우 처리
     if session.get('logged_in') and not show_popup:
