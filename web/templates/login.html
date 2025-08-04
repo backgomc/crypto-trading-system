@@ -119,40 +119,12 @@
         // ✅ 팝업이 필요한 경우 자동 표시 (기존 코드 수정)
         {% if show_popup %}
         document.addEventListener('DOMContentLoaded', function() {
-                    // 서버에서 전달된 팝업 정보 확인
-            const showPopup = {{ 'true' if show_popup else 'false' }};
-            const popupType = "{{ popup_type or '' }}";
-
-            console.log('Show Popup:', showPopup);
-            console.log('Popup Type:', popupType);
-
-            // 브라우저 콘솔에 직접 로그 출력
-            window.alert('팝업 디버그: ' + popupType);
-
-            // 팝업 조건 명시적으로 확인
-            if (showPopup) {
-                if (popupType === 'account_disabled') {
-                    window.alert('계정 비활성화 팝업');
-                    try {
-                        const modal = new bootstrap.Modal(document.getElementById('accountDisabledModal'), {
-                            backdrop: 'static',
-                            keyboard: false
-                        });
-                        modal.show();
-                    } catch (error) {
-                        console.error('모달 표시 오류:', error);
-                        window.alert('모달 표시 오류: ' + error.message);
-                    }
-                }
-            }
-
             setTimeout(function() {
                 {% if popup_type == 'session_expired' %}
                 showSessionExpiredModal();
                 {% elif popup_type == 'session_invalid' %}
                 showSessionExpiredModal();
                 {% elif popup_type == 'account_disabled' %}
-                console.log('Account disabled popup triggered'); // 디버깅용
                 showAccountDisabledModal();
                 {% endif %}
             }, 500); // 0.5초 후 표시
