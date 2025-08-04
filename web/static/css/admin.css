@@ -210,12 +210,6 @@
     font-weight: 600;
 }
 
-/* 상태 배지 색상 변경 */
-.badge.bg-secondary.user-inactive {
-    background-color: #dc3545 !important;  /* 붉은색으로 변경 */
-    color: #ffffff !important;
-}
-
 /* 설정 변경 이력 */
 .config-history {
     max-height: 400px;
