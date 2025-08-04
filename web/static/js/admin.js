@@ -52,23 +52,31 @@ async function updateCurrentUserLoginTime() {
     }
 }
 
-// 현재 사용자 ID 가져오기 (수정)
+// 현재 사용자 ID 가져오기 (개선된 버전)
 async function getCurrentUserId() {
     try {
         const response = await fetch('/api/status');
         const result = await response.json();
         
-        if (result.user_id) {
+        if (result && result.user_id) {
             currentUserId = parseInt(result.user_id);
-            currentUsername = result.username;
+            currentUsername = result.username || null;
         } else {
             currentUserId = null;
-            currentUsername = document.body.dataset.username || null;
+            currentUsername = null;
         }
-
-        console.log('현재 사용자 username:', currentUsername);
+        
+        console.log('현재 사용자 정보:', {
+            userId: currentUserId,
+            username: currentUsername
+        });
+        
+        return currentUserId;
     } catch (error) {
         console.error('현재 사용자 조회 실패:', error);
+        currentUserId = null;
+        currentUsername = null;
+        return null;
     }
 }
 
@@ -209,23 +217,15 @@ function displayUsers(users) {
         return;
     }
     
-    tbody.innerHTML = users.map(user => {
-        const isOnline = user.is_online || false;
-        const lastLoginText = user.last_login || '로그인 기록 없음';
-        const createdAtText = user.created_at || '없음';
-        
-        // 정확한 타입 비교
-        const isCurrentUser = user.username === currentUsername;
-        
-        return `
+    tbody.innerHTML = users.map(user => `
         <tr>
             <td>
                 <strong>${user.username}</strong>
-                ${isCurrentUser ? '<span class="badge bg-info ms-1">나</span>' : ''}
+                ${user.id === parseInt(document.body.dataset.currentUserId) ? '<span class="badge bg-info ms-1">나</span>' : ''}
                 ${user.email ? `<br><small class="text-muted">${user.email}</small>` : ''}
             </td>
             <td>
-                <span class="badge ${user.is_active ? 'bg-success' : 'bg-secondary'}">
+                <span class="badge ${user.is_active ? 'bg-success' : 'bg-danger'}">
                     ${user.is_active ? '활성' : '비활성'}
                 </span>
             </td>
@@ -235,16 +235,16 @@ function displayUsers(users) {
                 </span>
             </td>
             <td>
-                <span class="badge ${isOnline ? 'bg-success' : 'bg-secondary'}">
+                <span class="badge ${user.is_online ? 'bg-success' : 'bg-secondary'}">
                     <i class="bi bi-circle-fill me-1" style="font-size: 0.6rem;"></i>
-                    ${isOnline ? '접속중' : '오프라인'}
+                    ${user.is_online ? '접속중' : '오프라인'}
                 </span>
             </td>
             <td>
-                <small class="text-muted">${createdAtText}</small>
+                <small class="text-muted">${user.created_at || '없음'}</small>
             </td>
             <td>
-                <small class="text-muted">${lastLoginText}</small>
+                <small class="text-muted">${user.last_login || '없음'}</small>
             </td>
             <td class="text-center">
                 <div class="btn-group btn-group-sm">
@@ -254,7 +254,7 @@ function displayUsers(users) {
                     <button class="btn btn-outline-warning" onclick="resetPassword(${user.id}, '${user.username}')" title="비밀번호 리셋">
                         <i class="bi bi-key"></i>
                     </button>
-                    ${(!isCurrentUser && !user.is_admin) ? `
+                    ${(user.id !== parseInt(document.body.dataset.currentUserId) && !user.is_admin) ? `
                     <button class="btn btn-outline-danger" onclick="deleteUser(${user.id}, '${user.username}')" title="삭제">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -262,8 +262,7 @@ function displayUsers(users) {
                 </div>
             </td>
         </tr>
-        `;
-    }).join('');
+    `).join('');
 }
 
 // 최근 로그 표시 (수정: 더보기 기능 개선)
