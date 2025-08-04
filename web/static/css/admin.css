@@ -211,7 +211,6 @@
 }
 
 /* 비활성 사용자 배지 색상 설정 */
-.stats-card h3.text-danger,
 .badge.bg-danger {
     background-color: #dc3545 !important;
     color: #ffffff !important;
