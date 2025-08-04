@@ -3,7 +3,7 @@
 
 from flask import Blueprint, render_template, request, session, redirect, url_for
 from datetime import datetime, timedelta
-from config.models import User, SystemLog, UserSession, db
+from config.models import User, SystemLog, UserSession, db, get_kst_now
 import secrets
 
 auth_bp = Blueprint('auth', __name__)
@@ -89,7 +89,8 @@ def login():
             session['username'] = user.username
             session['is_admin'] = user.is_admin
             session['session_id'] = new_session_id
-            session['login_time'] = datetime.utcnow().isoformat()
+            #session['login_time'] = datetime.utcnow().isoformat()
+            session['login_time'] = get_kst_now().isoformat()
             
             # 로그인 시간 업데이트
             user.update_last_login()
