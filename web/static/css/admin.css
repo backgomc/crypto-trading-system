@@ -211,7 +211,7 @@
 }
 
 /* 상태 배지 색상 변경 */
-.badge.bg-secondary {  /* 비활성 상태의 배지 */
+.badge.bg-secondary[data-status="inactive"] {
     background-color: #dc3545 !important;  /* 붉은색으로 변경 */
     color: #ffffff !important;
 }
