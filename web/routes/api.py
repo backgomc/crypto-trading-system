@@ -496,8 +496,7 @@ def user_ping():
             data={
                 'user_id': user_id,
                 'username': user.username,
-                'last_active': user.last_active.isoformat() if user.last_active else None,
-                'login_time': session.get('login_time')  # 로그인 시간 함께 반환
+                'last_active': user.last_active.isoformat() if user.last_active else None
             },
             message='ping 성공'
         )

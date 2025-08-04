@@ -7,7 +7,7 @@ import os
 from flask import Flask, session
 from datetime import timedelta
 from config.settings import load_trading_config, SECRET_KEY
-from config.models import db, User, SystemLog, get_kst_now
+from config.models import db, User, SystemLog
 
 def create_app():
     """Flask 앱 생성"""
@@ -62,9 +62,8 @@ def create_app():
         """모든 요청 전에 세션 유효성 검사"""
         from flask import request, session, redirect, url_for
         from config.models import UserSession
-        from datetime import datetime, timedelta
         
-        # 제외할 경로들
+        # 제외할 경로들 (✅ /api/ 경로 추가)
         excluded_paths = ['/login', '/logout', '/static/', '/health', '/api/check-session']
         excluded_endpoints = ['auth.login', 'auth.logout', 'static', 'health_check', 'api.check_existing_session']
         
@@ -76,55 +75,7 @@ def create_app():
         # 로그인된 사용자만 검사
         if session.get('logged_in'):
             session_id = session.get('session_id')
-            remember_me = session.get('remember_me', False)
 
-            # 로그인 시간 디버깅 로그 추가
-            login_time_str = session.get('login_time')
-            print(f"Debug - Login Time: {login_time_str}")            
-            
-            # ✅ 세션 만료 시간 계산
-            current_time = get_kst_now()
-            try:
-                # login_time이 문자열인 경우 datetime으로 변환
-                if isinstance(login_time_str, str):
-                    login_time = datetime.fromisoformat(login_time_str)
-                else:
-                    # 만약 datetime 객체라면 그대로 사용
-                    login_time = login_time_str
-                
-                # 세션 만료 기준 설정
-                if remember_me:
-                    # 로그인 유지: 7일
-                    session_expiry = timedelta(days=7)
-                else:
-                    # 일반 로그인: 4시간
-                    session_expiry = timedelta(hours=4)
-                
-                # 세션 만료 여부 확인
-                if current_time - login_time > session_expiry:
-                    # 세션 만료 처리
-                    print(f"Debug - Session Expired: Current Time {current_time}, Login Time {login_time}")
-                    session.clear()
-                    
-                    # AJAX 요청인지 확인
-                    if request.headers.get('Content-Type') == 'application/json':
-                        # JSON 응답으로 401 에러 반환
-                        from flask import jsonify
-                        return jsonify({
-                            'success': False,
-                            'error': '세션이 만료되었습니다',
-                            'code': 'SESSION_EXPIRED'
-                        }), 401
-                    else:
-                        # 일반 요청은 로그인 페이지로 리다이렉트
-                        return redirect(url_for('auth.login', popup='session_expired'))
-            
-            except Exception as e:
-                # 예외 발생 시 로그인 상태 초기화
-                print(f"Debug - Login Time Parsing Error: {e}")
-                session.clear()
-                return redirect(url_for('auth.login', popup='session_expired'))
-            
             # ✅ 관리자는 세션 검증 완화
             if session.get('is_admin'):
                 # 관리자는 DB 세션이 없어도 허용 (단, 활동 시간은 업데이트)
@@ -136,7 +87,7 @@ def create_app():
                 # DB에서 세션 확인
                 db_session = UserSession.get_active_session(session_id)
                 if not db_session:
-                    # 세션이 무효하면 클리어하고 리다이렉트
+                    # ✅ 세션이 무효하면 클리어하고 리다이렉트
                     session.clear()
                     
                     # AJAX 요청인지 확인
