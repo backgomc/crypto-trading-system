@@ -112,6 +112,79 @@
         .btn-login:disabled {
             opacity: 0.7;
         }
+
+        /* 플로팅 카카오톡 버튼 */
+        .floating-kakao {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #FEE500 0%, #FFEB3B 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(254, 229, 0, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .floating-kakao:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(254, 229, 0, 0.6);
+            background: linear-gradient(135deg, #FFD600 0%, #FFC107 100%);
+            text-decoration: none;
+        }
+
+        .floating-kakao i {
+            font-size: 28px;
+            color: #3C1E1E;
+        }
+
+        .floating-kakao .tooltip-text {
+            position: absolute;
+            right: 70px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .floating-kakao:hover .tooltip-text {
+            opacity: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .floating-kakao {
+                width: 55px;
+                height: 55px;
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .floating-kakao i {
+                font-size: 24px;
+            }
+            
+            .floating-kakao .tooltip-text {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -439,6 +512,44 @@
             loginForm.appendChild(forceInput);
             loginForm.submit();
         }
+
+        // 카카오톡 버튼 클릭 추적
+        function trackKakaoClick() {
+            console.log('카카오톡 채널 접속:', new Date().toLocaleString('ko-KR'));
+        }
+
+        // 플로팅 버튼 애니메이션
+        document.addEventListener('DOMContentLoaded', function() {
+            const floatingBtn = document.querySelector('.floating-kakao');
+            if (floatingBtn) {
+                // 등장 애니메이션
+                floatingBtn.style.opacity = '0';
+                floatingBtn.style.transform = 'translateY(20px) scale(0.8)';
+                
+                setTimeout(() => {
+                    floatingBtn.style.transition = 'all 0.5s ease';
+                    floatingBtn.style.opacity = '1';
+                    floatingBtn.style.transform = 'translateY(0) scale(1)';
+                }, 500);
+                
+                // 주기적 펄스 효과 (관심 끌기)
+                setInterval(() => {
+                    floatingBtn.style.animation = 'pulse 2s ease-in-out';
+                    setTimeout(() => {
+                        floatingBtn.style.animation = 'none';
+                    }, 2000);
+                }, 15000); // 15초마다
+            }
+        });
     </script>
+<!-- 플로팅 카카오톡 채널 버튼 -->
+<a href="http://pf.kakao.com/_xjxeWxn" 
+   target="_blank" 
+   class="floating-kakao"
+   title="NHBot 카카오톡 채널"
+   onclick="trackKakaoClick()">
+    <i class="bi bi-chat-dots-fill"></i>
+    <span class="tooltip-text">NHBot 문의하기</span>
+</a>    
 </body>
 </html>
