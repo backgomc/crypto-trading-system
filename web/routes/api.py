@@ -479,7 +479,7 @@ def apply_config_preset(preset_type):
 @api_bp.route('/ping', methods=['POST'])
 @api_required
 def user_ping():
-    """사용자 ping (30초마다 호출되어 접속 상태 유지)"""
+    """사용자 ping (상태 확인만, 세션 갱신 안 함)"""
     try:
         user_id = session.get('user_id')
         if not user_id:
@@ -489,16 +489,15 @@ def user_ping():
         if not user:
             return api_error('사용자를 찾을 수 없습니다', 'USER_NOT_FOUND', 404)
         
-        # 마지막 활동 시간 업데이트 (한국시간)
-        user.update_last_active()
-        
+        # 상태 확인만 (갱신 없음)
         return api_success(
             data={
                 'user_id': user_id,
                 'username': user.username,
-                'last_active': user.last_active.isoformat() if user.last_active else None
+                'last_active': user.last_active.isoformat() if user.last_active else None,
+                'ping_time': datetime.utcnow().isoformat()  # ping 시간만 기록
             },
-            message='ping 성공'
+            message='ping 성공 (세션 갱신 없음)'
         )
         
     except Exception as e:

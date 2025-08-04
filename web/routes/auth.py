@@ -25,110 +25,113 @@ def log_system_event(level, category, message):
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-   """로그인 페이지"""
-   # 팝업 파라미터 확인
-   popup_type = request.args.get('popup')
-   show_popup = popup_type in ['session_expired', 'session_invalid']
-   
-   # 이미 로그인된 경우 처리
-   if session.get('logged_in') and not show_popup:
-       session_id = session.get('session_id')
-       if session_id and UserSession.get_active_session(session_id):  # ✅ 중복 import 제거
-           return redirect(url_for('pages.dashboard'))
-       # 세션이 무효하면 클리어만 하고 로그인 페이지 표시
-       session.clear()
-   
-   if request.method == 'POST':
-       username = request.form.get('username', '').strip()
-       password = request.form.get('password', '')
-       remember_me = request.form.get('remember_me') == 'on'
-       force_login = request.form.get('force_login') == 'true'
-       
-       # 입력 유효성 검사
-       if not username or not password:
-           error_msg = '사용자명과 비밀번호를 모두 입력해주세요.'
-           log_system_event('WARNING', 'LOGIN', f'로그인 실패: 빈 필드 - {username}')
-           return render_template('login.html', error=error_msg, show_popup=show_popup, popup_type=popup_type)
-       
-       # 사용자 조회
-       user = User.query.filter_by(username=username).first()
-       
-       if user and user.check_password(password) and user.is_active:
-           # ✅ 관리자가 아닌 경우에만 기존 세션 무효화
-           if not user.is_admin:
-               invalidated_count = UserSession.invalidate_user_sessions(user.id)
-               
-               if invalidated_count > 0:
-                   if force_login:
-                       log_system_event('INFO', 'LOGIN', f'강제 로그인: {username} - {invalidated_count}개 기존 세션 무효화')
-                   else:
-                       log_system_event('INFO', 'LOGIN', f'중복 로그인 감지: {username} - {invalidated_count}개 기존 세션 무효화')
-           else:
-               # 관리자는 중복 로그인 허용 로그
-               log_system_event('INFO', 'LOGIN', f'관리자 로그인: {username} - 중복 세션 허용')
-           
-           # 새 세션 생성
-           new_session_id = secrets.token_hex(32)
-           
-           try:
-               UserSession.create_session(
-                   user_id=user.id,
-                   session_id=new_session_id,
-                   ip_address=request.remote_addr,
-                   user_agent=request.headers.get('User-Agent', '')
-               )
-           except Exception as e:
-               print(f"세션 생성 실패: {e}")
-               error_msg = '로그인 처리 중 오류가 발생했습니다.'
-               return render_template('login.html', error=error_msg, show_popup=show_popup, popup_type=popup_type)
-           
-           # 로그인 성공 - 세션 설정
-           session.permanent = remember_me
-           session['logged_in'] = True
-           session['user_id'] = user.id
-           session['username'] = user.username
-           session['is_admin'] = user.is_admin
-           session['session_id'] = new_session_id
-           session['login_time'] = datetime.utcnow().isoformat()
-           
-           # 로그인 시간 업데이트
-           user.update_last_login()
-           
-           # 세션 유지 시간 설정
-           if remember_me:
-               session.permanent_session_lifetime = timedelta(days=30)
-           else:
-               session.permanent_session_lifetime = timedelta(hours=8)
-           
-           # 로그인 성공 로그
-           log_system_event('INFO', 'LOGIN', f'로그인 성공: {username}')
-           
-           # 신규 사용자 설정 초기화
-           try:
-               from config.models import init_user_config, get_user_full_config
-               existing_config = get_user_full_config(user.id)
-               if not existing_config or len(existing_config) == 0:
-                   init_user_config(user.id)
-           except Exception as e:
-               print(f"사용자 설정 체크 오류: {e}")
-           
-           # 리다이렉트
-           next_page = request.args.get('next')
-           if next_page and next_page.startswith('/'):
-               return redirect(next_page)
-           return redirect(url_for('pages.dashboard'))
-       
-       else:
-           # 로그인 실패
-           if user and not user.is_active:
-               error_msg = '비활성화된 계정입니다. 관리자에게 문의하세요.'
-               log_system_event('WARNING', 'LOGIN', f'로그인 실패: 비활성 계정 - {username}')
-           else:
-               error_msg = '잘못된 사용자명 또는 비밀번호입니다.'
-               log_system_event('WARNING', 'LOGIN', f'로그인 실패: 잘못된 인증 정보 - {username}')
-           return render_template('login.html', error=error_msg, show_popup=show_popup, popup_type=popup_type)
-   
-   return render_template('login.html', show_popup=show_popup, popup_type=popup_type)
+    """로그인 페이지"""
+    # 팝업 파라미터 확인
+    popup_type = request.args.get('popup')
+    show_popup = popup_type in ['session_expired', 'session_invalid']
+    
+    # 이미 로그인된 경우 처리
+    if session.get('logged_in') and not show_popup:
+        session_id = session.get('session_id')
+        if session_id and UserSession.get_active_session(session_id):  # ✅ 중복 import 제거
+            return redirect(url_for('pages.dashboard'))
+        # 세션이 무효하면 클리어만 하고 로그인 페이지 표시
+        session.clear()
+    
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        remember_me = request.form.get('remember_me') == 'on'
+        force_login = request.form.get('force_login') == 'true'
+        
+        # 입력 유효성 검사
+        if not username or not password:
+            error_msg = '사용자명과 비밀번호를 모두 입력해주세요.'
+            log_system_event('WARNING', 'LOGIN', f'로그인 실패: 빈 필드 - {username}')
+            return render_template('login.html', error=error_msg, show_popup=show_popup, popup_type=popup_type)
+        
+        # 사용자 조회
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.check_password(password) and user.is_active:
+            # ✅ 관리자가 아닌 경우에만 기존 세션 무효화
+            if not user.is_admin:
+                invalidated_count = UserSession.invalidate_user_sessions(user.id)
+                
+                if invalidated_count > 0:
+                    if force_login:
+                        log_system_event('INFO', 'LOGIN', f'강제 로그인: {username} - {invalidated_count}개 기존 세션 무효화')
+                    else:
+                        log_system_event('INFO', 'LOGIN', f'중복 로그인 감지: {username} - {invalidated_count}개 기존 세션 무효화')
+            else:
+                # 관리자는 중복 로그인 허용 로그
+                log_system_event('INFO', 'LOGIN', f'관리자 로그인: {username} - 중복 세션 허용')
+            
+            # 새 세션 생성
+            new_session_id = secrets.token_hex(32)
+            
+            try:
+                UserSession.create_session(
+                    user_id=user.id,
+                    session_id=new_session_id,
+                    ip_address=request.remote_addr,
+                    user_agent=request.headers.get('User-Agent', '')
+                )
+            except Exception as e:
+                print(f"세션 생성 실패: {e}")
+                error_msg = '로그인 처리 중 오류가 발생했습니다.'
+                return render_template('login.html', error=error_msg, show_popup=show_popup, popup_type=popup_type)
+            
+            # 로그인 성공 - 세션 설정
+            session.permanent = remember_me
+            session['logged_in'] = True
+            session['user_id'] = user.id
+            session['username'] = user.username
+            session['is_admin'] = user.is_admin
+            session['session_id'] = new_session_id
+            session['login_time'] = datetime.utcnow().isoformat()
+            session['remember_me'] = remember_me
+            
+            # 로그인 시간 업데이트
+            user.update_last_login()
+            
+            # 세션 유지 시간 설정
+            if remember_me:
+                session.permanent_session_lifetime = timedelta(days=7)
+                log_system_event('INFO', 'LOGIN', f'로그인 상태 유지: {username} (7일, 활동시 갱신)')
+            else:
+                session.permanent_session_lifetime = timedelta(hours=4)
+                log_system_event('INFO', 'LOGIN', f'일반 로그인: {username} (4시간, 절대 만료)')
+            
+            # 로그인 성공 로그
+            log_system_event('INFO', 'LOGIN', f'로그인 성공: {username}')
+            
+            # 신규 사용자 설정 초기화
+            try:
+                from config.models import init_user_config, get_user_full_config
+                existing_config = get_user_full_config(user.id)
+                if not existing_config or len(existing_config) == 0:
+                    init_user_config(user.id)
+            except Exception as e:
+                print(f"사용자 설정 체크 오류: {e}")
+            
+            # 리다이렉트
+            next_page = request.args.get('next')
+            if next_page and next_page.startswith('/'):
+                return redirect(next_page)
+            return redirect(url_for('pages.dashboard'))
+        
+        else:
+            # 로그인 실패
+            if user and not user.is_active:
+                error_msg = '비활성화된 계정입니다. 관리자에게 문의하세요.'
+                log_system_event('WARNING', 'LOGIN', f'로그인 실패: 비활성 계정 - {username}')
+            else:
+                error_msg = '잘못된 사용자명 또는 비밀번호입니다.'
+                log_system_event('WARNING', 'LOGIN', f'로그인 실패: 잘못된 인증 정보 - {username}')
+            return render_template('login.html', error=error_msg, show_popup=show_popup, popup_type=popup_type)
+    
+    return render_template('login.html', show_popup=show_popup, popup_type=popup_type)
 
 @auth_bp.route('/logout')
 def logout():
