@@ -98,7 +98,7 @@ def login():
             if remember_me:
                 session.permanent_session_lifetime = timedelta(days=7)
             else:
-                session.permanent_session_lifetime = timedelta(minutes=2)
+                session.permanent_session_lifetime = timedelta(hours=4)
             
             # 로그인 성공 로그
             log_system_event('INFO', 'LOGIN', f'로그인 성공: {username}')
