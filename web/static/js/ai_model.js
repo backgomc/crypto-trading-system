@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🤖 AI 모델 관리 페이지 초기화');
     
     loadCurrentModel();
-    loadModelHistory();
     loadTrainingParams();
     loadScheduleSettings(); // 🆕 추가
     updateTime();
@@ -51,43 +50,47 @@ setInterval(updateTime, 1000);
 // AI 모델 정보 로드 (API 경로 수정)
 // ============================================================================
 
-async function loadCurrentModel() {
+async function loadModelsData() {
     try {
         const result = await apiCall('/api/ai/models');
         if (result.success && result.data) {
+            // 1. 현재 활성 모델 표시 업데이트
             const activeModel = result.data.models.find(m => m.name === result.data.active_model);
             if (activeModel) {
                 updateActiveModelDisplay(activeModel);
             } else if (result.data.models.length > 0) {
                 updateActiveModelDisplay(result.data.models[0]);
             }
+            
+            // 2. 모델 히스토리 리스트 업데이트
+            if (result.data.models) {
+                updateModelHistoryDisplay(result.data.models, result.data.active_model);
+            }
+            
+            console.log('✅ 모델 데이터 로드 완료:', result.data.models.length + '개');
+            
+        } else {
+            throw new Error('API 응답 데이터가 올바르지 않습니다');
         }
     } catch (error) {
-        console.error('현재 모델 정보 로드 실패:', error);
-        // 기본값으로 대체
+        console.error('모델 데이터 로드 실패:', error);
+        
+        // 기본값으로 대체 (현재 활성 모델)
         updateActiveModelDisplay({
             name: 'model_20250720_143022',
             accuracy: 0.853,
             created_at: new Date().toISOString(),
             status: 'active'
         });
-    }
-}
-
-async function loadModelHistory() {
-    try {
-        const result = await apiCall('/api/ai/models');
-        if (result.success && result.data && result.data.models) {
-            updateModelHistoryDisplay(result.data.models, result.data.active_model);
-        }
-    } catch (error) {
-        console.error('모델 히스토리 로드 실패:', error);
-        // 기본값으로 대체
+        
+        // 기본값으로 대체 (모델 히스토리)
         const mockModels = [
             {name: 'model_20250720_143022', accuracy: 0.853, created_at: new Date().toISOString(), status: 'active'},
             {name: 'model_20250720_091544', accuracy: 0.827, created_at: new Date(Date.now() - 86400000).toISOString(), status: 'inactive'}
         ];
         updateModelHistoryDisplay(mockModels, 'model_20250720_143022');
+        
+        console.warn('⚠️ 기본값으로 모델 데이터를 표시합니다');
     }
 }
 
@@ -328,7 +331,6 @@ function startTrainingMonitor() {
                     if (result.data.status === 'completed') {
                         showToast('success', 'AI 모델 학습이 완료되었습니다!');
                         loadCurrentModel();
-                        loadModelHistory();
                     } else {
                         showToast('error', '학습 중 오류가 발생했습니다.');
                     }
@@ -426,7 +428,6 @@ async function activateModel(modelName) {
             if (apiResult.success) {
                 showToast('success', `${modelName} 모델이 활성화되었습니다.`);
                 loadCurrentModel();
-                loadModelHistory();
             } else {
                 throw new Error(apiResult.error || '모델 활성화에 실패했습니다.');
             }
@@ -451,7 +452,7 @@ async function deleteModel(modelName) {
             
             if (apiResult.success) {
                 showToast('success', `${modelName} 모델이 삭제되었습니다.`);
-                loadModelHistory();
+                loadModelsData();
             } else {
                 throw new Error(apiResult.error || '모델 삭제에 실패했습니다.');
             }
@@ -479,7 +480,7 @@ async function cleanupModels() {
             if (apiResult.success) {
                 const deletedCount = apiResult.data?.deleted_count || 0;
                 showToast('success', `${deletedCount}개 모델이 정리되었습니다.`);
-                loadModelHistory();
+                loadModelsData();
             } else {
                 throw new Error(apiResult.error || '모델 정리에 실패했습니다.');
             }
@@ -620,10 +621,7 @@ async function loadScheduleSettings() {
 // 이벤트 리스너 (복원)
 // ============================================================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    // 자동 학습 설정 로드
-    loadScheduleSettings();
-    
+document.addEventListener('DOMContentLoaded', function() {    
     // 자동 학습 설정 변경 감지
     const autoRetrainingCheckbox = document.getElementById('autoRetraining');
     const retrainingIntervalSelect = document.getElementById('retrainingInterval');
