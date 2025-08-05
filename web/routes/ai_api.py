@@ -141,7 +141,7 @@ def get_model_info(model_name):
         )
         
     except Exception as e:
-        log_ai_event('ERROR', f'모델 정보 조회 실패: {model_name}', str(e))
+        log_ai_event('ERROR', 'AI', f'모델 정보 조회 실패: {model_name} - {str(e)}')
         return ai_api_error('모델 정보 조회 중 오류가 발생했습니다', 'MODEL_INFO_ERROR', 500)
 
 @ai_api_bp.route('/models/activate', methods=['POST'])
@@ -159,7 +159,7 @@ def activate_model():
         success = manager.set_active_model(model_name)
         
         if success:
-            log_ai_event('INFO', f'모델 활성화: {model_name}')
+            log_ai_event('INFO', 'AI', f'모델 활성화: {model_name}')
             return ai_api_success(
                 data={'active_model': model_name},
                 message=f'{model_name} 모델이 활성화되었습니다'
@@ -168,7 +168,7 @@ def activate_model():
             return ai_api_error('모델 활성화에 실패했습니다', 'ACTIVATION_ERROR', 500)
             
     except Exception as e:
-        log_ai_event('ERROR', '모델 활성화 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'모델 활성화 실패: {str(e)}')
         return ai_api_error('모델 활성화 중 오류가 발생했습니다', 'ACTIVATION_ERROR', 500)
 
 @ai_api_bp.route('/models/<model_name>', methods=['DELETE'])
@@ -185,13 +185,13 @@ def delete_model(model_name):
         success = manager.delete_model(model_name)
         
         if success:
-            log_ai_event('INFO', f'모델 삭제: {model_name}')
+            log_ai_event('INFO', 'AI', f'모델 삭제: {model_name}')
             return ai_api_success(message=f'{model_name} 모델이 삭제되었습니다')
         else:
             return ai_api_error('모델 삭제에 실패했습니다', 'DELETE_ERROR', 500)
             
     except Exception as e:
-        log_ai_event('ERROR', f'모델 삭제 실패: {model_name}', str(e))
+        log_ai_event('ERROR', 'AI', f'모델 삭제 실패: {model_name} - {str(e)}')
         return ai_api_error('모델 삭제 중 오류가 발생했습니다', 'DELETE_ERROR', 500)
 
 @ai_api_bp.route('/models/cleanup', methods=['POST'])
@@ -205,7 +205,7 @@ def cleanup_models():
         manager = get_model_manager()
         deleted_count = manager.cleanup_old_models(keep_count)
         
-        log_ai_event('INFO', f'모델 정리 완료: {deleted_count}개 삭제')
+        log_ai_event('INFO', 'AI', f'모델 정리 완료: {deleted_count}개 삭제')
         
         return ai_api_success(
             data={'deleted_count': deleted_count},
@@ -213,7 +213,7 @@ def cleanup_models():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', '모델 정리 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'모델 정리 실패: {str(e)}')
         return ai_api_error('모델 정리 중 오류가 발생했습니다', 'CLEANUP_ERROR', 500)
 
 # ============================================================================
@@ -277,7 +277,7 @@ def start_training():
         success = trainer.start_training(selected_indicators, training_params)
         
         if success:
-            log_ai_event('INFO', '모델 학습 시작', f"지표: {sum(selected_indicators.values())}개, 에폭: {training_params['epochs']}")
+            log_ai_event('INFO', 'AI', f'모델 학습 시작 - 지표: {selected_count}개, 에폭: {training_params["epochs"]}')
             
             return ai_api_success(
                 data={
@@ -291,7 +291,7 @@ def start_training():
             return ai_api_error('학습 시작에 실패했습니다', 'TRAINING_START_ERROR', 500)
             
     except Exception as e:
-        log_ai_event('ERROR', '학습 시작 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'학습 시작 실패: {str(e)}')
         return ai_api_error('학습 시작 중 오류가 발생했습니다', 'TRAINING_ERROR', 500)
 
 @ai_api_bp.route('/training/stop', methods=['POST'])
@@ -307,13 +307,13 @@ def stop_training():
         success = trainer.stop_training()
         
         if success:
-            log_ai_event('INFO', '모델 학습 중지')
+            log_ai_event('INFO', 'AI', '모델 학습 중지')
             return ai_api_success(message='AI 모델 학습을 중지했습니다')
         else:
             return ai_api_error('학습 중지에 실패했습니다', 'TRAINING_STOP_ERROR', 500)
             
     except Exception as e:
-        log_ai_event('ERROR', '학습 중지 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'학습 중지 실패: {str(e)}')
         return ai_api_error('학습 중지 중 오류가 발생했습니다', 'TRAINING_ERROR', 500)
 
 @ai_api_bp.route('/training/status', methods=['GET'])
@@ -349,7 +349,7 @@ def get_training_status():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', '학습 상태 조회 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'학습 상태 조회 실패: {str(e)}')
         return ai_api_error('학습 상태 조회 중 오류가 발생했습니다', 'STATUS_ERROR', 500)
 
 @ai_api_bp.route('/training/parameters', methods=['GET'])
@@ -391,7 +391,7 @@ def get_training_parameters():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', '학습 파라미터 조회 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'학습 파라미터 조회 실패: {str(e)}')
         return ai_api_error('학습 파라미터 조회 중 오류가 발생했습니다', 'PARAMS_ERROR', 500)
 
 # ============================================================================
@@ -437,7 +437,7 @@ def get_available_indicators():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', '지표 목록 조회 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'지표 목록 조회 실패: {str(e)}')
         return ai_api_error('지표 목록 조회 중 오류가 발생했습니다', 'INDICATORS_ERROR', 500)
 
 @ai_api_bp.route('/data/summary', methods=['GET'])
@@ -466,7 +466,7 @@ def get_market_data_summary():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', '시장 데이터 요약 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'시장 데이터 요약 실패: {str(e)}')
         return ai_api_error('시장 데이터 요약 중 오류가 발생했습니다', 'DATA_SUMMARY_ERROR', 500)
 
 # ============================================================================
@@ -517,7 +517,7 @@ def get_ai_system_info():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', 'AI 시스템 정보 조회 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'시스템 정보 조회 실패: {str(e)}')
         return ai_api_error('AI 시스템 정보 조회 중 오류가 발생했습니다', 'SYSTEM_INFO_ERROR', 500)
 
 # ============================================================================
@@ -566,7 +566,7 @@ def get_schedule_settings():
             'next_training': next_training.isoformat()
         }
         
-        log_ai_event('INFO', '스케줄 설정 조회')
+        log_ai_event('INFO', 'AI', '시스템 정보 조회')
         
         return ai_api_success(
             data=result_data,
@@ -574,7 +574,7 @@ def get_schedule_settings():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', '스케줄 설정 조회 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'스케줄 설정 조회 실패: {str(e)}')
         return ai_api_error('스케줄 설정 조회 중 오류가 발생했습니다', 'SCHEDULE_GET_ERROR', 500)
 
 @ai_api_bp.route('/schedule', methods=['PUT'])
@@ -648,7 +648,7 @@ def update_schedule_settings():
         # 스케줄 상태에 따른 로그
         status = '활성화' if enabled else '비활성화'
         interval_hours = interval // 3600
-        log_ai_event('INFO', f'스케줄 설정 업데이트: {status}, {interval_hours}시간 간격')
+        log_ai_event('INFO', 'AI', f'스케줄 설정 업데이트: {status}, {interval_hours}시간 간격')
         
         return ai_api_success(
             data=result_data,
@@ -656,7 +656,7 @@ def update_schedule_settings():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', '스케줄 설정 업데이트 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'스케줄 설정 업데이트 실패: {str(e)}')
         db.session.rollback()
         return ai_api_error('스케줄 설정 업데이트 중 오류가 발생했습니다', 'SCHEDULE_UPDATE_ERROR', 500)
 
@@ -667,7 +667,7 @@ def update_schedule_settings():
 @ai_api_bp.errorhandler(500)
 def ai_internal_error(error):
     """AI API 500 에러 처리"""
-    log_ai_event('ERROR', f'Internal AI API error: {error}')
+    log_ai_event('ERROR', 'AI', f'Internal AI API error: {error}')
     db.session.rollback()
     return ai_api_error('AI 서비스 내부 오류가 발생했습니다', 'AI_INTERNAL_ERROR', 500)
 
