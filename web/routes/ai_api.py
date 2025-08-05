@@ -566,7 +566,7 @@ def get_schedule_settings():
             'next_training': next_training.isoformat()
         }
         
-        log_ai_event('INFO', 'AI', '시스템 정보 조회')
+        log_ai_event('INFO', 'AI', '스케줄 설정 조회')
         
         return ai_api_success(
             data=result_data,
