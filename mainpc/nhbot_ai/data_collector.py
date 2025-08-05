@@ -1,23 +1,34 @@
-# 파일 경로: core/ai/data_collector.py
-# 코드명: 바이비트 데이터 수집 및 기술적 지표 계산
+# 파일 경로: mainpc/nhbot_ai/data_collector.py
+# 코드명: 메인 PC용 데이터 수집 및 기술적 지표 계산 (GPU 최적화)
 
-#import pandas as pd
-class DummyPandas:
-    class DataFrame: pass
-pd = DummyPandas()
+import os
 import numpy as np
+import pandas as pd
+import cupy as cp
 import requests
+import sqlite3
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
-import time
 from pathlib import Path
 
 class DataCollector:
-    """바이비트 데이터 수집 및 기술적 지표 계산 클래스"""
+    """메인 PC용 데이터 수집 및 기술적 지표 계산 클래스 (GPU 최적화)"""
     
-    def __init__(self, symbol: str = "BTCUSDT"):
+    def __init__(
+        self, 
+        symbol: str = "BTCUSDT", 
+        config_path: str = None
+    ):
         self.symbol = symbol
         self.base_url = "https://api.bybit.com/v5/market/kline"
+        
+        # 데이터베이스 경로 설정
+        self.config_path = config_path or Path(__file__).parent.parent / 'config' / 'data_config.db'
+        self.conn = sqlite3.connect(str(self.config_path))
+        self._create_tables()
+        
+        # GPU 지원 여부 확인
+        self.gpu_available = self._check_gpu_availability()
         
         # 시간대별 수집 설정
         self.intervals = {
@@ -27,11 +38,57 @@ class DataCollector:
             "60": "1시간봉"
         }
         
-        print(f"✅ DataCollector 초기화 완료: {symbol}")
+        print(f"✅ DataCollector 초기화: {symbol}")
+        print(f"🖥️ GPU 사용 가능: {self.gpu_available}")
     
-    def collect_historical_data(self, interval: str = "15", days: int = 365) -> Optional[pd.DataFrame]:
+    def _check_gpu_availability(self):
+        """GPU 사용 가능 여부 확인"""
+        try:
+            cp.cuda.runtime.getDeviceCount()
+            return True
+        except:
+            return False
+    
+    def _create_tables(self):
+        """데이터 수집 설정 테이블 생성"""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS data_collection_config (
+                symbol TEXT PRIMARY KEY,
+                interval TEXT,
+                days INTEGER,
+                last_collected DATETIME,
+                total_bars INTEGER
+            )
+        ''')
+        self.conn.commit()
+    
+    def _save_collection_config(self, interval: str, days: int):
+        """데이터 수집 설정 저장"""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            INSERT OR REPLACE INTO data_collection_config 
+            (symbol, interval, days, last_collected, total_bars) 
+            VALUES (?, ?, ?, ?, ?)
+        ''', (
+            self.symbol, 
+            interval, 
+            days, 
+            datetime.now().isoformat(),
+            days * (24 * 60 // int(interval))
+        ))
+        self.conn.commit()
+    
+    def collect_historical_data(
+        self, 
+        interval: str = "15", 
+        days: int = 365
+    ) -> Optional[pd.DataFrame]:
         """과거 데이터 수집"""
         try:
+            # 수집 설정 저장
+            self._save_collection_config(interval, days)
+            
             print(f"📊 {self.symbol} {self.intervals.get(interval, interval)} 데이터 수집 시작...")
             print(f"   기간: {days}일 (약 {days * 24 * 60 // int(interval):,}개 봉)")
             
@@ -86,9 +143,6 @@ class DataCollector:
                 
                 # 다음 요청을 위한 시간 업데이트 (가장 오래된 데이터의 시간)
                 end_time = int(klines[-1][0]) - 1
-                
-                # API 제한 방지 (초당 10요청)
-                time.sleep(0.1)
             
             if not all_data:
                 print("❌ 수집된 데이터가 없습니다.")
@@ -110,7 +164,11 @@ class DataCollector:
             df = df.sort_values("timestamp").reset_index(drop=True)
             df.set_index("timestamp", inplace=True)
             
+            # 기술적 지표 계산
+            df = self.calculate_technical_indicators(df)
+            
             print(f"📈 데이터 범위: {df.index[0]} ~ {df.index[-1]}")
+            print(f"🔧 총 지표: {len(df.columns)}개")
             
             return df
             
@@ -217,65 +275,6 @@ class DataCollector:
         
         return df
     
-    def _add_volatility_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
-        """변동성 지표"""
-        
-        # 볼린저 밴드
-        bb_upper, bb_middle, bb_lower = self._calculate_bollinger_bands(df['close'])
-        df['bb_upper'] = bb_upper
-        df['bb_middle'] = bb_middle
-        df['bb_lower'] = bb_lower
-        df['bb_width'] = (bb_upper - bb_lower) / bb_middle
-        df['bb_position'] = (df['close'] - bb_lower) / (bb_upper - bb_lower)
-        
-        # ATR (Average True Range)
-        df['atr'] = self._calculate_atr(df)
-        
-        # 변동성 (표준편차)
-        df['volatility_10'] = df['close'].rolling(window=10).std()
-        df['volatility_20'] = df['close'].rolling(window=20).std()
-        
-        return df
-    
-    def _add_volume_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
-        """거래량 지표"""
-        
-        # 거래량 이동평균
-        df['volume_sma_10'] = df['volume'].rolling(window=10).mean()
-        df['volume_sma_20'] = df['volume'].rolling(window=20).mean()
-        
-        # 상대 거래량
-        df['volume_ratio'] = df['volume'] / df['volume_sma_20']
-        
-        # VWAP (Volume Weighted Average Price)
-        df['vwap'] = self._calculate_vwap(df)
-        
-        # OBV (On Balance Volume)
-        df['obv'] = self._calculate_obv(df)
-        
-        return df
-    
-    def _add_additional_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
-        """추가 지표들"""
-        
-        # 연속 상승/하락
-        df['consecutive_up'] = self._calculate_consecutive(df['close'] > df['close'].shift(1))
-        df['consecutive_down'] = self._calculate_consecutive(df['close'] < df['close'].shift(1))
-        
-        # 최고점/최저점 이후 기간
-        df['bars_since_high'] = self._bars_since_extreme(df['high'], 'max')
-        df['bars_since_low'] = self._bars_since_extreme(df['low'], 'min')
-        
-        # 시간 특성 (시간대별 패턴)
-        df['hour'] = df.index.hour
-        df['day_of_week'] = df.index.dayofweek
-        
-        return df
-    
-    # ============================================================================
-    # 지표 계산 헬퍼 함수들
-    # ============================================================================
-    
     def _calculate_rsi(self, prices: pd.Series, period: int = 14) -> pd.Series:
         """RSI 계산"""
         delta = prices.diff()
@@ -306,7 +305,27 @@ class DataCollector:
         highest_high = df['high'].rolling(window=period).max()
         lowest_low = df['low'].rolling(window=period).min()
         return -100 * ((highest_high - df['close']) / (highest_high - lowest_low))
-    
+
+    def _add_volatility_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
+        """변동성 지표"""
+        
+        # 볼린저 밴드
+        bb_upper, bb_middle, bb_lower = self._calculate_bollinger_bands(df['close'])
+        df['bb_upper'] = bb_upper
+        df['bb_middle'] = bb_middle
+        df['bb_lower'] = bb_lower
+        df['bb_width'] = (bb_upper - bb_lower) / bb_middle
+        df['bb_position'] = (df['close'] - bb_lower) / (bb_upper - bb_lower)
+        
+        # ATR (Average True Range)
+        df['atr'] = self._calculate_atr(df)
+        
+        # 변동성 (표준편차)
+        df['volatility_10'] = df['close'].rolling(window=10).std()
+        df['volatility_20'] = df['close'].rolling(window=20).std()
+        
+        return df
+
     def _calculate_bollinger_bands(self, prices: pd.Series, period: int = 20, std_dev: int = 2) -> Tuple[pd.Series, pd.Series, pd.Series]:
         """볼린저 밴드 계산"""
         middle = prices.rolling(window=period).mean()
@@ -322,6 +341,24 @@ class DataCollector:
         low_close = abs(df['low'] - df['close'].shift(1))
         true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
         return true_range.rolling(window=period).mean()
+    
+    def _add_volume_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
+        """거래량 지표"""
+        
+        # 거래량 이동평균
+        df['volume_sma_10'] = df['volume'].rolling(window=10).mean()
+        df['volume_sma_20'] = df['volume'].rolling(window=20).mean()
+        
+        # 상대 거래량
+        df['volume_ratio'] = df['volume'] / df['volume_sma_20']
+        
+        # VWAP (Volume Weighted Average Price)
+        df['vwap'] = self._calculate_vwap(df)
+        
+        # OBV (On Balance Volume)
+        df['obv'] = self._calculate_obv(df)
+        
+        return df
     
     def _calculate_vwap(self, df: pd.DataFrame) -> pd.Series:
         """VWAP 계산 (당일 기준)"""
@@ -343,6 +380,23 @@ class DataCollector:
                 obv.iloc[i] = obv.iloc[i-1]
         
         return obv
+    
+    def _add_additional_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
+        """추가 지표들"""
+        
+        # 연속 상승/하락
+        df['consecutive_up'] = self._calculate_consecutive(df['close'] > df['close'].shift(1))
+        df['consecutive_down'] = self._calculate_consecutive(df['close'] < df['close'].shift(1))
+        
+        # 최고점/최저점 이후 기간
+        df['bars_since_high'] = self._bars_since_extreme(df['high'], 'max')
+        df['bars_since_low'] = self._bars_since_extreme(df['low'], 'min')
+        
+        # 시간 특성 (시간대별 패턴)
+        df['hour'] = df.index.hour
+        df['day_of_week'] = df.index.dayofweek
+        
+        return df
     
     def _calculate_consecutive(self, condition: pd.Series) -> pd.Series:
         """연속 조건 만족 횟수 계산"""
@@ -373,6 +427,29 @@ class DataCollector:
             result.iloc[i] = bars_since
         
         return result
+    
+    def save_data(self, df: pd.DataFrame, filename: str = None) -> bool:
+        """데이터 저장"""
+        try:
+            if filename is None:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"market_data_{self.symbol}_{timestamp}.csv"
+            
+            # data 폴더에 저장
+            data_dir = Path(__file__).parent.parent / 'data'
+            data_dir.mkdir(exist_ok=True)
+            
+            filepath = data_dir / filename
+            df.to_csv(filepath)
+            
+            print(f"✅ 데이터 저장 완료: {filepath}")
+            print(f"   크기: {len(df)}행 × {len(df.columns)}열")
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ 데이터 저장 실패: {e}")
+            return False
     
     def get_latest_data(self, interval: str = "15", limit: int = 100) -> Optional[pd.DataFrame]:
         """최신 데이터 수집 (실시간용)"""
@@ -416,29 +493,6 @@ class DataCollector:
         except Exception as e:
             print(f"❌ 최신 데이터 수집 실패: {e}")
             return None
-    
-    def save_data(self, df: pd.DataFrame, filename: str = None) -> bool:
-        """데이터 저장"""
-        try:
-            if filename is None:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"market_data_{self.symbol}_{timestamp}.csv"
-            
-            # data 폴더에 저장
-            data_dir = Path("data")
-            data_dir.mkdir(exist_ok=True)
-            
-            filepath = data_dir / filename
-            df.to_csv(filepath)
-            
-            print(f"✅ 데이터 저장 완료: {filepath}")
-            print(f"   크기: {len(df)}행 × {len(df.columns)}열")
-            
-            return True
-            
-        except Exception as e:
-            print(f"❌ 데이터 저장 실패: {e}")
-            return False
     
     def get_indicator_summary(self, df: pd.DataFrame) -> Dict:
         """지표 요약 정보"""
@@ -492,18 +546,14 @@ if __name__ == "__main__":
         print(f"✅ 수집 완료: {len(df)}개 데이터")
         print(f"📈 컬럼: {list(df.columns)}")
         
-        # 기술적 지표 계산
-        df_with_indicators = collector.calculate_technical_indicators(df)
-        print(f"🔧 지표 추가 후: {len(df_with_indicators.columns)}개 컬럼")
-        
         # 요약 정보
-        summary = collector.get_indicator_summary(df_with_indicators)
+        summary = collector.get_indicator_summary(df)
         print(f"📋 현재 지표 요약:")
         print(f"   가격: ${summary.get('price', {}).get('close', 0):,.2f}")
         print(f"   RSI: {summary.get('momentum', {}).get('rsi_14', 0):.1f}")
         print(f"   MACD: {summary.get('trend', {}).get('macd', 0):.4f}")
         
         # 데이터 저장 테스트
-        collector.save_data(df_with_indicators, "test_data.csv")
+        collector.save_data(df, "test_data.csv")
         
-    print("\n✅ DataCollector 테스트 완료")
+    print("\n✅ DataCollector 테스트 완료")        
