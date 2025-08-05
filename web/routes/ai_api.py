@@ -75,16 +75,15 @@ def ai_api_error(message, code='AI_ERROR', status_code=400, details=None):
         response['details'] = details
     return jsonify(response), status_code
 
-def log_ai_event(level, message, details=None):
+def log_ai_event(level, category, message):
     """AI 이벤트 로깅"""
     try:
-        full_message = f"AI: {message}"
-        if details:
-            full_message += f" - {details}"
-            
+        username = session.get('username')
+        full_message = f"{message}: {username}"
+        
         log_entry = SystemLog(
             level=level,
-            category='AI',
+            category=category,
             message=full_message,
             ip_address=request.remote_addr,
             user_agent=request.headers.get('User-Agent', '')[:200]
@@ -92,7 +91,7 @@ def log_ai_event(level, message, details=None):
         db.session.add(log_entry)
         db.session.commit()
     except Exception as e:
-        print(f"AI 로그 저장 실패: {e}")
+        print(f"AI 로그 저장 실패: {e}")        
 
 # ============================================================================
 # 모델 관리 API
@@ -108,7 +107,7 @@ def get_models():
         active_model = manager.get_active_model()
         storage_info = manager.get_storage_info()
         
-        log_ai_event('INFO', '모델 목록 조회')
+        log_ai_event('INFO', 'AI', '모델 목록 조회')
         
         return ai_api_success(
             data={
@@ -120,7 +119,7 @@ def get_models():
         )
         
     except Exception as e:
-        log_ai_event('ERROR', '모델 목록 조회 실패', str(e))
+        log_ai_event('ERROR', 'AI', f'모델 목록 조회 실패: {str(e)}')
         return ai_api_error('모델 목록 조회 중 오류가 발생했습니다', 'MODEL_LIST_ERROR', 500)
 
 @ai_api_bp.route('/models/<model_name>', methods=['GET'])
@@ -134,7 +133,7 @@ def get_model_info(model_name):
         if not model_info:
             return ai_api_error('모델을 찾을 수 없습니다', 'MODEL_NOT_FOUND', 404)
         
-        log_ai_event('INFO', f'모델 정보 조회: {model_name}')
+        log_ai_event('INFO', 'AI', f'모델 정보 조회: {model_name}')
         
         return ai_api_success(
             data={'model': model_info},

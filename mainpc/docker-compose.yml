@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  ai_trainer:
+    build: .
+    runtime: nvidia
+    volumes:
+      - .:/app
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
