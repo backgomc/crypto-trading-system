@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 # AI 모듈 임포트
-from core.ai import ModelManager, DataCollector, ModelTrainer
+from core.ai import ModelManager
 from config.models import SystemLog, db
 
 ai_api_bp = Blueprint('ai_api', __name__)
@@ -28,20 +28,6 @@ def get_model_manager():
     if _model_manager is None:
         _model_manager = ModelManager()
     return _model_manager
-
-def get_data_collector():
-    """DataCollector 싱글톤"""
-    global _data_collector
-    if _data_collector is None:
-        _data_collector = DataCollector("BTCUSDT")
-    return _data_collector
-
-def get_model_trainer():
-    """ModelTrainer 싱글톤"""
-    global _model_trainer
-    if _model_trainer is None:
-        _model_trainer = ModelTrainer("BTCUSDT")
-    return _model_trainer
 
 # ============================================================================
 # 유틸리티 함수들
