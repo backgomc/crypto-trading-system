@@ -2,15 +2,15 @@
 # 코드명: AI 모델 학습 클래스 (사용자 선택 지표 기반)
 
 import numpy as np
-import pandas as pd
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, classification_report
+# import pandas as pd
+# import tensorflow as tf
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization
+# from tensorflow.keras.optimizers import Adam
+# from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+# from sklearn.preprocessing import MinMaxScaler
+# from sklearn.model_selection import train_test_split
+# from sklearn.metrics import accuracy_score, classification_report
 import pickle
 import json
 from datetime import datetime
@@ -18,7 +18,6 @@ from pathlib import Path
 import threading
 import time
 from typing import Dict, List, Optional, Tuple, Callable
-
 from .data_collector import DataCollector
 from .model_manager import ModelManager
 

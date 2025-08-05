@@ -1,7 +1,7 @@
 # 파일 경로: core/ai/data_collector.py
 # 코드명: 바이비트 데이터 수집 및 기술적 지표 계산
 
-import pandas as pd
+#import pandas as pd
 import numpy as np
 import requests
 from datetime import datetime, timedelta

@@ -3,7 +3,7 @@
 
 import requests
 import time
-import pandas as pd
+#import pandas as pd
 from datetime import datetime
 from pybit.unified_trading import HTTP
 from requests.adapters import HTTPAdapter
