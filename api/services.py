@@ -4,6 +4,9 @@
 import requests
 import time
 #import pandas as pd
+class DummyPandas:
+    class DataFrame: pass
+pd = DummyPandas()
 from datetime import datetime
 from pybit.unified_trading import HTTP
 from requests.adapters import HTTPAdapter

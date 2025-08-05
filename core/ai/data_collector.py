@@ -2,6 +2,9 @@
 # 코드명: 바이비트 데이터 수집 및 기술적 지표 계산
 
 #import pandas as pd
+class DummyPandas:
+    class DataFrame: pass
+pd = DummyPandas()
 import numpy as np
 import requests
 from datetime import datetime, timedelta

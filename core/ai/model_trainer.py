@@ -4,6 +4,13 @@
 import numpy as np
 # import pandas as pd
 # import tensorflow as tf
+class DummyPandas:
+    class DataFrame: pass
+class DummyTensorFlow:
+    class keras:
+        class models: pass
+pd = DummyPandas()
+tf = DummyTensorFlow()
 # from tensorflow.keras.models import Sequential
 # from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization
 # from tensorflow.keras.optimizers import Adam
