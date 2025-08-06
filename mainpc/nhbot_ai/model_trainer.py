@@ -1,4 +1,4 @@
-# 파일 경로: core/ai/model_trainer.py
+# 파일 경로: mainpc/nhbot_ai/model_trainer.py
 # 코드명: AI 모델 학습 클래스 (사용자 선택 지표 기반)
 
 import numpy as np
