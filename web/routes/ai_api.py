@@ -1,5 +1,5 @@
 # 파일 경로: web/routes/ai_api.py
-# 코드명: AI 관련 API 엔드포인트 (완전 분리)
+# 코드명: AI 관련 API 엔드포인트 (RemoteTrainer 연동 버전)
 
 from flask import Blueprint, request, session, jsonify
 from functools import wraps
@@ -10,6 +10,7 @@ from pathlib import Path
 
 # AI 모듈 임포트
 from core.ai import ModelManager
+from core.remote_trainer import RemoteTrainer
 from config.models import SystemLog, db
 
 ai_api_bp = Blueprint('ai_api', __name__)
@@ -19,8 +20,7 @@ ai_api_bp = Blueprint('ai_api', __name__)
 # ============================================================================
 
 _model_manager = None
-_data_collector = None
-_model_trainer = None
+_remote_trainer = None
 
 def get_model_manager():
     """ModelManager 싱글톤"""
@@ -28,6 +28,13 @@ def get_model_manager():
     if _model_manager is None:
         _model_manager = ModelManager()
     return _model_manager
+
+def get_remote_trainer():
+    """RemoteTrainer 싱글톤"""
+    global _remote_trainer
+    if _remote_trainer is None:
+        _remote_trainer = RemoteTrainer()
+    return _remote_trainer
 
 # ============================================================================
 # 유틸리티 함수들
@@ -242,7 +249,8 @@ def start_training():
             'learning_rate': data.get('learning_rate', 0.001),
             'sequence_length': data.get('sequence_length', 60),
             'validation_split': data.get('validation_split', 20),
-            'interval': data.get('interval', '15')
+            'interval': data.get('interval', '15'),
+            'symbol': data.get('symbol', 'BTCUSDT')
         }
         
         # 파라미터 유효성 검사
@@ -268,15 +276,20 @@ def start_training():
                 {'errors': validation_errors}
             )
         
-        # 학습 시작
-        trainer = get_model_trainer()
+        # RemoteTrainer로 학습 시작
+        trainer = get_remote_trainer()
         
         if trainer.is_training:
             return ai_api_error('이미 학습이 진행 중입니다', 'TRAINING_IN_PROGRESS', 400)
         
-        success = trainer.start_training(selected_indicators, training_params)
+        # 진행률 콜백
+        def progress_callback(message):
+            print(f"학습 진행: {message}")
+        
+        success = trainer.start_training(selected_indicators, training_params, progress_callback)
         
         if success:
+            selected_count = sum(1 for v in selected_indicators.values() if v)
             log_ai_event('INFO', 'AI', f'모델 학습 시작 - 지표: {selected_count}개, 에폭: {training_params["epochs"]}')
             
             return ai_api_success(
@@ -299,7 +312,7 @@ def start_training():
 def stop_training():
     """AI 모델 학습 중지"""
     try:
-        trainer = get_model_trainer()
+        trainer = get_remote_trainer()
         
         if not trainer.is_training:
             return ai_api_error('진행 중인 학습이 없습니다', 'NO_TRAINING', 400)
@@ -321,7 +334,7 @@ def stop_training():
 def get_training_status():
     """AI 모델 학습 상태 조회"""
     try:
-        trainer = get_model_trainer()
+        trainer = get_remote_trainer()
         status = trainer.get_training_status()
         
         # 상태 정보 보강
@@ -332,16 +345,20 @@ def get_training_status():
         }
         
         # 진행률 계산
-        if status['total_epochs'] > 0:
+        if status.get('total_epochs', 0) > 0:
             enhanced_status['progress_percentage'] = (
-                status['current_epoch'] / status['total_epochs'] * 100
+                status.get('current_epoch', 0) / status['total_epochs'] * 100
             )
         
         # 경과 시간 계산
         if status.get('start_time'):
-            elapsed = datetime.now() - status['start_time']
-            enhanced_status['elapsed_seconds'] = int(elapsed.total_seconds())
-            enhanced_status['elapsed_formatted'] = str(elapsed).split('.')[0]  # 초 단위 제거
+            try:
+                start_time = datetime.fromisoformat(status['start_time'])
+                elapsed = datetime.now() - start_time
+                enhanced_status['elapsed_seconds'] = int(elapsed.total_seconds())
+                enhanced_status['elapsed_formatted'] = str(elapsed).split('.')[0]
+            except:
+                pass
         
         return ai_api_success(
             data=enhanced_status,
@@ -368,18 +385,25 @@ def get_training_parameters():
         }
         
         default_indicators = {
+            # 필수 지표들은 기본 ON
             'price': True,
-            'sma': True,
-            'ema': True,
-            'bb': True,
-            'rsi': True,
             'macd': True,
-            'stoch': True,
-            'williams': True,
-            'volume': True,
-            'vwap': True,
+            'rsi': True,
+            'bb': True,
             'atr': True,
-            'volatility': True
+            'volume': True,
+            'adx': True,
+            'aroon': True,
+            'consecutive': True,
+            'trend': True,
+            # 선택적 지표들은 기본 OFF
+            'sma': False,
+            'ema': False,
+            'stoch': False,
+            'williams': False,
+            'mfi': False,
+            'vwap': False,
+            'volatility': False
         }
         
         return ai_api_success(
@@ -403,32 +427,61 @@ def get_training_parameters():
 def get_available_indicators():
     """사용 가능한 기술적 지표 목록"""
     try:
-        trainer = get_model_trainer()
-        indicators = trainer.indicator_mapping
-        
-        # 지표 설명 추가
+        # 지표 설명
         indicator_descriptions = {
             'price': {'name': '가격 데이터', 'description': 'OHLCV 기본 가격 정보'},
+            'macd': {'name': 'MACD', 'description': '이동평균 수렴확산 지표'},
+            'rsi': {'name': 'RSI', 'description': '과매수/과매도 모멘텀 지표'},
+            'bb': {'name': '볼린저 밴드', 'description': '가격 변동성 기반 지지/저항선'},
+            'atr': {'name': 'ATR', 'description': '평균 실제 범위(변동성)'},
+            'volume': {'name': '거래량', 'description': '거래량 관련 지표들'},
+            'adx': {'name': 'ADX', 'description': '추세 강도 지표'},
+            'aroon': {'name': 'Aroon', 'description': '추세 전환 타이밍 지표'},
+            'consecutive': {'name': '연속 카운터', 'description': '연속 상승/하락 횟수'},
+            'trend': {'name': '다중 시간대', 'description': '시간대별 추세 분석'},
             'sma': {'name': '단순이동평균', 'description': '가격의 단순 평균선'},
             'ema': {'name': '지수이동평균', 'description': '최근 가격에 가중치를 둔 평균선'},
-            'bb': {'name': '볼린저 밴드', 'description': '가격 변동성 기반 지지/저항선'},
-            'rsi': {'name': 'RSI', 'description': '과매수/과매도 모멘텀 지표'},
-            'macd': {'name': 'MACD', 'description': '이동평균 수렴확산 지표'},
             'stoch': {'name': '스토캐스틱', 'description': '고저점 대비 현재가 위치'},
             'williams': {'name': 'Williams %R', 'description': '스토캐스틱과 유사한 모멘텀 지표'},
-            'volume': {'name': '거래량', 'description': '거래량 관련 지표들'},
+            'mfi': {'name': 'MFI', 'description': '자금 흐름 지표'},
             'vwap': {'name': 'VWAP', 'description': '거래량 가중 평균 가격'},
-            'atr': {'name': 'ATR', 'description': '평균 실제 범위(변동성)'},
             'volatility': {'name': '변동성', 'description': '가격 변동성 지표'}
         }
         
-        # 지표별 컬럼 수 계산
+        # RemoteTrainer는 indicator_mapping이 없으므로 직접 정의
+        indicators = {
+            # 필수 지표
+            "price": ["close", "price_change", "hl_range"],
+            "macd": ["macd", "macd_signal", "macd_histogram"],
+            "rsi": ["rsi_14"],
+            "bb": ["bb_position", "bb_width"],
+            "atr": ["atr"],
+            "volume": ["volume_ratio", "cvd", "cvd_slope"],
+            "adx": ["adx", "adx_slope"],
+            "aroon": ["aroon_oscillator"],
+            "consecutive": ["consecutive_up", "consecutive_down"],
+            "trend": ["1h_trend", "4h_trend", "trend_alignment", "trend_strength"],
+            # 선택적 지표
+            "sma": ["sma_20", "close_vs_sma_20"],
+            "ema": ["ema_20", "ema_50", "ema_20_slope"],
+            "stoch": ["stoch_k", "stoch_d"],
+            "williams": ["williams_r"],
+            "mfi": ["mfi"],
+            "vwap": ["vwap"],
+            "volatility": ["volatility_20"]
+        }
+        
+        # 지표별 정보 구성
         result = {}
+        essential_list = ["price", "macd", "rsi", "bb", "atr", "volume", "adx", "aroon", "consecutive", "trend"]
+        
         for indicator, columns in indicators.items():
             result[indicator] = {
                 **indicator_descriptions.get(indicator, {'name': indicator, 'description': ''}),
                 'columns': columns,
-                'column_count': len(columns)
+                'column_count': len(columns),
+                'is_essential': indicator in essential_list,
+                'default_enabled': indicator in essential_list
             }
         
         return ai_api_success(
@@ -439,35 +492,6 @@ def get_available_indicators():
     except Exception as e:
         log_ai_event('ERROR', 'AI', f'지표 목록 조회 실패: {str(e)}')
         return ai_api_error('지표 목록 조회 중 오류가 발생했습니다', 'INDICATORS_ERROR', 500)
-
-@ai_api_bp.route('/data/summary', methods=['GET'])
-@ai_api_required
-def get_market_data_summary():
-    """시장 데이터 요약 정보"""
-    try:
-        collector = get_data_collector()
-        
-        # 최신 데이터 수집 (100개 봉)
-        df = collector.get_latest_data(interval="15", limit=100)
-        
-        if df is None or len(df) == 0:
-            return ai_api_error('시장 데이터를 가져올 수 없습니다', 'DATA_ERROR', 500)
-        
-        # 요약 정보 생성
-        summary = collector.get_indicator_summary(df)
-        
-        return ai_api_success(
-            data={
-                'summary': summary,
-                'data_count': len(df),
-                'last_updated': df.index[-1].isoformat() if len(df) > 0 else None
-            },
-            message='시장 데이터 요약 조회 성공'
-        )
-        
-    except Exception as e:
-        log_ai_event('ERROR', 'AI', f'시장 데이터 요약 실패: {str(e)}')
-        return ai_api_error('시장 데이터 요약 중 오류가 발생했습니다', 'DATA_SUMMARY_ERROR', 500)
 
 # ============================================================================
 # 시스템 정보 API
@@ -482,13 +506,9 @@ def get_ai_system_info():
         manager = get_model_manager()
         storage_info = manager.get_storage_info()
         
-        # TensorFlow 정보
-        import tensorflow as tf
-        tf_info = {
-            'version': tf.__version__,
-            'gpu_available': len(tf.config.list_physical_devices('GPU')) > 0,
-            'cpu_count': os.cpu_count()
-        }
+        # 원격 연결 테스트
+        trainer = get_remote_trainer()
+        connection_test = trainer.test_connection()
         
         # 데이터 폴더 정보
         data_dir = Path("data")
@@ -498,8 +518,8 @@ def get_ai_system_info():
         models_size = sum(f.stat().st_size for f in models_dir.glob("**/*") if f.is_file()) if models_dir.exists() else 0
         
         system_info = {
-            'tensorflow': tf_info,
             'storage': storage_info,
+            'remote_connection': connection_test,
             'disk_usage': {
                 'data_size_mb': round(data_size / 1024 / 1024, 2),
                 'models_size_mb': round(models_size / 1024 / 1024, 2),

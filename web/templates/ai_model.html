@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/ai_model.html -->
-<!-- 코드명: AI 모델 관리 페이지 템플릿 (압축 + JS 분리) -->
+<!-- 코드명: AI 모델 관리 페이지 템플릿 (필수/선택 지표 구분 UI) -->
 
 {% extends "base.html" %}
 
@@ -13,81 +13,179 @@
 <div class="container-fluid">
     <!-- 페이지 헤더 -->
     <div class="d-flex justify-content-between align-items-center mb-4 page-header">
-        <h2 class="mb-0"><i class="bi bi-cpu me-2"></i>AI 모델 관리</h2>
-        <div class="current-time"><i class="bi bi-clock me-1"></i><span id="currentTime"></span></div>
+        <h2 class="mb-0">
+            <i class="bi bi-cpu me-2"></i>AI 모델 관리
+        </h2>
+        <div class="current-time">
+            <i class="bi bi-clock me-1"></i>
+            <span id="currentTime"></span>
+        </div>
     </div>
 
     <div class="row">
         <!-- 좌측: 학습 설정 및 실행 -->
         <div class="col-lg-8 mb-4">
-            <!-- 학습 지표 선택 -->
+            <!-- 학습 지표 선택 (개선된 UI) -->
             <div class="card main-card mb-4">
                 <div class="card-header">
-                    <h5><i class="bi bi-graph-up me-2"></i>학습 지표 선택</h5>
+                    <h5>
+                        <i class="bi bi-graph-up me-2"></i>학습 지표 선택
+                        <span class="badge bg-info ms-2" id="selectedIndicatorCount">10/17개 선택</span>
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted mb-3">AI 모델 학습에 포함할 기술적 지표들을 선택하세요.</p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="fw-bold mb-3">가격 지표</h6>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_price" checked>
-                                <label class="form-check-label" for="indicator_price">가격 데이터 (OHLCV)</label>
+                    <!-- 필수 지표 섹션 -->
+                    <div class="indicator-section mb-4">
+                        <h6 class="section-title">
+                            <i class="bi bi-star-fill text-warning me-2"></i>필수 지표
+                            <small class="text-muted ms-2">(항상 포함됨)</small>
+                        </h6>
+                        <div class="essential-indicators-grid">
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">가격 데이터</label>
+                                    <span class="indicator-badge">3</span>
+                                </div>
+                                <small class="indicator-desc">종가, 변화율, 고저범위</small>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_sma" checked>
-                                <label class="form-check-label" for="indicator_sma">단순이동평균 (SMA)</label>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">MACD</label>
+                                    <span class="indicator-badge">3</span>
+                                </div>
+                                <small class="indicator-desc">MACD, 시그널, 히스토그램</small>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_ema" checked>
-                                <label class="form-check-label" for="indicator_ema">지수이동평균 (EMA)</label>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">RSI</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">14일 RSI</small>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_bb" checked>
-                                <label class="form-check-label" for="indicator_bb">볼린저 밴드</label>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">볼린저밴드</label>
+                                    <span class="indicator-badge">2</span>
+                                </div>
+                                <small class="indicator-desc">위치, 폭</small>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-bold mb-3">모멘텀 지표</h6>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_rsi" checked>
-                                <label class="form-check-label" for="indicator_rsi">RSI</label>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">ATR</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">평균 실제 범위</small>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_macd" checked>
-                                <label class="form-check-label" for="indicator_macd">MACD</label>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">거래량</label>
+                                    <span class="indicator-badge">3</span>
+                                </div>
+                                <small class="indicator-desc">비율, CVD, CVD 기울기</small>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_stoch" checked>
-                                <label class="form-check-label" for="indicator_stoch">스토캐스틱</label>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">ADX</label>
+                                    <span class="indicator-badge">2</span>
+                                </div>
+                                <small class="indicator-desc">추세강도, 기울기</small>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_williams" checked>
-                                <label class="form-check-label" for="indicator_williams">Williams %R</label>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">Aroon</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">추세 전환 타이밍</small>
+                            </div>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">연속 카운터</label>
+                                    <span class="indicator-badge">2</span>
+                                </div>
+                                <small class="indicator-desc">연속 상승/하락</small>
+                            </div>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" checked disabled class="form-check-input">
+                                    <label class="indicator-name">다중 시간대</label>
+                                    <span class="indicator-badge">4</span>
+                                </div>
+                                <small class="indicator-desc">1H, 4H 추세, 정렬도</small>
                             </div>
                         </div>
                     </div>
-                    <div class="row mt-3">
-                        <div class="col-md-6">
-                            <h6 class="fw-bold mb-3">거래량 지표</h6>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_volume" checked>
-                                <label class="form-check-label" for="indicator_volume">거래량</label>
+
+                    <!-- 선택적 지표 섹션 -->
+                    <div class="indicator-section">
+                        <h6 class="section-title">
+                            <i class="bi bi-plus-circle me-2"></i>선택적 지표
+                            <small class="text-muted ms-2">(필요시 추가)</small>
+                        </h6>
+                        <div class="optional-indicators-grid">
+                            <div class="indicator-card optional">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_sma" class="form-check-input indicator-checkbox" data-indicator="sma">
+                                    <label class="indicator-name" for="indicator_sma">SMA</label>
+                                    <span class="indicator-badge">2</span>
+                                </div>
+                                <small class="indicator-desc">단순이동평균</small>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_vwap" checked>
-                                <label class="form-check-label" for="indicator_vwap">VWAP</label>
+                            <div class="indicator-card optional">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_ema" class="form-check-input indicator-checkbox" data-indicator="ema">
+                                    <label class="indicator-name" for="indicator_ema">EMA</label>
+                                    <span class="indicator-badge">3</span>
+                                </div>
+                                <small class="indicator-desc">지수이동평균</small>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-bold mb-3">변동성 지표</h6>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_atr" checked>
-                                <label class="form-check-label" for="indicator_atr">ATR (Average True Range)</label>
+                            <div class="indicator-card optional">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_stoch" class="form-check-input indicator-checkbox" data-indicator="stoch">
+                                    <label class="indicator-name" for="indicator_stoch">스토캐스틱</label>
+                                    <span class="indicator-badge">2</span>
+                                </div>
+                                <small class="indicator-desc">K%, D%</small>
                             </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox" id="indicator_volatility" checked>
-                                <label class="form-check-label" for="indicator_volatility">변동성</label>
+                            <div class="indicator-card optional">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_williams" class="form-check-input indicator-checkbox" data-indicator="williams">
+                                    <label class="indicator-name" for="indicator_williams">Williams %R</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">모멘텀 지표</small>
+                            </div>
+                            <div class="indicator-card optional">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_mfi" class="form-check-input indicator-checkbox" data-indicator="mfi">
+                                    <label class="indicator-name" for="indicator_mfi">MFI</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">자금흐름지표</small>
+                            </div>
+                            <div class="indicator-card optional">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_vwap" class="form-check-input indicator-checkbox" data-indicator="vwap">
+                                    <label class="indicator-name" for="indicator_vwap">VWAP</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">거래량가중평균</small>
+                            </div>
+                            <div class="indicator-card optional">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_volatility" class="form-check-input indicator-checkbox" data-indicator="volatility">
+                                    <label class="indicator-name" for="indicator_volatility">변동성</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">20일 변동성</small>
                             </div>
                         </div>
                     </div>
@@ -97,7 +195,9 @@
             <!-- 학습 파라미터 설정 -->
             <div class="card main-card mb-4">
                 <div class="card-header">
-                    <h5><i class="bi bi-sliders me-2"></i>학습 파라미터 설정</h5>
+                    <h5>
+                        <i class="bi bi-sliders me-2"></i>학습 파라미터 설정
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -109,30 +209,35 @@
                             </div>
                             <div class="form-text">과거 몇 일간의 데이터로 학습할지 설정</div>
                         </div>
+                        
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-medium">에폭 (Epochs)</label>
                             <input type="number" class="form-control" id="epochs" value="100" min="10" max="1000">
                             <div class="form-text">모델 학습 반복 횟수</div>
                         </div>
                     </div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-medium">배치 크기 (Batch Size)</label>
                             <input type="number" class="form-control" id="batchSize" value="32" min="8" max="128">
                             <div class="form-text">한 번에 처리할 데이터 개수</div>
                         </div>
+                        
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-medium">학습률 (Learning Rate)</label>
                             <input type="number" class="form-control" id="learningRate" value="0.001" min="0.0001" max="0.1" step="0.0001">
                             <div class="form-text">모델 가중치 업데이트 속도</div>
                         </div>
                     </div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-medium">시퀀스 길이</label>
                             <input type="number" class="form-control" id="sequenceLength" value="60" min="10" max="200">
                             <div class="form-text">예측에 사용할 과거 데이터 개수 (분)</div>
                         </div>
+                        
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-medium">검증 비율</label>
                             <div class="input-group">
@@ -148,20 +253,22 @@
             <!-- 학습 실행 및 모니터링 -->
             <div class="card main-card">
                 <div class="card-header">
-                    <h5><i class="bi bi-play-circle me-2"></i>학습 실행 및 모니터링</h5>
+                    <h5>
+                        <i class="bi bi-play-circle me-2"></i>학습 실행 및 모니터링
+                    </h5>
                 </div>
                 <div class="card-body">
                     <!-- 학습 제어 버튼 -->
                     <div class="row mb-4">
                         <div class="col-md-8">
                             <div class="d-flex gap-2">
-                                <button class="btn btn-success" id="startTrainingBtn" onclick="startTraining()">
+                                <button class="btn btn-success" id="startTrainingBtn">
                                     <i class="bi bi-play-fill me-1"></i>학습 시작
                                 </button>
-                                <button class="btn btn-danger" id="stopTrainingBtn" onclick="stopTraining()" disabled>
+                                <button class="btn btn-danger" id="stopTrainingBtn" disabled>
                                     <i class="bi bi-stop-fill me-1"></i>학습 중지
                                 </button>
-                                <button class="btn btn-outline-secondary" onclick="resetParameters()">
+                                <button class="btn btn-outline-secondary" id="resetParametersBtn">
                                     <i class="bi bi-arrow-clockwise me-1"></i>기본값 복원
                                 </button>
                             </div>
@@ -193,6 +300,7 @@
                                 <small class="text-muted" id="epochText">0/100 배치</small>
                             </div>
                         </div>
+                        
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="training-info">
@@ -237,25 +345,27 @@
             <!-- 현재 활성 모델 -->
             <div class="card main-card mb-4">
                 <div class="card-header">
-                    <h5><i class="bi bi-star me-2"></i>현재 활성 모델</h5>
+                    <h5>
+                        <i class="bi bi-star me-2"></i>현재 활성 모델
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="active-model-info">
                         <div class="model-name">
-                            <strong>model_20250720_143022</strong>
+                            <strong id="activeModelName">모델 없음</strong>
                         </div>
                         <div class="model-stats">
                             <div class="stat-item">
                                 <span class="label">정확도:</span>
-                                <span class="value text-success">85.3%</span>
+                                <span class="value text-success" id="activeModelAccuracy">-</span>
                             </div>
                             <div class="stat-item">
                                 <span class="label">학습일:</span>
-                                <span class="value">2025-07-20</span>
+                                <span class="value" id="activeModelDate">-</span>
                             </div>
                             <div class="stat-item">
                                 <span class="label">상태:</span>
-                                <span class="badge bg-success">활성</span>
+                                <span id="activeModelBadge" class="badge bg-secondary">비활성</span>
                             </div>
                         </div>
                     </div>
@@ -265,61 +375,16 @@
             <!-- 모델 히스토리 -->
             <div class="card main-card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>모델 히스토리</h5>
-                    <button class="btn btn-outline-danger btn-sm" onclick="cleanupModels()">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history me-2"></i>모델 히스토리
+                    </h5>
+                    <button class="btn btn-outline-danger btn-sm" id="cleanupModelsBtn">
                         <i class="bi bi-trash me-1"></i>정리
                     </button>
                 </div>
                 <div class="card-body p-0">
                     <div class="model-list">
-                        <div class="model-item active">
-                            <div class="model-info">
-                                <div class="model-name">model_20250720_143022</div>
-                                <div class="model-meta">
-                                    <small>2025-07-20 14:30</small>
-                                    <span class="accuracy">85.3%</span>
-                                </div>
-                            </div>
-                            <div class="model-actions">
-                                <button class="btn btn-sm btn-success" disabled>
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="model-item">
-                            <div class="model-info">
-                                <div class="model-name">model_20250720_091544</div>
-                                <div class="model-meta">
-                                    <small>2025-07-20 09:15</small>
-                                    <span class="accuracy">82.7%</span>
-                                </div>
-                            </div>
-                            <div class="model-actions">
-                                <button class="btn btn-sm btn-outline-primary" onclick="activateModel('model_20250720_091544')">
-                                    <i class="bi bi-play"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('model_20250720_091544')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="model-item">
-                            <div class="model-info">
-                                <div class="model-name">model_20250719_235612</div>
-                                <div class="model-meta">
-                                    <small>2025-07-19 23:56</small>
-                                    <span class="accuracy">79.1%</span>
-                                </div>
-                            </div>
-                            <div class="model-actions">
-                                <button class="btn btn-sm btn-outline-primary" onclick="activateModel('model_20250719_235612')">
-                                    <i class="bi bi-play"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('model_20250719_235612')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </div>
+                        <!-- JavaScript로 동적 생성 -->
                     </div>
                 </div>
             </div>
@@ -327,13 +392,18 @@
             <!-- 자동 학습 스케줄러 -->
             <div class="card main-card">
                 <div class="card-header">
-                    <h5><i class="bi bi-calendar-event me-2"></i>자동 학습 스케줄러</h5>
+                    <h5>
+                        <i class="bi bi-calendar-event me-2"></i>자동 학습 스케줄러
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="form-check form-switch mb-3">
                         <input class="form-check-input" type="checkbox" id="autoRetraining" checked>
-                        <label class="form-check-label fw-medium" for="autoRetraining">자동 재학습 활성화</label>
+                        <label class="form-check-label fw-medium" for="autoRetraining">
+                            자동 재학습 활성화
+                        </label>
                     </div>
+                    
                     <div class="mb-3">
                         <label class="form-label fw-medium">재학습 간격</label>
                         <select class="form-select" id="retrainingInterval">
@@ -343,18 +413,22 @@
                             <option value="1209600">2주마다</option>
                         </select>
                     </div>
+                    
                     <div class="next-training">
                         <small class="text-muted">다음 자동 학습: </small>
-                        <small id="nextTraining">2025-07-21 14:30</small>
+                        <small id="nextTraining">-</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- 토스트 컨테이너 -->
+<div id="toastContainer"></div>
+
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ai_model.js') }}"></script>
 {% endblock %}

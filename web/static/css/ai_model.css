@@ -1,543 +1,673 @@
 /* 파일 경로: web/static/css/ai_model.css */
-/* 코드명: AI 모델 관리 페이지 스타일 (스위치 겹침 문제 해결) */
+/* 코드명: AI 모델 관리 페이지 스타일 (필수/선택 지표 구분 추가) */
 
 /* 페이지 헤더 */
 .page-header {
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #333333;
+   margin-bottom: 24px;
+   padding-bottom: 16px;
+   border-bottom: 1px solid #333333;
 }
 
 .page-header h2 {
-    color: #ffffff;
-    font-weight: 600;
-    margin-bottom: 0;
-    font-size: 1.8rem;
+   color: #ffffff;
+   font-weight: 600;
+   margin-bottom: 0;
+   font-size: 1.8rem;
 }
 
 .current-time {
-    color: #aaaaaa;
-    font-size: 0.9rem;
-    font-weight: 500;
+   color: #aaaaaa;
+   font-size: 0.9rem;
+   font-weight: 500;
 }
 
 .current-time i {
-    color: #667eea;
-    margin-right: 0.25rem;
+   color: #667eea;
+   margin-right: 0.25rem;
 }
 
 /* 메인 카드 스타일 */
 .main-card {
-    background-color: #1e1e1e;
-    border: 1px solid #333333;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
+   background-color: #1e1e1e;
+   border: 1px solid #333333;
+   border-radius: 12px;
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+   transition: all 0.3s ease;
 }
 
 .main-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+   transform: translateY(-2px);
+   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 .main-card .card-header {
-    background-color: #2a2a2a;
-    border-bottom: 1px solid #404040;
-    border-radius: 12px 12px 0 0;
-    padding: 18px 24px;
+   background-color: #2a2a2a;
+   border-bottom: 1px solid #404040;
+   border-radius: 12px 12px 0 0;
+   padding: 18px 24px;
 }
 
 .main-card .card-header h5 {
-    color: #ffffff;
-    font-weight: 600;
-    margin-bottom: 0;
-    font-size: 1.1rem;
+   color: #ffffff;
+   font-weight: 600;
+   margin-bottom: 0;
+   font-size: 1.1rem;
 }
 
 .main-card .card-body {
-    padding: 24px;
-    background-color: #1e1e1e;
+   padding: 24px;
+   background-color: #1e1e1e;
 }
 
-/* 지표 선택 섹션 - 체크박스 완전 제거하고 스위치로 변경 */
+/* 🆕 지표 섹션 분리 스타일 */
+.indicator-section {
+   margin-bottom: 28px;
+}
+
+.section-title {
+   color: #ffffff;
+   font-weight: 600;
+   font-size: 1rem;
+   margin-bottom: 16px;
+   padding-bottom: 8px;
+   border-bottom: 2px solid #404040;
+}
+
+/* 🆕 필수 지표 그리드 */
+.essential-indicators-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+   gap: 12px;
+   margin-top: 16px;
+}
+
+/* 🆕 선택적 지표 그리드 */
+.optional-indicators-grid {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+   gap: 12px;
+   margin-top: 16px;
+}
+
+/* 🆕 지표 카드 */
+.indicator-card {
+   background-color: #2a2a2a;
+   border: 1px solid #404040;
+   border-radius: 8px;
+   padding: 12px;
+   transition: all 0.2s ease;
+}
+
+.indicator-card.essential {
+   background: linear-gradient(135deg, #2a3a4a 0%, #2a2a2a 100%);
+   border-color: #4a5a6a;
+}
+
+.indicator-card.optional:hover {
+   background-color: #333333;
+   border-color: #667eea;
+   transform: translateY(-1px);
+}
+
+.indicator-header {
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   margin-bottom: 4px;
+}
+
+.indicator-name {
+   color: #ffffff;
+   font-weight: 500;
+   font-size: 0.9rem;
+   flex: 1;
+   margin: 0;
+   cursor: pointer;
+}
+
+.indicator-badge {
+   background-color: #667eea;
+   color: #ffffff;
+   padding: 2px 6px;
+   border-radius: 4px;
+   font-size: 0.75rem;
+   font-weight: 600;
+}
+
+.indicator-desc {
+   color: #999999;
+   font-size: 0.8rem;
+   display: block;
+   margin-top: 4px;
+}
+
+/* 지표 체크박스 스타일 (기존 스위치 스타일 유지하되 크기 조정) */
+.indicator-card .form-check-input {
+   width: 18px !important;
+   height: 18px !important;
+   border-radius: 4px !important;
+   background-color: #333333 !important;
+   border: 1px solid #444444 !important;
+   position: relative !important;
+   cursor: pointer !important;
+   appearance: none !important;
+   -webkit-appearance: none !important;
+   -moz-appearance: none !important;
+   flex-shrink: 0;
+   margin: 0 !important;
+   background-image: none !important;
+}
+
+.indicator-card .form-check-input:checked {
+   background-color: #667eea !important;
+   border-color: #667eea !important;
+}
+
+.indicator-card .form-check-input:checked::after {
+   content: '✓';
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   color: white;
+   font-size: 12px;
+   font-weight: bold;
+}
+
+.indicator-card.essential .form-check-input {
+   background-color: #4a5a6a !important;
+   border-color: #667eea !important;
+   cursor: not-allowed !important;
+}
+
+.indicator-card .form-check-input:focus {
+   box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+   outline: none !important;
+}
+
+/* 지표 선택 섹션 - 기존 스타일 (하위 호환성) */
 .form-check {
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-left: 0 !important; /* Bootstrap 기본 패딩 제거 */
+   margin-bottom: 12px;
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   padding-left: 0 !important;
 }
 
-/* 모든 form-check-input을 스위치 스타일로 변경 - 체크박스 완전 제거 */
-.form-check-input {
-    width: 40px !important;
-    height: 20px !important;
-    border-radius: 20px !important;
-    background-color: #333333 !important;
-    border: none !important;
-    position: relative !important;
-    cursor: pointer !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    flex-shrink: 0;
-    margin: 0 !important;
-    background-image: none !important; /* Bootstrap 체크 이미지 제거 */
+/* 기존 form-check-input 스위치 스타일 (학습 파라미터 등에서 사용) */
+.form-check-input:not(.indicator-card .form-check-input) {
+   width: 40px !important;
+   height: 20px !important;
+   border-radius: 20px !important;
+   background-color: #333333 !important;
+   border: none !important;
+   position: relative !important;
+   cursor: pointer !important;
+   appearance: none !important;
+   -webkit-appearance: none !important;
+   -moz-appearance: none !important;
+   flex-shrink: 0;
+   margin: 0 !important;
+   background-image: none !important;
 }
 
-.form-check-input:checked {
-    background-color: #667eea !important;
-    border-color: #667eea !important;
-    background-image: none !important; /* 체크 이미지 완전 제거 */
+.form-check-input:not(.indicator-card .form-check-input):checked {
+   background-color: #667eea !important;
+   border-color: #667eea !important;
+   background-image: none !important;
 }
 
-.form-check-input::before {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: #ffffff;
-    top: 2px;
-    left: 2px;
-    transition: all 0.3s ease;
-    z-index: 2; /* 체크박스 위에 표시 */
+.form-check-input:not(.indicator-card .form-check-input)::before {
+   content: '';
+   position: absolute;
+   width: 16px;
+   height: 16px;
+   border-radius: 50%;
+   background-color: #ffffff;
+   top: 2px;
+   left: 2px;
+   transition: all 0.3s ease;
+   z-index: 2;
 }
 
-.form-check-input:checked::before {
-    transform: translateX(20px);
-}
-
-.form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
-    outline: none !important;
-    background-image: none !important; /* 포커스 시에도 체크 이미지 제거 */
+.form-check-input:not(.indicator-card .form-check-input):checked::before {
+   transform: translateX(20px);
 }
 
 .form-check-label {
-    color: #e0e0e0 !important;
-    font-weight: 500 !important;
-    font-size: 0.95rem !important;
-    cursor: pointer !important;
-    margin: 0 !important;
-    line-height: 1.2;
+   color: #e0e0e0 !important;
+   font-weight: 500 !important;
+   font-size: 0.95rem !important;
+   cursor: pointer !important;
+   margin: 0 !important;
+   line-height: 1.2;
 }
 
 /* 학습 파라미터 폼 */
 .form-label {
-    color: #ffffff;
-    font-weight: 600;
-    margin-bottom: 8px;
-    font-size: 0.95rem;
+   color: #ffffff;
+   font-weight: 600;
+   margin-bottom: 8px;
+   font-size: 0.95rem;
 }
 
 .form-control, .form-select {
-    background-color: #2d2d2d;
-    border: 1px solid #444444;
-    color: #ffffff;
-    font-weight: 500;
-    border-radius: 8px;
-    padding: 10px 12px;
+   background-color: #2d2d2d;
+   border: 1px solid #444444;
+   color: #ffffff;
+   font-weight: 500;
+   border-radius: 8px;
+   padding: 10px 12px;
 }
 
 .form-control:focus, .form-select:focus {
-    background-color: #2d2d2d;
-    border-color: #667eea;
-    color: #ffffff;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+   background-color: #2d2d2d;
+   border-color: #667eea;
+   color: #ffffff;
+   box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }
 
 .input-group-text {
-    background-color: #444444;
-    border: 1px solid #444444;
-    color: #ffffff;
-    font-weight: 500;
-    border-radius: 0 8px 8px 0;
+   background-color: #444444;
+   border: 1px solid #444444;
+   color: #ffffff;
+   font-weight: 500;
+   border-radius: 0 8px 8px 0;
 }
 
 .form-text {
-    color: #aaaaaa;
-    font-size: 0.85rem;
-    margin-top: 4px;
+   color: #aaaaaa;
+   font-size: 0.85rem;
+   margin-top: 4px;
 }
 
 /* 학습 제어 버튼 */
 .btn {
-    font-weight: 600;
-    border-radius: 8px;
-    padding: 10px 16px;
-    transition: all 0.3s ease;
-    border: none;
+   font-weight: 600;
+   border-radius: 8px;
+   padding: 10px 16px;
+   transition: all 0.3s ease;
+   border: none;
 }
 
 .btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+   transform: translateY(-1px);
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .btn-success {
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    color: #ffffff;
+   background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+   color: #ffffff;
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
-    color: #ffffff;
+   background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+   color: #ffffff;
 }
 
 .btn-outline-secondary {
-    border: 1px solid #6c757d;
-    color: #6c757d;
-    background: transparent;
+   border: 1px solid #6c757d;
+   color: #6c757d;
+   background: transparent;
 }
 
 .btn-outline-secondary:hover {
-    background-color: #6c757d;
-    color: #ffffff;
+   background-color: #6c757d;
+   color: #ffffff;
 }
 
 /* 학습 상태 배지 */
 .training-status {
-    text-align: right;
+   text-align: right;
 }
 
 .badge {
-    font-size: 0.85rem;
-    padding: 6px 12px;
-    font-weight: 600;
-    border-radius: 6px;
+   font-size: 0.85rem;
+   padding: 6px 12px;
+   font-weight: 600;
+   border-radius: 6px;
 }
 
 .badge.bg-secondary {
-    background-color: #6c757d !important;
+   background-color: #6c757d !important;
 }
 
 .badge.bg-primary {
-    background-color: #667eea !important;
+   background-color: #667eea !important;
 }
 
 .badge.bg-success {
-    background-color: #28a745 !important;
+   background-color: #28a745 !important;
 }
 
 .badge.bg-warning {
-    background-color: #ffc107 !important;
-    color: #212529 !important;
+   background-color: #ffc107 !important;
+   color: #212529 !important;
+}
+
+.badge.bg-info {
+   background-color: #17a2b8 !important;
 }
 
 /* 진행률 바 */
 .progress {
-    background-color: #333333;
-    border-radius: 8px;
-    height: 25px;
-    overflow: hidden;
+   background-color: #333333;
+   border-radius: 8px;
+   height: 25px;
+   overflow: hidden;
 }
 
 .progress-bar {
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    transition: width 0.3s ease;
-    font-weight: 600;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+   transition: width 0.3s ease;
+   font-weight: 600;
+   font-size: 0.85rem;
+   display: flex;
+   align-items: center;
+   justify-content: center;
 }
 
 .progress-bar.bg-info {
-    background: linear-gradient(90deg, #17a2b8 0%, #20c997 100%) !important;
+   background: linear-gradient(90deg, #17a2b8 0%, #20c997 100%) !important;
 }
 
 /* 학습 정보 섹션 */
 .training-info, .training-metrics {
-    background-color: #2a2a2a;
-    border-radius: 8px;
-    padding: 16px;
-    border: 1px solid #404040;
+   background-color: #2a2a2a;
+   border-radius: 8px;
+   padding: 16px;
+   border: 1px solid #404040;
 }
 
 .info-item, .metric-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    padding: 4px 0;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 8px;
+   padding: 4px 0;
 }
 
 .info-item:last-child, .metric-item:last-child {
-    margin-bottom: 0;
+   margin-bottom: 0;
 }
 
 .info-item .label, .metric-item .label {
-    color: #aaaaaa;
-    font-weight: 500;
-    font-size: 0.9rem;
+   color: #aaaaaa;
+   font-weight: 500;
+   font-size: 0.9rem;
 }
 
 .info-item span:last-child, .metric-item .value {
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 0.9rem;
+   color: #ffffff;
+   font-weight: 600;
+   font-size: 0.9rem;
 }
 
 /* 활성 모델 정보 */
 .active-model-info {
-    text-align: center;
-    padding: 16px;
-    background: linear-gradient(135deg, #1a3a5c 0%, #2a4a6c 100%);
-    border-radius: 8px;
-    border: 1px solid #404040;
+   text-align: center;
+   padding: 16px;
+   background: linear-gradient(135deg, #1a3a5c 0%, #2a4a6c 100%);
+   border-radius: 8px;
+   border: 1px solid #404040;
 }
 
 .model-name {
-    color: #ffffff;
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 12px;
-    font-family: 'Courier New', monospace;
+   color: #ffffff;
+   font-size: 1.1rem;
+   font-weight: 700;
+   margin-bottom: 12px;
+   font-family: 'Courier New', monospace;
 }
 
 .model-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+   display: flex;
+   flex-direction: column;
+   gap: 8px;
 }
 
 .stat-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
 }
 
 .stat-item .label {
-    color: #aaaaaa;
-    font-weight: 500;
-    font-size: 0.9rem;
+   color: #aaaaaa;
+   font-weight: 500;
+   font-size: 0.9rem;
 }
 
 .stat-item .value {
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 0.9rem;
+   color: #ffffff;
+   font-weight: 600;
+   font-size: 0.9rem;
 }
 
 /* 모델 히스토리 리스트 */
 .model-list {
-    max-height: 400px;
-    overflow-y: auto;
+   max-height: 400px;
+   overflow-y: auto;
 }
 
 .model-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    border-bottom: 1px solid #333333;
-    transition: all 0.3s ease;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 16px 20px;
+   border-bottom: 1px solid #333333;
+   transition: all 0.3s ease;
 }
 
 .model-item:last-child {
-    border-bottom: none;
+   border-bottom: none;
 }
 
 .model-item:hover {
-    background-color: #2a2a2a;
+   background-color: #2a2a2a;
 }
 
 .model-item.active {
-    background-color: #1a3a5c;
-    border-left: 4px solid #667eea;
+   background-color: #1a3a5c;
+   border-left: 4px solid #667eea;
 }
 
 .model-info .model-name {
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 4px;
-    font-family: 'Courier New', monospace;
+   color: #ffffff;
+   font-weight: 600;
+   font-size: 0.95rem;
+   margin-bottom: 4px;
+   font-family: 'Courier New', monospace;
 }
 
 .model-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
 }
 
 .model-meta small {
-    color: #aaaaaa;
-    font-size: 0.8rem;
+   color: #aaaaaa;
+   font-size: 0.8rem;
 }
 
 .model-meta .accuracy {
-    color: #28a745;
-    font-weight: 600;
-    font-size: 0.85rem;
+   color: #28a745;
+   font-weight: 600;
+   font-size: 0.85rem;
 }
 
 .model-actions {
-    display: flex;
-    gap: 4px;
+   display: flex;
+   gap: 4px;
 }
 
 .model-actions .btn {
-    padding: 4px 8px;
-    font-size: 0.75rem;
-    border-radius: 4px;
+   padding: 4px 8px;
+   font-size: 0.75rem;
+   border-radius: 4px;
 }
 
 .btn-outline-primary {
-    border: 1px solid #667eea;
-    color: #667eea;
-    background: transparent;
+   border: 1px solid #667eea;
+   color: #667eea;
+   background: transparent;
 }
 
 .btn-outline-primary:hover {
-    background-color: #667eea;
-    color: #ffffff;
+   background-color: #667eea;
+   color: #ffffff;
 }
 
 .btn-outline-danger {
-    border: 1px solid #dc3545;
-    color: #dc3545;
-    background: transparent;
+   border: 1px solid #dc3545;
+   color: #dc3545;
+   background: transparent;
 }
 
 .btn-outline-danger:hover {
-    background-color: #dc3545;
-    color: #ffffff;
+   background-color: #dc3545;
+   color: #ffffff;
 }
 
 /* 자동 학습 스케줄러 - 왼쪽 공백 제거 및 정렬 개선 */
 .form-switch {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-    padding-left: 0 !important; /* Bootstrap 기본 패딩 제거 */
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   margin-bottom: 12px;
+   padding-left: 0 !important;
 }
 
 .form-switch .form-check-input {
-    width: 50px !important;
-    height: 25px !important;
-    border-radius: 25px !important;
-    background-color: #333333 !important;
-    border: none !important;
-    position: relative !important;
-    cursor: pointer !important;
-    appearance: none !important;
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    flex-shrink: 0;
-    margin: 0 !important;
-    background-image: none !important; /* Bootstrap 체크 이미지 제거 */
+   width: 50px !important;
+   height: 25px !important;
+   border-radius: 25px !important;
+   background-color: #333333 !important;
+   border: none !important;
+   position: relative !important;
+   cursor: pointer !important;
+   appearance: none !important;
+   -webkit-appearance: none !important;
+   -moz-appearance: none !important;
+   flex-shrink: 0;
+   margin: 0 !important;
+   background-image: none !important;
 }
 
 .form-switch .form-check-input:checked {
-    background-color: #667eea !important;
-    background-image: none !important; /* 체크 이미지 완전 제거 */
+   background-color: #667eea !important;
+   background-image: none !important;
 }
 
 .form-switch .form-check-input::before {
-    content: '';
-    position: absolute;
-    width: 19px;
-    height: 19px;
-    border-radius: 50%;
-    background-color: #ffffff;
-    top: 3px;
-    left: 3px;
-    transition: all 0.3s ease;
-    z-index: 2; /* 체크박스 위에 표시 */
+   content: '';
+   position: absolute;
+   width: 19px;
+   height: 19px;
+   border-radius: 50%;
+   background-color: #ffffff;
+   top: 3px;
+   left: 3px;
+   transition: all 0.3s ease;
+   z-index: 2;
 }
 
 .form-switch .form-check-input:checked::before {
-    transform: translateX(25px);
+   transform: translateX(25px);
 }
 
 .form-switch .form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
-    outline: none !important;
-    background-image: none !important; /* 포커스 시에도 체크 이미지 제거 */
+   box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+   outline: none !important;
+   background-image: none !important;
 }
 
 .form-switch .form-check-label {
-    cursor: pointer !important;
-    color: #e0e0e0 !important;
-    font-weight: 500 !important;
-    margin: 0 !important;
-    line-height: 1.2;
+   cursor: pointer !important;
+   color: #e0e0e0 !important;
+   font-weight: 500 !important;
+   margin: 0 !important;
+   line-height: 1.2;
 }
 
 .next-training {
-    background-color: #2a2a2a;
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid #404040;
-    text-align: center;
+   background-color: #2a2a2a;
+   padding: 12px;
+   border-radius: 6px;
+   border: 1px solid #404040;
+   text-align: center;
 }
 
 /* 모바일 반응형 */
 @media (max-width: 768px) {
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    
-    .page-header h2 {
-        font-size: 1.5rem;
-    }
-    
-    .current-time {
-        align-self: flex-end;
-        font-size: 0.8rem;
-    }
-    
-    .main-card .card-header {
-        padding: 16px 20px;
-    }
-    
-    .main-card .card-body {
-        padding: 20px;
-    }
-    
-    .model-list {
-        max-height: 300px;
-    }
-    
-    .model-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    
-    .model-actions {
-        align-self: flex-end;
-    }
-    
-    .training-info, .training-metrics {
-        margin-bottom: 16px;
-    }
-    
-    .btn {
-        padding: 8px 12px;
-        font-size: 0.9rem;
-    }
+   .page-header {
+       flex-direction: column;
+       align-items: flex-start;
+       gap: 12px;
+   }
+   
+   .page-header h2 {
+       font-size: 1.5rem;
+   }
+   
+   .current-time {
+       align-self: flex-end;
+       font-size: 0.8rem;
+   }
+   
+   .main-card .card-header {
+       padding: 16px 20px;
+   }
+   
+   .main-card .card-body {
+       padding: 20px;
+   }
+   
+   /* 🆕 모바일에서 지표 그리드 1열로 */
+   .essential-indicators-grid,
+   .optional-indicators-grid {
+       grid-template-columns: 1fr;
+   }
+   
+   .model-list {
+       max-height: 300px;
+   }
+   
+   .model-item {
+       flex-direction: column;
+       align-items: flex-start;
+       gap: 12px;
+   }
+   
+   .model-actions {
+       align-self: flex-end;
+   }
+   
+   .training-info, .training-metrics {
+       margin-bottom: 16px;
+   }
+   
+   .btn {
+       padding: 8px 12px;
+       font-size: 0.9rem;
+   }
 }
 
 /* 애니메이션 */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+   from {
+       opacity: 0;
+       transform: translateY(20px);
+   }
+   to {
+       opacity: 1;
+       transform: translateY(0);
+   }
 }
 
 .main-card {
-    animation: fadeInUp 0.6s ease-out;
+   animation: fadeInUp 0.6s ease-out;
 }
 
 .main-card:nth-child(1) { animation-delay: 0.1s; }
@@ -547,19 +677,27 @@
 
 /* 스크롤바 커스터마이징 */
 .model-list::-webkit-scrollbar {
-    width: 6px;
+   width: 6px;
 }
 
 .model-list::-webkit-scrollbar-track {
-    background: #333333;
-    border-radius: 3px;
+   background: #333333;
+   border-radius: 3px;
 }
 
 .model-list::-webkit-scrollbar-thumb {
-    background: #667eea;
-    border-radius: 3px;
+   background: #667eea;
+   border-radius: 3px;
 }
 
 .model-list::-webkit-scrollbar-thumb:hover {
-    background: #764ba2;
+   background: #764ba2;
+}
+
+/* 🆕 토스트 컨테이너 */
+#toastContainer {
+   position: fixed;
+   top: 20px;
+   right: 20px;
+   z-index: 9999;
 }
