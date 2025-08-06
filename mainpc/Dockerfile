@@ -1,5 +1,5 @@
-# Dockerfile 최종 준비
-FROM tensorflow/tensorflow:2.12.0-gpu
+# 파일 경로: mainpc/Dockerfile
+FROM tensorflow/tensorflow:2.15.0-gpu
 
 WORKDIR /app
 

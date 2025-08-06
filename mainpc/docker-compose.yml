@@ -1,9 +1,20 @@
+# 파일 경로: mainpc/docker-compose.yml
 version: '3.8'
+
 services:
-  ai_trainer:
-    build: .
-    runtime: nvidia
+  ai-trainer:
+    image: nhbot-trainer
+    container_name: nhbot-trainer-container
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     volumes:
-      - .:/app
+      - .:/app  # 이것만 있어도 충분!
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
+    command: tail -f /dev/null
+    restart: unless-stopped
