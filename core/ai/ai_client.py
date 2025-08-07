@@ -7,8 +7,6 @@ import time
 import threading
 import logging
 import hashlib
-import numpy as np
-import pandas as pd
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple, Callable
 from functools import lru_cache
@@ -505,12 +503,12 @@ class AIClient:
     # 예측 관련 기능 (PredictorClient에서 가져옴)
     # ============================================================================
     
-    def predict(self, market_data: Optional[pd.DataFrame] = None) -> Dict:
+    def predict(self, market_data: Optional[Any] = None) -> Dict:
         """
         AI 예측 수행
         
         Args:
-            market_data: 시장 데이터 DataFrame (None이면 메인 PC에서 최신 데이터 수집)
+            market_data: 시장 데이터 (dict 또는 list 형태)
             
         Returns:
             예측 결과 딕셔너리
@@ -530,21 +528,8 @@ class AIClient:
             request_data = {}
             
             if market_data is not None:
-                # DataFrame을 JSON으로 변환
-                if isinstance(market_data, pd.DataFrame):
-                    # 인덱스가 datetime인 경우 문자열로 변환
-                    if isinstance(market_data.index, pd.DatetimeIndex):
-                        market_data_dict = market_data.reset_index().to_dict('records')
-                        for record in market_data_dict:
-                            if 'index' in record and hasattr(record['index'], 'isoformat'):
-                                record['timestamp'] = record['index'].isoformat()
-                                del record['index']
-                    else:
-                        market_data_dict = market_data.to_dict('records')
-                    
-                    request_data['market_data'] = market_data_dict
-                else:
-                    request_data['market_data'] = market_data
+                # 이미 dict나 list 형태로 전달된다고 가정
+                request_data['market_data'] = market_data
             
             # API 호출
             print("🔮 예측 API 호출 중...")
@@ -593,7 +578,7 @@ class AIClient:
             print(f"❌ 예측 중 오류: {e}")
             return self._get_fallback_prediction(str(e))
     
-    def predict_batch(self, market_data_list: List[pd.DataFrame]) -> List[Dict]:
+    def predict_batch(self, market_data_list: List[Any]) -> List[Dict]:
         """배치 예측 수행"""
         predictions = []
         
@@ -607,7 +592,7 @@ class AIClient:
         return predictions
     
     def get_prediction_with_confidence(self, 
-                                      market_data: Optional[pd.DataFrame] = None,
+                                      market_data: Optional[Any] = None,
                                       min_confidence: float = 0.6) -> Dict:
         """최소 확신도 이상일 때만 예측 반환"""
         prediction = self.predict(market_data)
@@ -1072,11 +1057,11 @@ if __name__ == "__main__":
     
     # 5. 예측 테스트 (더미 데이터)
     print("\n🔮 예측 테스트")
-    dummy_data = pd.DataFrame({
-        'close': np.random.randn(100) * 1000 + 95000,
-        'volume': np.random.randn(100) * 100 + 1000,
-        'rsi_14': np.random.randn(100) * 20 + 50
-    })
+    dummy_data = {
+        'close': [95000, 95100, 95200],
+        'volume': [1000, 1100, 1200],
+        'rsi_14': [50, 51, 52]
+    }
     
     prediction = client.predict(dummy_data)
     print(f"   신호: {prediction['signal']}")
