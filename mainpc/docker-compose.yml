@@ -1,10 +1,11 @@
 # 파일 경로: mainpc/docker-compose.yml
 version: '3.8'
-
 services:
   ai-trainer:
     image: nhbot-trainer
     container_name: nhbot-trainer-container
+    ports:
+      - "5000:5000"  # ⭐ Flask API 포트 매핑 추가
     deploy:
       resources:
         reservations:
@@ -13,8 +14,9 @@ services:
               count: all
               capabilities: [gpu]
     volumes:
-      - .:/app  # 이것만 있어도 충분!
+      - .:/app
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
-    command: tail -f /dev/null
+      - PYTHONUNBUFFERED=1  # ⭐ Flask 로그 실시간 출력
+    command: python ai_server.py  # ⭐ Flask 서버 실행으로 변경
     restart: unless-stopped
