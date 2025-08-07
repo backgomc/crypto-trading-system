@@ -1,5 +1,5 @@
 # 파일 경로: web/routes/ai_api.py
-# 코드명: AI 관련 API 엔드포인트 (RemoteTrainer 연동 버전)
+# 코드명: AI 관련 API 엔드포인트 (AIClient 통합 버전)
 
 from flask import Blueprint, request, session, jsonify
 from functools import wraps
@@ -8,9 +8,8 @@ import json
 import os
 from pathlib import Path
 
-# AI 모듈 임포트
-from core.ai import ModelManager
-from core.remote_trainer import RemoteTrainer
+# AI 통합 클라이언트 임포트
+from core.ai import AIClient
 from config.models import SystemLog, db
 
 ai_api_bp = Blueprint('ai_api', __name__)
@@ -19,22 +18,14 @@ ai_api_bp = Blueprint('ai_api', __name__)
 # 전역 AI 인스턴스 (싱글톤 패턴)
 # ============================================================================
 
-_model_manager = None
-_remote_trainer = None
+_ai_client = None
 
-def get_model_manager():
-    """ModelManager 싱글톤"""
-    global _model_manager
-    if _model_manager is None:
-        _model_manager = ModelManager()
-    return _model_manager
-
-def get_remote_trainer():
-    """RemoteTrainer 싱글톤"""
-    global _remote_trainer
-    if _remote_trainer is None:
-        _remote_trainer = RemoteTrainer()
-    return _remote_trainer
+def get_ai_client():
+    """AIClient 싱글톤"""
+    global _ai_client
+    if _ai_client is None:
+        _ai_client = AIClient()
+    return _ai_client
 
 # ============================================================================
 # 유틸리티 함수들
@@ -109,10 +100,10 @@ def log_ai_event(level, category, message):
 def get_models():
     """AI 모델 목록 조회"""
     try:
-        manager = get_model_manager()
-        models = manager.get_model_list()
-        active_model = manager.get_active_model()
-        storage_info = manager.get_storage_info()
+        client = get_ai_client()
+        models = client.get_model_list()
+        active_model = client.get_active_model()
+        storage_info = client.get_storage_info()
         
         log_ai_event('INFO', 'AI', '모델 목록 조회')
         
@@ -134,8 +125,8 @@ def get_models():
 def get_model_info(model_name):
     """특정 모델 정보 조회"""
     try:
-        manager = get_model_manager()
-        model_info = manager.get_model_info(model_name)
+        client = get_ai_client()
+        model_info = client.get_model_info(model_name)
         
         if not model_info:
             return ai_api_error('모델을 찾을 수 없습니다', 'MODEL_NOT_FOUND', 404)
@@ -161,9 +152,9 @@ def activate_model():
             return ai_api_error('model_name이 필요합니다', 'INVALID_REQUEST', 400)
         
         model_name = data['model_name']
-        manager = get_model_manager()
+        client = get_ai_client()
         
-        success = manager.set_active_model(model_name)
+        success = client.set_active_model(model_name)
         
         if success:
             log_ai_event('INFO', 'AI', f'모델 활성화: {model_name}')
@@ -183,13 +174,13 @@ def activate_model():
 def delete_model(model_name):
     """모델 삭제"""
     try:
-        manager = get_model_manager()
+        client = get_ai_client()
         
         # 활성 모델인지 확인
-        if manager.get_active_model() == model_name:
+        if client.get_active_model() == model_name:
             return ai_api_error('활성 모델은 삭제할 수 없습니다', 'ACTIVE_MODEL_DELETE', 400)
         
-        success = manager.delete_model(model_name)
+        success = client.delete_model(model_name)
         
         if success:
             log_ai_event('INFO', 'AI', f'모델 삭제: {model_name}')
@@ -209,8 +200,8 @@ def cleanup_models():
         data = request.get_json() or {}
         keep_count = data.get('keep_count', 5)
         
-        manager = get_model_manager()
-        deleted_count = manager.cleanup_old_models(keep_count)
+        client = get_ai_client()
+        deleted_count = client.cleanup_old_models(keep_count)
         
         log_ai_event('INFO', 'AI', f'모델 정리 완료: {deleted_count}개 삭제')
         
@@ -276,17 +267,17 @@ def start_training():
                 {'errors': validation_errors}
             )
         
-        # RemoteTrainer로 학습 시작
-        trainer = get_remote_trainer()
+        # AIClient로 학습 시작
+        client = get_ai_client()
         
-        if trainer.is_training:
+        if client.is_training:
             return ai_api_error('이미 학습이 진행 중입니다', 'TRAINING_IN_PROGRESS', 400)
         
         # 진행률 콜백
         def progress_callback(message):
             print(f"학습 진행: {message}")
         
-        success = trainer.start_training(selected_indicators, training_params, progress_callback)
+        success = client.start_training(selected_indicators, training_params, progress_callback)
         
         if success:
             selected_count = sum(1 for v in selected_indicators.values() if v)
@@ -312,12 +303,12 @@ def start_training():
 def stop_training():
     """AI 모델 학습 중지"""
     try:
-        trainer = get_remote_trainer()
+        client = get_ai_client()
         
-        if not trainer.is_training:
+        if not client.is_training:
             return ai_api_error('진행 중인 학습이 없습니다', 'NO_TRAINING', 400)
         
-        success = trainer.stop_training()
+        success = client.stop_training()
         
         if success:
             log_ai_event('INFO', 'AI', '모델 학습 중지')
@@ -334,13 +325,13 @@ def stop_training():
 def get_training_status():
     """AI 모델 학습 상태 조회"""
     try:
-        trainer = get_remote_trainer()
-        status = trainer.get_training_status()
+        client = get_ai_client()
+        status = client.get_training_status()
         
         # 상태 정보 보강
         enhanced_status = {
             **status,
-            'is_training': trainer.is_training,
+            'is_training': client.is_training,
             'progress_percentage': 0
         }
         
@@ -448,7 +439,7 @@ def get_available_indicators():
             'volatility': {'name': '변동성', 'description': '가격 변동성 지표'}
         }
         
-        # RemoteTrainer는 indicator_mapping이 없으므로 직접 정의
+        # AIClient는 indicator_mapping이 없으므로 직접 정의
         indicators = {
             # 필수 지표
             "price": ["close", "price_change", "hl_range"],
@@ -502,13 +493,13 @@ def get_available_indicators():
 def get_ai_system_info():
     """AI 시스템 정보"""
     try:
+        client = get_ai_client()
+        
         # 모델 저장소 정보
-        manager = get_model_manager()
-        storage_info = manager.get_storage_info()
+        storage_info = client.get_storage_info()
         
         # 원격 연결 테스트
-        trainer = get_remote_trainer()
-        connection_test = trainer.test_connection()
+        connection_test = client.test_connection()
         
         # 데이터 폴더 정보
         data_dir = Path("data")
