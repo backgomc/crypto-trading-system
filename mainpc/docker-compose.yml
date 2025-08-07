@@ -1,5 +1,4 @@
 # 파일 경로: mainpc/docker-compose.yml
-version: '3.8'
 services:
   ai-trainer:
     image: nhbot-trainer
