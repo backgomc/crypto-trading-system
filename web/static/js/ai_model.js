@@ -1,11 +1,46 @@
 // 파일 경로: web/static/js/ai_model.js
-// 코드명: AI 모델 관리 페이지 JavaScript (RemoteTrainer 연동)
+// 코드명: AI 모델 관리 페이지 JavaScript (새 지표 추가 버전)
 
 // 전역 변수
 let isTraining = false;
 let statusInterval = null;
 let selectedIndicators = {};
 let trainingParams = {};
+
+// 지표 정보 매핑 (새 지표 추가 및 재구성)
+const indicatorInfo = {
+    // 핵심 지표 (14개) - 원웨이 장 대응 특화
+    'price': { name: '가격 데이터', columns: 3, essential: true, default: true },
+    'macd': { name: 'MACD', columns: 3, essential: true, default: true },
+    'rsi': { name: 'RSI', columns: 1, essential: true, default: true },
+    'bb': { name: '볼린저밴드', columns: 2, essential: true, default: true },
+    'atr': { name: 'ATR', columns: 1, essential: true, default: true },
+    'volume': { name: '거래량', columns: 3, essential: true, default: true },
+    'adx': { name: 'ADX', columns: 2, essential: true, default: true },
+    'aroon': { name: 'Aroon', columns: 1, essential: true, default: true },
+    'consecutive': { name: '연속 카운터', columns: 2, essential: true, default: true },
+    'trend': { name: '다중 시간대', columns: 4, essential: true, default: true },
+    'hhll': { name: 'HH/LL 카운터', columns: 3, essential: true, default: true },
+    'zscore': { name: 'Z-score', columns: 2, essential: true, default: true },
+    'market_structure': { name: 'Market Structure', columns: 2, essential: true, default: true },
+    'trend_strength': { name: '추세 강도 점수', columns: 1, essential: true, default: true },
+    
+    // 선택적 지표 (7개)
+    'sma': { name: 'SMA', columns: 2, essential: false, default: false },
+    'ema': { name: 'EMA', columns: 3, essential: false, default: false },
+    'stoch': { name: '스토캐스틱', columns: 2, essential: false, default: false },
+    'williams': { name: 'Williams %R', columns: 1, essential: false, default: false },
+    'mfi': { name: 'MFI', columns: 1, essential: false, default: false },
+    'vwap': { name: 'VWAP', columns: 1, essential: false, default: false },
+    'volatility': { name: '변동성', columns: 1, essential: false, default: false },
+    
+    // 고급 지표 (5개)
+    'keltner': { name: 'Keltner Channel', columns: 4, essential: false, default: false },
+    'donchian': { name: 'Donchian Channel', columns: 4, essential: false, default: false },
+    'vpoc': { name: 'VPOC', columns: 2, essential: false, default: false },
+    'order_flow': { name: 'Order Flow', columns: 1, essential: false, default: false },
+    'pivot': { name: 'Pivot Points', columns: 4, essential: false, default: false }
+};
 
 // ============================================================================
 // 페이지 초기화
@@ -15,8 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 AI 모델 관리 페이지 초기화');
     
     // 초기 데이터 로드
+    initializeIndicators();
     loadModels();
-    loadIndicators();
     loadTrainingStatus();
     loadScheduleSettings();
     
@@ -68,6 +103,98 @@ function initEventListeners() {
     if (cleanupBtn) {
         cleanupBtn.addEventListener('click', cleanupModels);
     }
+    
+    // 지표 체크박스 이벤트 리스너
+    document.querySelectorAll('.indicator-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const indicator = this.dataset.indicator;
+            selectedIndicators[indicator] = this.checked;
+            updateSelectedCounts();
+        });
+    });
+}
+
+// ============================================================================
+// 지표 초기화
+// ============================================================================
+
+function initializeIndicators() {
+    // 모든 지표의 초기 상태 설정
+    Object.entries(indicatorInfo).forEach(([key, info]) => {
+        const checkbox = document.getElementById(`indicator_${key}`);
+        if (checkbox) {
+            // default 값에 따라 초기 체크 상태 설정
+            if (info.default) {
+                checkbox.checked = true;
+                selectedIndicators[key] = true;
+            } else {
+                selectedIndicators[key] = checkbox.checked;
+            }
+        }
+    });
+    
+    updateSelectedCounts();
+}
+
+function updateSelectedCounts() {
+    // 각 섹션별로 선택된 개수 계산
+    let essentialCount = 0;
+    let optionalCount = 0;
+    let advancedCount = 0;
+    let totalCount = 0;
+    
+    // 핵심 지표 (essential: true)
+    const essentialKeys = ['price', 'macd', 'rsi', 'bb', 'atr', 'volume', 'adx', 'aroon', 
+                          'consecutive', 'trend', 'hhll', 'zscore', 'market_structure', 'trend_strength'];
+    
+    // 선택적 지표
+    const optionalKeys = ['sma', 'ema', 'stoch', 'williams', 'mfi', 'vwap', 'volatility'];
+    
+    // 고급 지표
+    const advancedKeys = ['keltner', 'donchian', 'vpoc', 'order_flow', 'pivot'];
+    
+    essentialKeys.forEach(key => {
+        if (selectedIndicators[key]) essentialCount++;
+    });
+    
+    optionalKeys.forEach(key => {
+        if (selectedIndicators[key]) optionalCount++;
+    });
+    
+    advancedKeys.forEach(key => {
+        if (selectedIndicators[key]) advancedCount++;
+    });
+    
+    totalCount = essentialCount + optionalCount + advancedCount;
+    
+    // UI 업데이트
+    const essentialElement = document.getElementById('essentialIndicatorCount');
+    if (essentialElement) {
+        essentialElement.textContent = `${essentialCount}개 선택`;
+    }
+    
+    const optionalElement = document.getElementById('optionalIndicatorCount');
+    if (optionalElement) {
+        optionalElement.textContent = `${optionalCount}개 선택`;
+    }
+    
+    const advancedElement = document.getElementById('advancedIndicatorCount');
+    if (advancedElement) {
+        advancedElement.textContent = `${advancedCount}개 선택`;
+    }
+    
+    const totalElement = document.getElementById('totalSelectedCount');
+    if (totalElement) {
+        totalElement.textContent = `${totalCount}개 선택`;
+        // 색상 변경
+        if (totalCount === 0) {
+            totalElement.className = 'badge bg-secondary ms-2';
+        } else if (totalCount < 10) {
+            totalElement.className = 'badge bg-warning ms-2';
+        } else {
+            totalElement.className = 'badge bg-primary ms-2';
+        }
+    }
 }
 
 // ============================================================================
@@ -108,7 +235,7 @@ function displayModels(models) {
     
     modelList.innerHTML = models.map(model => {
         const isActive = model.name === document.getElementById('activeModelName')?.textContent;
-        const accuracy = (model.accuracy * 100).toFixed(1);
+        const accuracy = model.accuracy ? (model.accuracy * 100).toFixed(1) : 'N/A';
         const date = new Date(model.created_at).toLocaleDateString('ko-KR');
         const time = new Date(model.created_at).toLocaleTimeString('ko-KR', {hour: '2-digit', minute: '2-digit'});
         
@@ -156,16 +283,7 @@ function updateActiveModel(modelName) {
 function updateStorageInfo(info) {
     if (!info) return;
     
-    const totalModels = document.getElementById('totalModels');
-    const storageSize = document.getElementById('storageSize');
-    
-    if (totalModels) {
-        totalModels.textContent = `${info.total_models}개`;
-    }
-    
-    if (storageSize) {
-        storageSize.textContent = `${info.storage_size_mb} MB`;
-    }
+    console.log('Storage info:', info);
 }
 
 async function activateModel(modelName) {
@@ -184,7 +302,7 @@ async function activateModel(modelName) {
         
         if (data.success) {
             showToast('모델이 활성화되었습니다', 'success');
-            loadModels(); // 목록 새로고침
+            loadModels();
         } else {
             showToast(data.error || '모델 활성화 실패', 'error');
         }
@@ -208,7 +326,7 @@ async function deleteModel(modelName) {
         
         if (data.success) {
             showToast('모델이 삭제되었습니다', 'success');
-            loadModels(); // 목록 새로고침
+            loadModels();
         } else {
             showToast(data.error || '모델 삭제 실패', 'error');
         }
@@ -234,112 +352,13 @@ async function cleanupModels() {
         
         if (data.success) {
             showToast(`${data.data.deleted_count}개 모델이 정리되었습니다`, 'success');
-            loadModels(); // 목록 새로고침
+            loadModels();
         } else {
             showToast(data.error || '모델 정리 실패', 'error');
         }
     } catch (error) {
         console.error('모델 정리 오류:', error);
         showToast('모델 정리 중 오류 발생', 'error');
-    }
-}
-
-// ============================================================================
-// 지표 관리
-// ============================================================================
-
-async function loadIndicators() {
-    try {
-        const response = await fetch('/api/ai/data/indicators');
-        const data = await response.json();
-        
-        if (data.success) {
-            displayIndicators(data.data.indicators);
-        } else {
-            showToast('지표 목록 로드 실패', 'error');
-        }
-    } catch (error) {
-        console.error('지표 로드 오류:', error);
-        showToast('지표 목록 로드 중 오류 발생', 'error');
-    }
-}
-
-function displayIndicators(indicators) {
-    const priceIndicators = document.getElementById('priceIndicators');
-    const momentumIndicators = document.getElementById('momentumIndicators');
-    const volumeIndicators = document.getElementById('volumeIndicators');
-    const volatilityIndicators = document.getElementById('volatilityIndicators');
-    
-    // 지표 분류
-    const categories = {
-        price: ['price', 'sma', 'ema', 'bb'],
-        momentum: ['macd', 'rsi', 'stoch', 'williams', 'adx', 'aroon'],
-        volume: ['volume', 'mfi', 'vwap', 'cvd'],
-        volatility: ['atr', 'volatility', 'consecutive', 'trend']
-    };
-    
-    // 각 카테고리별로 표시
-    Object.entries(categories).forEach(([category, indicatorKeys]) => {
-        let container = null;
-        
-        switch(category) {
-            case 'price': container = priceIndicators; break;
-            case 'momentum': container = momentumIndicators; break;
-            case 'volume': container = volumeIndicators; break;
-            case 'volatility': container = volatilityIndicators; break;
-        }
-        
-        if (!container) return;
-        
-        const html = indicatorKeys.map(key => {
-            const indicator = indicators[key];
-            if (!indicator) return '';
-            
-            const isEssential = indicator.is_essential;
-            const isChecked = indicator.default_enabled;
-            const isDisabled = isEssential; // 필수 지표는 비활성화
-            
-            selectedIndicators[key] = isChecked; // 초기값 설정
-            
-            return `
-                <div class="form-check mb-2">
-                    <input class="form-check-input indicator-checkbox" 
-                           type="checkbox" 
-                           id="indicator_${key}" 
-                           data-indicator="${key}"
-                           ${isChecked ? 'checked' : ''}
-                           ${isDisabled ? 'disabled' : ''}>
-                    <label class="form-check-label" for="indicator_${key}">
-                        ${indicator.name}
-                        ${isEssential ? '<span class="badge bg-info ms-1">필수</span>' : ''}
-                        <small class="text-muted">(${indicator.column_count}개)</small>
-                    </label>
-                </div>
-            `;
-        }).join('');
-        
-        container.innerHTML = html;
-    });
-    
-    // 체크박스 이벤트 리스너
-    document.querySelectorAll('.indicator-checkbox:not(:disabled)').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const indicator = this.dataset.indicator;
-            selectedIndicators[indicator] = this.checked;
-            updateSelectedCount();
-        });
-    });
-    
-    updateSelectedCount();
-}
-
-function updateSelectedCount() {
-    const totalCount = Object.keys(selectedIndicators).length;
-    const selectedCount = Object.values(selectedIndicators).filter(v => v).length;
-    
-    const countElement = document.getElementById('selectedIndicatorCount');
-    if (countElement) {
-        countElement.textContent = `${selectedCount}/${totalCount}개 선택`;
     }
 }
 
@@ -379,7 +398,13 @@ async function startTraining() {
         return;
     }
     
-    if (!confirm(`학습을 시작하시겠습니까?\n\n선택된 지표: ${selectedCount}개\n에폭: ${trainingParams.epochs}\n학습 기간: ${trainingParams.training_days}일`)) {
+    // 선택된 지표 정보 생성
+    const selectedIndicatorNames = Object.entries(selectedIndicators)
+        .filter(([key, value]) => value)
+        .map(([key, value]) => indicatorInfo[key]?.name || key)
+        .join(', ');
+    
+    if (!confirm(`학습을 시작하시겠습니까?\n\n선택된 지표: ${selectedCount}개\n(${selectedIndicatorNames})\n\n에폭: ${trainingParams.epochs}\n학습 기간: ${trainingParams.training_days}일`)) {
         return;
     }
     
@@ -724,11 +749,12 @@ function showToast(message, type = 'info') {
 
 window.debugAI = {
     getSelectedIndicators: () => selectedIndicators,
+    getIndicatorInfo: () => indicatorInfo,
     getTrainingParams: () => trainingParams,
     getTrainingStatus: () => isTraining,
     reloadAll: () => {
         loadModels();
-        loadIndicators();
+        initializeIndicators();
         loadTrainingStatus();
         loadScheduleSettings();
     }
@@ -736,5 +762,6 @@ window.debugAI = {
 
 console.log('💡 디버그 명령어:');
 console.log('   debugAI.getSelectedIndicators() - 선택된 지표 확인');
+console.log('   debugAI.getIndicatorInfo() - 지표 정보 확인');
 console.log('   debugAI.getTrainingParams() - 학습 파라미터 확인');
 console.log('   debugAI.reloadAll() - 전체 데이터 새로고침');

@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/ai_model.html -->
-<!-- 코드명: AI 모델 관리 페이지 템플릿 (필수/선택 지표 구분 UI) -->
+<!-- 코드명: AI 모델 관리 페이지 템플릿 (새 지표 추가 버전) -->
 
 {% extends "base.html" %}
 
@@ -30,105 +30,140 @@
                 <div class="card-header">
                     <h5>
                         <i class="bi bi-graph-up me-2"></i>학습 지표 선택
-                        <span class="badge bg-info ms-2" id="selectedIndicatorCount">10/17개 선택</span>
+                        <span class="badge bg-primary ms-2" id="totalSelectedCount">0개 선택</span>
                     </h5>
                 </div>
                 <div class="card-body">
-                    <!-- 필수 지표 섹션 -->
+                    <!-- 핵심 지표 섹션 (선택 가능하게 변경) -->
                     <div class="indicator-section mb-4">
                         <h6 class="section-title">
-                            <i class="bi bi-star-fill text-warning me-2"></i>필수 지표
-                            <small class="text-muted ms-2">(항상 포함됨)</small>
+                            <i class="bi bi-star-fill text-warning me-2"></i>핵심 지표
+                            <small class="text-muted ms-2">(원웨이 장 대응 특화)</small>
+                            <span class="badge bg-info float-end" id="essentialIndicatorCount">0개 선택</span>
                         </h6>
                         <div class="essential-indicators-grid">
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">가격 데이터</label>
+                                    <input type="checkbox" id="indicator_price" checked class="form-check-input indicator-checkbox" data-indicator="price">
+                                    <label class="indicator-name" for="indicator_price">가격 데이터</label>
                                     <span class="indicator-badge">3</span>
                                 </div>
                                 <small class="indicator-desc">종가, 변화율, 고저범위</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">MACD</label>
+                                    <input type="checkbox" id="indicator_macd" checked class="form-check-input indicator-checkbox" data-indicator="macd">
+                                    <label class="indicator-name" for="indicator_macd">MACD</label>
                                     <span class="indicator-badge">3</span>
                                 </div>
                                 <small class="indicator-desc">MACD, 시그널, 히스토그램</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">RSI</label>
+                                    <input type="checkbox" id="indicator_rsi" checked class="form-check-input indicator-checkbox" data-indicator="rsi">
+                                    <label class="indicator-name" for="indicator_rsi">RSI</label>
                                     <span class="indicator-badge">1</span>
                                 </div>
                                 <small class="indicator-desc">14일 RSI</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">볼린저밴드</label>
+                                    <input type="checkbox" id="indicator_bb" checked class="form-check-input indicator-checkbox" data-indicator="bb">
+                                    <label class="indicator-name" for="indicator_bb">볼린저밴드</label>
                                     <span class="indicator-badge">2</span>
                                 </div>
                                 <small class="indicator-desc">위치, 폭</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">ATR</label>
+                                    <input type="checkbox" id="indicator_atr" checked class="form-check-input indicator-checkbox" data-indicator="atr">
+                                    <label class="indicator-name" for="indicator_atr">ATR</label>
                                     <span class="indicator-badge">1</span>
                                 </div>
                                 <small class="indicator-desc">평균 실제 범위</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">거래량</label>
+                                    <input type="checkbox" id="indicator_volume" checked class="form-check-input indicator-checkbox" data-indicator="volume">
+                                    <label class="indicator-name" for="indicator_volume">거래량</label>
                                     <span class="indicator-badge">3</span>
                                 </div>
                                 <small class="indicator-desc">비율, CVD, CVD 기울기</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">ADX</label>
+                                    <input type="checkbox" id="indicator_adx" checked class="form-check-input indicator-checkbox" data-indicator="adx">
+                                    <label class="indicator-name" for="indicator_adx">ADX</label>
                                     <span class="indicator-badge">2</span>
                                 </div>
                                 <small class="indicator-desc">추세강도, 기울기</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">Aroon</label>
+                                    <input type="checkbox" id="indicator_aroon" checked class="form-check-input indicator-checkbox" data-indicator="aroon">
+                                    <label class="indicator-name" for="indicator_aroon">Aroon</label>
                                     <span class="indicator-badge">1</span>
                                 </div>
                                 <small class="indicator-desc">추세 전환 타이밍</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">연속 카운터</label>
+                                    <input type="checkbox" id="indicator_consecutive" checked class="form-check-input indicator-checkbox" data-indicator="consecutive">
+                                    <label class="indicator-name" for="indicator_consecutive">연속 카운터</label>
                                     <span class="indicator-badge">2</span>
                                 </div>
                                 <small class="indicator-desc">연속 상승/하락</small>
                             </div>
                             <div class="indicator-card essential">
                                 <div class="indicator-header">
-                                    <input type="checkbox" checked disabled class="form-check-input">
-                                    <label class="indicator-name">다중 시간대</label>
+                                    <input type="checkbox" id="indicator_trend" checked class="form-check-input indicator-checkbox" data-indicator="trend">
+                                    <label class="indicator-name" for="indicator_trend">다중 시간대</label>
                                     <span class="indicator-badge">4</span>
                                 </div>
                                 <small class="indicator-desc">1H, 4H 추세, 정렬도</small>
+                            </div>
+                            <!-- 🆕 핵심 지표로 이동된 중요 지표들 -->
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_hhll" checked class="form-check-input indicator-checkbox" data-indicator="hhll">
+                                    <label class="indicator-name" for="indicator_hhll">HH/LL 카운터 ⭐</label>
+                                    <span class="indicator-badge">3</span>
+                                </div>
+                                <small class="indicator-desc">고점/저점 갱신 추적</small>
+                            </div>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_zscore" checked class="form-check-input indicator-checkbox" data-indicator="zscore">
+                                    <label class="indicator-name" for="indicator_zscore">Z-score ⭐</label>
+                                    <span class="indicator-badge">2</span>
+                                </div>
+                                <small class="indicator-desc">평균 회귀 지표</small>
+                            </div>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_market_structure" checked class="form-check-input indicator-checkbox" data-indicator="market_structure">
+                                    <label class="indicator-name" for="indicator_market_structure">Market Structure ⭐</label>
+                                    <span class="indicator-badge">2</span>
+                                </div>
+                                <small class="indicator-desc">시장 구조 돌파</small>
+                            </div>
+                            <div class="indicator-card essential">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_trend_strength" checked class="form-check-input indicator-checkbox" data-indicator="trend_strength">
+                                    <label class="indicator-name" for="indicator_trend_strength">추세 강도 점수 ⭐</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">종합 추세 점수</small>
                             </div>
                         </div>
                     </div>
 
                     <!-- 선택적 지표 섹션 -->
-                    <div class="indicator-section">
+                    <div class="indicator-section mb-4">
                         <h6 class="section-title">
                             <i class="bi bi-plus-circle me-2"></i>선택적 지표
                             <small class="text-muted ms-2">(필요시 추가)</small>
+                            <span class="badge bg-info float-end" id="optionalIndicatorCount">0개 선택</span>
                         </h6>
                         <div class="optional-indicators-grid">
                             <div class="indicator-card optional">
@@ -186,6 +221,62 @@
                                     <span class="indicator-badge">1</span>
                                 </div>
                                 <small class="indicator-desc">20일 변동성</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🆕 고급 지표 섹션 (새로 추가) -->
+                    <div class="indicator-section">
+                        <h6 class="section-title">
+                            <i class="bi bi-lightning-fill text-danger me-2"></i>고급 지표
+                            <small class="text-muted ms-2">(고급 전략용)</small>
+                            <span class="badge bg-info float-end" id="advancedIndicatorCount">0개 선택</span>
+                        </h6>
+                        <div class="advanced-indicators-grid">
+                            <!-- 채널 지표 -->
+                            <div class="indicator-card advanced">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_keltner" class="form-check-input indicator-checkbox" data-indicator="keltner">
+                                    <label class="indicator-name" for="indicator_keltner">Keltner Channel</label>
+                                    <span class="indicator-badge">4</span>
+                                </div>
+                                <small class="indicator-desc">볼린저밴드 대안</small>
+                            </div>
+                            <div class="indicator-card advanced">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_donchian" class="form-check-input indicator-checkbox" data-indicator="donchian">
+                                    <label class="indicator-name" for="indicator_donchian">Donchian Channel</label>
+                                    <span class="indicator-badge">4</span>
+                                </div>
+                                <small class="indicator-desc">고점/저점 돌파</small>
+                            </div>
+                            
+                            <!-- 거래량 고급 지표 -->
+                            <div class="indicator-card advanced">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_vpoc" class="form-check-input indicator-checkbox" data-indicator="vpoc">
+                                    <label class="indicator-name" for="indicator_vpoc">VPOC</label>
+                                    <span class="indicator-badge">2</span>
+                                </div>
+                                <small class="indicator-desc">가격대별 거래량</small>
+                            </div>
+                            <div class="indicator-card advanced">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_order_flow" class="form-check-input indicator-checkbox" data-indicator="order_flow">
+                                    <label class="indicator-name" for="indicator_order_flow">Order Flow</label>
+                                    <span class="indicator-badge">1</span>
+                                </div>
+                                <small class="indicator-desc">주문 플로우 불균형</small>
+                            </div>
+                            
+                            <!-- 가격 구조 지표 -->
+                            <div class="indicator-card advanced">
+                                <div class="indicator-header">
+                                    <input type="checkbox" id="indicator_pivot" class="form-check-input indicator-checkbox" data-indicator="pivot">
+                                    <label class="indicator-name" for="indicator_pivot">Pivot Points</label>
+                                    <span class="indicator-badge">4</span>
+                                </div>
+                                <small class="indicator-desc">피봇 지지/저항</small>
                             </div>
                         </div>
                     </div>
