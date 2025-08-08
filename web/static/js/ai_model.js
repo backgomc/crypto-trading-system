@@ -49,6 +49,12 @@ const indicatorInfo = {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 AI 모델 관리 페이지 초기화');
     
+    // Bootstrap 툴팁 초기화
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
     // 초기 데이터 로드
     initializeIndicators();
     loadModels();

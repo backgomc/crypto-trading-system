@@ -599,7 +599,7 @@
    text-align: center;
 }
 
-/* 🆕 고급 지표 그리드  */
+/* 🆕 고급 지표 그리드 */
 .advanced-indicators-grid {
    display: grid;
    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -630,6 +630,47 @@
    font-size: 0.75rem;
    padding: 4px 8px;
    margin-top: -2px;
+}
+
+/* 🆕 섹션 설명 스타일 */
+.section-description {
+   background-color: rgba(255, 255, 255, 0.03);
+   border-left: 3px solid #667eea;
+   padding: 10px 12px;
+   border-radius: 4px;
+   line-height: 1.5;
+}
+
+.section-description i {
+   color: #667eea;
+}
+
+/* 🆕 Bootstrap 툴팁 다크테마 커스터마이징 */
+.tooltip-inner {
+   background-color: #333333 !important;
+   color: #ffffff !important;
+   max-width: 300px;
+   text-align: left;
+   padding: 8px 12px;
+   font-size: 0.85rem;
+   line-height: 1.4;
+   border: 1px solid #555555;
+}
+
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+   border-top-color: #333333 !important;
+}
+
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+   border-bottom-color: #333333 !important;
+}
+
+.tooltip.bs-tooltip-start .tooltip-arrow::before {
+   border-left-color: #333333 !important;
+}
+
+.tooltip.bs-tooltip-end .tooltip-arrow::before {
+   border-right-color: #333333 !important;
 }
 
 /* 모바일 반응형 */
