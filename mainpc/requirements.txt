@@ -5,9 +5,13 @@ numpy==1.24.3
 pandas==2.0.3
 scikit-learn==1.3.0
 
+# GPU 가속 (CUDA 11.x용)
+cupy-cuda11x
+
 # ⭐ Flask API 추가
 flask==2.3.3
 flask-cors==4.0.0
+blinker==1.6.2  # 특정 버전 지정
 
 # API 및 데이터
 requests==2.31.0

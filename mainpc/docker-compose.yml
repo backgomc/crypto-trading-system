@@ -1,6 +1,7 @@
 # 파일 경로: mainpc/docker-compose.yml
 services:
   ai-trainer:
+    build: .  # ⭐ 이 줄 반드시 추가!
     image: nhbot-trainer
     container_name: nhbot-trainer-container
     ports:
