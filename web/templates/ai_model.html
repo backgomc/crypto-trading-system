@@ -47,7 +47,7 @@
                         </p>
                         <div class="essential-indicators-grid">
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="현재가, 가격 변화율, 고저 범위 등 기본적인 가격 데이터. 모든 분석의 기초가 되는 정보입니다.">
+                                 title="📊 가격 데이터 (Price Data)&#10;&#10;용도: 모든 기술적 분석의 기초 데이터&#10;&#10;포함 내용:&#10;• 종가: 해당 캔들의 마감 가격&#10;• 가격 변화율: 이전 대비 % 변화&#10;• 고저 범위: 고가-저가 차이&#10;&#10;왜 중요한가?&#10;가격의 움직임 자체가 가장 순수한 시장 신호입니다. 다른 모든 지표들은 이 가격 데이터를 가공한 것입니다.">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_price" checked class="form-check-input indicator-checkbox" data-indicator="price">
                                     <label class="indicator-name" for="indicator_price">가격 데이터</label>
@@ -56,7 +56,7 @@
                                 <small class="indicator-desc">종가, 변화율, 고저범위</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="이동평균 수렴확산 지표. 단기선과 장기선의 교차로 추세 전환을 감지합니다. 리밸런싱 타이밍의 핵심 신호입니다.">
+                                 title="📈 MACD (이동평균 수렴확산)&#10;&#10;용도: 추세 전환점을 포착하는 핵심 지표&#10;&#10;계산 방법:&#10;• MACD선 = 12일 EMA - 26일 EMA&#10;• 시그널선 = MACD의 9일 EMA&#10;• 히스토그램 = MACD - 시그널&#10;&#10;매매 신호:&#10;• MACD가 시그널선을 상향 돌파 → 매수 신호&#10;• MACD가 시그널선을 하향 돌파 → 매도 신호&#10;&#10;NHBot에서의 역할:&#10;리밸런싱 타이밍을 결정하는 가장 중요한 지표입니다. 15분봉 MACD 전환이 매매의 핵심 트리거입니다.">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_macd" checked class="form-check-input indicator-checkbox" data-indicator="macd">
                                     <label class="indicator-name" for="indicator_macd">MACD</label>
@@ -65,7 +65,7 @@
                                 <small class="indicator-desc">MACD, 시그널, 히스토그램</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="상대강도지수. 70 이상이면 과매수, 30 이하면 과매도 구간입니다. 추세의 과열도를 측정합니다.">
+                                 title="🔥 RSI (상대강도지수)&#10;&#10;용도: 과매수/과매도 구간을 판단하는 모멘텀 지표&#10;&#10;해석 방법:&#10;• RSI > 70: 과매수 구간 (하락 전환 가능성)&#10;• RSI < 30: 과매도 구간 (상승 전환 가능성)&#10;• 50 기준: 상승/하락 추세 판단&#10;&#10;실전 활용:&#10;극단적인 RSI 값(80 이상, 20 이하)은 강한 추세를 의미하기도 합니다. 다이버전스(가격과 RSI의 반대 움직임)는 추세 전환의 조기 신호입니다.&#10;&#10;NHBot 활용:&#10;과열된 시장 상황을 감지하여 리밸런싱 크기를 조절합니다.">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_rsi" checked class="form-check-input indicator-checkbox" data-indicator="rsi">
                                     <label class="indicator-name" for="indicator_rsi">RSI</label>
@@ -138,7 +138,7 @@
                             </div>
                             <!-- 🆕 핵심 지표로 이동된 중요 지표들 -->
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="⭐ 원웨이 장 핵심 지표! 고점(HH)과 저점(LL)이 계속 갱신되는지 추적. 원웨이 장의 가장 명확한 신호입니다.">
+                                 title="⭐ HH/LL 카운터 (Higher Highs/Lower Lows)&#10;&#10;🎯 원웨이 장 감지의 핵심!&#10;&#10;용도: 추세의 지속성을 판단하는 가장 명확한 지표&#10;&#10;측정 내용:&#10;• HH(Higher High): 이전 고점보다 높은 고점 형성 횟수&#10;• LL(Lower Low): 이전 저점보다 낮은 저점 형성 횟수&#10;• 추세 점수: 연속 HH/LL 발생 빈도&#10;&#10;원웨이 장 신호:&#10;• 연속 5회 이상 HH → 강력한 상승 원웨이&#10;• 연속 5회 이상 LL → 강력한 하락 원웨이&#10;&#10;NHBot 핵심 전략:&#10;이 지표가 높은 값을 보일 때 AI는 '지금은 리밸런싱하면 안 된다'고 판단합니다. 원웨이 장에서의 손실을 방지하는 가장 중요한 안전장치입니다.">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_hhll" checked class="form-check-input indicator-checkbox" data-indicator="hhll">
                                     <label class="indicator-name" for="indicator_hhll">HH/LL 카운터 ⭐</label>
@@ -147,7 +147,7 @@
                                 <small class="indicator-desc">고점/저점 갱신 추적</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="⭐ 평균 회귀 지표! 현재 가격이 평균에서 얼마나 벗어났는지를 표준편차로 측정. ±2 이상이면 극단적 상황입니다.">
+                                 title="⭐ Z-score (표준점수)&#10;&#10;용도: 현재 가격이 평균에서 얼마나 벗어났는지 측정&#10;&#10;계산 방법:&#10;Z = (현재가격 - 평균) ÷ 표준편차&#10;&#10;해석:&#10;• Z > +2: 평균보다 2 표준편차 위 (매우 과매수)&#10;• Z < -2: 평균보다 2 표준편차 아래 (매우 과매도)&#10;• -1 ~ +1: 정상 범위 (68% 확률)&#10;&#10;평균 회귀 전략:&#10;극단적인 Z-score는 평균으로 돌아올 가능성이 높습니다. +3 또는 -3을 넘으면 99.7% 확률로 평균 회귀가 발생합니다.&#10;&#10;NHBot 활용:&#10;극단적 상황에서 리밸런싱 크기를 늘려 수익을 극대화합니다.">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_zscore" checked class="form-check-input indicator-checkbox" data-indicator="zscore">
                                     <label class="indicator-name" for="indicator_zscore">Z-score ⭐</label>
@@ -156,7 +156,7 @@
                                 <small class="indicator-desc">평균 회귀 지표</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="⭐ 시장 구조 돌파 감지! 주요 지지/저항선이 깨졌는지 판단. 추세 전환의 강력한 신호입니다.">
+                                 title="⭐ Market Structure Break (시장 구조 돌파)&#10;&#10;용도: 주요 지지/저항선 돌파를 감지하여 추세 전환 확인&#10;&#10;감지 내용:&#10;• 주요 고점 돌파 → 상승 추세 확정&#10;• 주요 저점 돌파 → 하락 추세 확정&#10;• 돌파 강도: 거래량과 함께 측정&#10;&#10;중요성:&#10;단순한 가격 돌파가 아닌 '구조적 변화'를 감지합니다. 가짜 돌파(훼이크)를 필터링하여 진짜 추세 전환만 포착합니다.&#10;&#10;NHBot 전략:&#10;시장 구조가 깨질 때 포지션 조정을 일시 중단하고, 새로운 추세가 확립될 때까지 대기합니다.">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_market_structure" checked class="form-check-input indicator-checkbox" data-indicator="market_structure">
                                     <label class="indicator-name" for="indicator_market_structure">Market Structure ⭐</label>
@@ -165,7 +165,7 @@
                                 <small class="indicator-desc">시장 구조 돌파</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="⭐ 종합 추세 점수! 여러 지표를 종합하여 -100~+100점으로 추세 강도를 평가합니다.">
+                                 title="⭐ 추세 강도 종합 점수&#10;&#10;용도: 여러 지표를 종합하여 추세 강도를 점수화&#10;&#10;계산 요소:&#10;• ADX 값 (추세 강도)&#10;• 연속 상승/하락 횟수&#10;• 거래량 증가율&#10;• 다중 시간대 일치도&#10;&#10;점수 해석:&#10;• +80 이상: 매우 강한 상승 추세&#10;• +50 ~ +80: 상승 추세&#10;• -50 ~ +50: 횡보/불확실&#10;• -80 이하: 매우 강한 하락 추세&#10;&#10;NHBot 핵심:&#10;점수가 ±80을 넘으면 원웨이 장으로 판단하고 리밸런싱을 최소화합니다. 이 점수가 AI의 최종 의사결정에 가장 큰 영향을 미칩니다.">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_trend_strength" checked class="form-check-input indicator-checkbox" data-indicator="trend_strength">
                                     <label class="indicator-name" for="indicator_trend_strength">추세 강도 점수 ⭐</label>

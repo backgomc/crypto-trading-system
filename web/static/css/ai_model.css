@@ -599,6 +599,9 @@
    text-align: center;
 }
 
+/* 파일 경로: web/static/css/ai_model.css 에 추가할 내용 */
+/* 코드명: 고급 지표 그리드 및 개선된 스타일 */
+
 /* 🆕 고급 지표 그리드 */
 .advanced-indicators-grid {
    display: grid;
@@ -618,6 +621,25 @@
    border-color: #ff6b6b;
    box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
    transform: translateY(-1px);
+}
+
+/* 🆕 핵심 지표 호버 효과 추가 */
+.indicator-card.essential:hover {
+   background: linear-gradient(135deg, #2a4a6a 0%, #2a3a4a 100%);
+   border-color: #667eea;
+   transform: translateY(-1px);
+   box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+}
+
+/* 🆕 모든 지표 카드 클릭 가능 스타일 */
+.indicator-card {
+   cursor: pointer;
+   user-select: none;
+}
+
+/* 🆕 체크박스 금지 표시 제거 */
+.indicator-card.essential .form-check-input {
+   cursor: pointer !important;
 }
 
 /* 🆕 섹션 타이틀 float 지원 */
@@ -649,11 +671,11 @@
 .tooltip-inner {
    background-color: #333333 !important;
    color: #ffffff !important;
-   max-width: 300px;
+   max-width: 400px;
    text-align: left;
-   padding: 8px 12px;
-   font-size: 0.85rem;
-   line-height: 1.4;
+   padding: 10px 14px;
+   font-size: 0.9rem;
+   line-height: 1.5;
    border: 1px solid #555555;
 }
 

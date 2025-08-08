@@ -49,10 +49,13 @@ const indicatorInfo = {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 AI 모델 관리 페이지 초기화');
     
-    // Bootstrap 툴팁 초기화
+    // Bootstrap 툴팁 초기화 (trigger: hover로 설정)
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            trigger: 'hover',  // 마우스 호버시에만 표시
+            delay: { show: 500, hide: 100 }  // 0.5초 후 표시, 0.1초 후 숨김
+        });
     });
     
     // 초기 데이터 로드
@@ -110,12 +113,41 @@ function initEventListeners() {
         cleanupBtn.addEventListener('click', cleanupModels);
     }
     
+    // 지표 카드 전체 클릭 이벤트
+    document.querySelectorAll('.indicator-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // 체크박스 직접 클릭은 제외
+            if (e.target.type !== 'checkbox') {
+                const checkbox = this.querySelector('.indicator-checkbox');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    const indicator = checkbox.dataset.indicator;
+                    selectedIndicators[indicator] = checkbox.checked;
+                    updateSelectedCounts();
+                    
+                    // 툴팁 숨기기
+                    const tooltip = bootstrap.Tooltip.getInstance(this);
+                    if (tooltip) {
+                        tooltip.hide();
+                    }
+                }
+            }
+        });
+    });
+    
     // 지표 체크박스 이벤트 리스너
     document.querySelectorAll('.indicator-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const indicator = this.dataset.indicator;
             selectedIndicators[indicator] = this.checked;
             updateSelectedCounts();
+            
+            // 툴팁 숨기기
+            const card = this.closest('.indicator-card');
+            const tooltip = bootstrap.Tooltip.getInstance(card);
+            if (tooltip) {
+                tooltip.hide();
+            }
         });
     });
 }
