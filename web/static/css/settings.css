@@ -1,29 +1,482 @@
 /* 파일 경로: web/static/css/settings.css */
-/* 코드명: 설정 페이지 전용 스타일 (다크 테마 보정, 애니메이션 추가) */
+/* 코드명: 설정 페이지 전용 스타일 (AI 모델 테마 적용) */
 
-/* 알림 설정 카드 다크 테마 적용 */
+/* 페이지 헤더 */
+.page-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #333333;
+}
+
+.page-header h2 {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 0;
+    font-size: 1.8rem;
+}
+
+/* 메인 카드 스타일 (AI 모델과 동일) */
+.main-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.main-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.main-card .card-header {
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #404040;
+    padding: 18px 24px;
+    margin: 0;
+}
+
+.main-card .card-header h5 {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 0;
+    font-size: 1.1rem;
+}
+
+.main-card .card-header h5 i {
+    color: #667eea;
+    margin-right: 8px;
+}
+
+.main-card .card-body {
+    padding: 24px;
+    background-color: #1e1e1e;
+    margin: 0;
+}
+
+/* 기존 카드 클래스도 main-card 스타일 적용 */
+.card.bg-dark {
+    background-color: #1e1e1e !important;
+    border: 1px solid #333333 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden !important;
+}
+
+.card.bg-dark:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.card-header.bg-secondary {
+    background-color: #2a2a2a !important;
+    border-bottom: 1px solid #404040 !important;
+    padding: 18px 24px !important;
+}
+
+/* 알림 설정 카드 */
 .notification-card {
     background-color: #1e1e1e !important;
-    border: 1px solid #404040 !important;
+    border: 1px solid #333333 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden !important;
+}
+
+.notification-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
 .notification-card .card-header {
     background-color: #2a2a2a !important;
     border-bottom: 1px solid #404040 !important;
+    padding: 18px 24px !important;
 }
 
-/* 도움말 카드 다크 테마 적용 */
+/* 도움말 카드 */
 .help-card {
     background-color: #1e1e1e !important;
-    border: 1px solid #404040 !important;
+    border: 1px solid #333333 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    overflow: hidden !important;
+}
+
+.help-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
 .help-card .card-header {
     background-color: #2a2a2a !important;
     border-bottom: 1px solid #404040 !important;
+    padding: 18px 24px !important;
 }
 
-/* 페이지 로드 애니메이션 추가 */
+/* 헤더 버튼 스타일 */
+.page-header .btn {
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 16px;
+    transition: all 0.3s ease;
+}
+
+.page-header .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-outline-secondary {
+    border: 1px solid #6c757d;
+    color: #aaaaaa;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #ffffff;
+    border-color: #6c757d;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* 빠른 설정 버튼들 */
+.btn-outline-primary {
+    border: 1px solid #667eea;
+    color: #667eea;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background-color: #667eea;
+    color: #ffffff;
+    border-color: #667eea;
+    transform: translateY(-1px);
+}
+
+.btn-outline-warning {
+    border: 1px solid #ffc107;
+    color: #ffc107;
+    background: transparent;
+}
+
+.btn-outline-warning:hover {
+    background-color: #ffc107;
+    color: #212529;
+    border-color: #ffc107;
+    transform: translateY(-1px);
+}
+
+.btn-outline-danger {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #ffffff;
+    border-color: #dc3545;
+    transform: translateY(-1px);
+}
+
+/* 폼 스타일 개선 */
+.form-label {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-control, .form-select {
+    background-color: #2d2d2d;
+    border: 1px solid #444444;
+    color: #ffffff;
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #2d2d2d;
+    border-color: #667eea;
+    color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.input-group-text {
+    background-color: #444444;
+    border: 1px solid #444444;
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.form-text {
+    color: #aaaaaa;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+/* 스위치 스타일 개선 */
+.form-switch .form-check-input {
+    width: 50px !important;
+    height: 25px !important;
+    border-radius: 25px !important;
+    background-color: #333333 !important;
+    border: none !important;
+    position: relative !important;
+    cursor: pointer !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    margin: 0 !important;
+    background-image: none !important;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: #667eea !important;
+    background-image: none !important;
+}
+
+.form-switch .form-check-input::before {
+    content: '';
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    top: 3px;
+    left: 3px;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.form-switch .form-check-input:checked::before {
+    transform: translateX(25px);
+}
+
+.form-switch .form-check-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+    outline: none !important;
+}
+
+.form-check-label {
+    color: #e0e0e0 !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+}
+
+/* 현재 상태 섹션 스타일 */
+.badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+.badge.bg-success {
+    background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+/* 아코디언 다크테마 개선 */
+.accordion-item {
+    background-color: transparent;
+    border: none;
+}
+
+.accordion-button {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border: 1px solid #444444;
+    font-weight: 500;
+    padding: 12px 16px;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #444444;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: #667eea;
+}
+
+.accordion-button::after {
+    filter: invert(1);
+}
+
+.accordion-body {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #444444;
+    border-top: none;
+    padding: 16px;
+}
+
+/* 로딩 오버레이 */
+#loadingOverlay {
+    backdrop-filter: blur(4px);
+}
+
+#loadingOverlay .spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.3rem;
+}
+
+/* 토스트 컨테이너 (AI 모델과 동일) */
+#toastContainer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+/* 토스트 스타일 */
+.toast {
+    min-width: 300px;
+    background-color: #1e1e1e;
+    border: 1px solid #404040;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    animation: slideInRight 0.3s ease-out;
+}
+
+.toast-header {
+    background-color: #2a2a2a;
+    border-bottom: 1px solid #404040;
+    color: #ffffff;
+    border-radius: 8px 8px 0 0;
+}
+
+.toast-body {
+    color: #e0e0e0;
+    padding: 12px;
+}
+
+/* 성공 토스트 (녹색) */
+.toast.toast-success {
+    border-left: 4px solid #28a745;
+}
+
+.toast.toast-success .toast-header {
+    background: linear-gradient(135deg, #155724 0%, #1e7e34 100%);
+}
+
+.toast.toast-success .toast-body {
+    background-color: #1c2e1f;
+}
+
+/* 에러 토스트 (빨간색) */
+.toast.toast-error {
+    border-left: 4px solid #dc3545;
+}
+
+.toast.toast-error .toast-header {
+    background: linear-gradient(135deg, #721c24 0%, #a94442 100%);
+}
+
+.toast.toast-error .toast-body {
+    background-color: #2e1c1c;
+}
+
+/* 경고 토스트 (노란색) */
+.toast.toast-warning {
+    border-left: 4px solid #ffc107;
+}
+
+.toast.toast-warning .toast-header {
+    background: linear-gradient(135deg, #856404 0%, #b38600 100%);
+}
+
+.toast.toast-warning .toast-body {
+    background-color: #2e2a1c;
+}
+
+/* 정보 토스트 (파란색) */
+.toast.toast-info {
+    border-left: 4px solid #17a2b8;
+}
+
+.toast.toast-info .toast-header {
+    background: linear-gradient(135deg, #0c5460 0%, #138496 100%);
+}
+
+.toast.toast-info .toast-body {
+    background-color: #1c2a2e;
+}
+
+/* 토스트 애니메이션 */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.toast.hiding {
+    animation: slideOutRight 0.3s ease-out;
+}
+
+/* 알림 컨테이너 (기존 알림용) */
+#alertContainer {
+    position: relative;
+    z-index: 1050;
+}
+
+#alertContainer .alert {
+    border-radius: 8px;
+    border: none;
+    animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 페이지 로드 애니메이션 */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -35,14 +488,86 @@
     }
 }
 
-/* 카드들에 애니메이션 적용 */
-.card {
+/* 카드 순차 애니메이션 */
+.main-card, .notification-card, .help-card {
     animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: both;
 }
 
-/* 순차적 애니메이션 효과 */
-.card:nth-child(1) { animation-delay: 0.1s; }
-.card:nth-child(2) { animation-delay: 0.2s; }
-.card:nth-child(3) { animation-delay: 0.3s; }
-.card:nth-child(4) { animation-delay: 0.4s; }
-.card:nth-child(5) { animation-delay: 0.5s; }
+.main-card:nth-child(1) { animation-delay: 0.1s; }
+.main-card:nth-child(2) { animation-delay: 0.2s; }
+.main-card:nth-child(3) { animation-delay: 0.3s; }
+.notification-card { animation-delay: 0.4s; }
+.help-card { animation-delay: 0.5s; }
+
+/* 섹션 구분선 */
+hr {
+    border-color: #404040 !important;
+    margin: 20px 0;
+}
+
+/* 빠른 설정 섹션 */
+h6 {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* 현재 상태 정보 */
+.d-flex.justify-content-between span:first-child {
+    color: #aaaaaa;
+    font-weight: 500;
+}
+
+.d-flex.justify-content-between span:last-child {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.text-muted {
+    color: #999999 !important;
+}
+
+.text-success i {
+    color: #28a745;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .page-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .page-header .d-flex {
+        justify-content: center;
+    }
+    
+    .main-card .card-header {
+        padding: 16px 20px;
+    }
+    
+    .main-card .card-body {
+        padding: 20px;
+    }
+    
+    .btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    #toastContainer {
+        left: 10px;
+        right: 10px;
+        top: 10px;
+    }
+    
+    .toast {
+        width: 100%;
+    }
+}

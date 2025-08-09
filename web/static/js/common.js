@@ -1,5 +1,5 @@
 // 파일 경로: web/static/js/common.js
-// 코드명: 공통 API 호출 및 유틸리티 함수
+// 코드명: 공통 API 호출 및 유틸리티 함수 (AI 모델 스타일 토스트 추가)
 
 // ============================================================================
 // API 호출 함수
@@ -52,7 +52,7 @@ async function apiCall(url, method = 'GET', data = null) {
         return result;
     } catch (error) {
         console.error('API 호출 오류:', error);
-        showToast('error', error.message || '네트워크 오류가 발생했습니다.');
+        showAdvancedToast('error', '오류', error.message || '네트워크 오류가 발생했습니다.');
         throw error;
     }
 }
@@ -79,45 +79,96 @@ function showLoading(show, overlayId = 'loadingOverlay') {
 }
 
 // ============================================================================
-// 토스트 알림 시스템
+// 고급 토스트 알림 시스템 (AI 모델 페이지 스타일)
 // ============================================================================
 
-function showToast(type, message, duration = 3000) {
-    const container = document.getElementById('alertContainer') || createAlertContainer();
-    const alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
-    const iconClass = type === 'error' ? 'bi-exclamation-triangle' : 'bi-check-circle';
+function showAdvancedToast(type, title, message, duration = 3000) {
+    // 토스트 컨테이너가 없으면 생성
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+        document.body.appendChild(container);
+    }
     
-    const alertHtml = `
-        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-            <i class="bi ${iconClass} me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    // 토스트 ID 생성
+    const toastId = 'toast-' + Date.now();
+    
+    // 아이콘 설정
+    const icons = {
+        success: 'bi-check-circle-fill',
+        error: 'bi-exclamation-triangle-fill',
+        warning: 'bi-exclamation-circle-fill',
+        info: 'bi-info-circle-fill'
+    };
+    
+    // 현재 시간
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+    
+    // 토스트 HTML 생성
+    const toastHtml = `
+        <div id="${toastId}" class="toast toast-${type}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+            <div class="toast-header">
+                <i class="bi ${icons[type]} me-2"></i>
+                <strong class="me-auto">${title}</strong>
+                <small>${timeStr}</small>
+                <button type="button" class="btn-close btn-close-white" onclick="hideAdvancedToast('${toastId}')"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
         </div>
     `;
     
-    container.innerHTML = alertHtml;
+    // 토스트 추가
+    container.insertAdjacentHTML('beforeend', toastHtml);
     
+    // Bootstrap 토스트 인스턴스 생성 및 표시
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+    
+    // 자동 제거
     if (duration > 0) {
         setTimeout(() => {
-            const alert = container.querySelector('.alert');
-            if (alert) {
-                alert.remove();
-            }
+            hideAdvancedToast(toastId);
         }, duration);
     }
 }
 
-function createAlertContainer() {
-    const container = document.createElement('div');
-    container.id = 'alertContainer';
-    container.style.position = 'fixed';
-    container.style.top = '20px';
-    container.style.left = '50%';
-    container.style.transform = 'translateX(-50%)';
-    container.style.zIndex = '9999';
-    container.style.maxWidth = '400px';
-    document.body.appendChild(container);
-    return container;
+function hideAdvancedToast(toastId) {
+    const toastElement = document.getElementById(toastId);
+    if (toastElement) {
+        // 숨김 애니메이션 추가
+        toastElement.classList.add('hiding');
+        
+        // 애니메이션 후 제거
+        setTimeout(() => {
+            const toast = bootstrap.Toast.getInstance(toastElement);
+            if (toast) {
+                toast.dispose();
+            }
+            toastElement.remove();
+        }, 300);
+    }
+}
+
+// ============================================================================
+// 기존 토스트 함수 (하위 호환성) - 고급 토스트로 리다이렉트
+// ============================================================================
+
+function showToast(type, message, duration = 3000) {
+    // 제목 자동 설정
+    const titles = {
+        success: '성공',
+        error: '오류',
+        warning: '경고',
+        info: '정보'
+    };
+    
+    showAdvancedToast(type, titles[type] || '알림', message, duration);
 }
 
 // ============================================================================
@@ -167,6 +218,30 @@ function createConfirmModal() {
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+// ============================================================================
+// 설정 관련 확인 모달 (settings.js에서 사용)
+// ============================================================================
+
+function confirmReset() {
+    return new Promise((resolve) => {
+        showConfirm(
+            '설정 초기화',
+            '모든 설정을 기본값으로 복원하시겠습니까?\n현재 설정은 모두 삭제됩니다.',
+            (confirmed) => resolve(confirmed)
+        );
+    });
+}
+
+function confirmPreset(presetName) {
+    return new Promise((resolve) => {
+        showConfirm(
+            '프리셋 적용',
+            `${presetName} 설정을 적용하시겠습니까?\n현재 설정이 변경됩니다.`,
+            (confirmed) => resolve(confirmed)
+        );
+    });
 }
 
 // ============================================================================
@@ -288,14 +363,6 @@ function startTimeUpdates() {
     setInterval(updateTime, 1000); // 1초마다 반복
 }
 
-// 페이지 로드 시 자동 시작
-document.addEventListener('DOMContentLoaded', function() {
-    // 기존 DOMContentLoaded 내용...
-    
-    // 시간 업데이트 시작
-    startTimeUpdates();
-});
-
 // ============================================================================
 // 시간 포맷팅 함수들
 // ============================================================================
@@ -334,10 +401,10 @@ function downloadJSON(data, filename) {
         link.download = filename;
         link.click();
         
-        showToast('success', '파일이 다운로드되었습니다.');
+        showAdvancedToast('success', '파일 다운로드', '파일이 다운로드되었습니다.');
         return true;
     } catch (error) {
-        showToast('error', '파일 다운로드에 실패했습니다.');
+        showAdvancedToast('error', '다운로드 실패', '파일 다운로드에 실패했습니다.');
         return false;
     }
 }
@@ -356,9 +423,9 @@ function uploadJSON(callback) {
             try {
                 const data = JSON.parse(e.target.result);
                 callback(data);
-                showToast('success', '파일을 성공적으로 불러왔습니다.');
+                showAdvancedToast('success', '파일 업로드', '파일을 성공적으로 불러왔습니다.');
             } catch (error) {
-                showToast('error', '파일 형식이 올바르지 않습니다.');
+                showAdvancedToast('error', '업로드 실패', '파일 형식이 올바르지 않습니다.');
             }
         };
         reader.readAsText(file);
@@ -388,6 +455,9 @@ function debugAPI() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Common.js 로드 완료');
     
+    // 시간 업데이트 시작
+    startTimeUpdates();
+    
     // 전역 에러 핸들러
     window.addEventListener('error', function(e) {
         console.error('전역 오류:', e.error);
@@ -405,11 +475,41 @@ document.addEventListener('DOMContentLoaded', function() {
  * 세션 만료 모달 표시
  */
 function showSessionExpiredModal() {
+    // 세션 만료 모달이 없으면 생성
+    if (!document.getElementById('sessionExpiredModal')) {
+        createSessionExpiredModal();
+    }
+    
     const modal = new bootstrap.Modal(document.getElementById('sessionExpiredModal'), {
         backdrop: 'static',
         keyboard: false
     });
     modal.show();
+}
+
+function createSessionExpiredModal() {
+    const modalHtml = `
+        <div class="modal fade" id="sessionExpiredModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title text-white">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>세션 만료
+                        </h5>
+                    </div>
+                    <div class="modal-body text-white">
+                        세션이 만료되었습니다. 다시 로그인해주세요.
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-primary" onclick="handleSessionExpired()">
+                            로그인 페이지로 이동
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
 /**
@@ -423,11 +523,43 @@ function handleSessionExpired() {
  * 중복 로그인 확인 모달 표시
  */
 function showDuplicateLoginModal() {
+    // 중복 로그인 모달이 없으면 생성
+    if (!document.getElementById('duplicateLoginModal')) {
+        createDuplicateLoginModal();
+    }
+    
     const modal = new bootstrap.Modal(document.getElementById('duplicateLoginModal'), {
         backdrop: 'static',
         keyboard: false
     });
     modal.show();
+}
+
+function createDuplicateLoginModal() {
+    const modalHtml = `
+        <div class="modal fade" id="duplicateLoginModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title text-white">
+                            <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>중복 로그인 감지
+                        </h5>
+                    </div>
+                    <div class="modal-body text-white">
+                        다른 기기에서 이미 로그인된 상태입니다.
+                        계속 진행하시면 다른 기기의 세션이 종료됩니다.
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" onclick="cancelLogin()">취소</button>
+                        <button type="button" class="btn btn-primary" onclick="confirmLogin()">
+                            강제 로그인
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
 /**

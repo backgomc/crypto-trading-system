@@ -1,5 +1,5 @@
 // 파일 경로: web/static/js/settings.js
-// 코드명: 설정 페이지 전용 로직
+// 코드명: 설정 페이지 전용 로직 (Promise 기반 확인 모달)
 
 // ============================================================================
 // 전역 변수
@@ -38,13 +38,14 @@ async function loadConfig() {
             
             populateForm(currentConfig);
             updateStatusDisplay();
+            showAdvancedToast('success', '설정 로드', '설정을 성공적으로 불러왔습니다.');
         } else {
             throw new Error('설정 데이터 형식이 올바르지 않습니다.');
         }
         
     } catch (error) {
         console.error('❌ 설정 로드 실패:', error);
-        showToast('error', '설정을 불러오는데 실패했습니다: ' + error.message);
+        showAdvancedToast('error', '로드 실패', '설정을 불러오는데 실패했습니다: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -67,7 +68,7 @@ async function saveSettings() {
         if (result.success) {
             currentConfig = result.data.config;
             updateStatusDisplay();
-            showToast('success', result.message || '설정이 성공적으로 저장되었습니다.');
+            showAdvancedToast('success', '저장 완료', result.message || '설정이 성공적으로 저장되었습니다.');
             console.log('✅ 설정 저장 완료');
         } else {
             throw new Error(result.error || '설정 저장에 실패했습니다.');
@@ -75,7 +76,7 @@ async function saveSettings() {
         
     } catch (error) {
         console.error('❌ 설정 저장 실패:', error);
-        showToast('error', '설정 저장 실패: ' + error.message);
+        showAdvancedToast('error', '저장 실패', '설정 저장 실패: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -84,7 +85,9 @@ async function saveSettings() {
 async function resetSettings() {
     if (isLoading) return;
 
-    if (!confirmReset()) {
+    // Promise 기반 확인 모달
+    const confirmed = await confirmReset();
+    if (!confirmed) {
         return;
     }
 
@@ -98,7 +101,7 @@ async function resetSettings() {
             currentConfig = result.data.config;
             populateForm(currentConfig);
             updateStatusDisplay();
-            showToast('success', result.message || '모든 설정이 기본값으로 복원되었습니다.');
+            showAdvancedToast('success', '초기화 완료', result.message || '모든 설정이 기본값으로 복원되었습니다.');
             console.log('✅ 설정 초기화 완료');
         } else {
             throw new Error(result.error || '설정 초기화에 실패했습니다.');
@@ -106,7 +109,7 @@ async function resetSettings() {
         
     } catch (error) {
         console.error('❌ 설정 초기화 실패:', error);
-        showToast('error', '설정 초기화 실패: ' + error.message);
+        showAdvancedToast('error', '초기화 실패', '설정 초기화 실패: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -125,7 +128,9 @@ async function applyPreset(presetType) {
         aggressive: '공격적'
     };
 
-    if (!confirmPreset(presetNames[presetType])) {
+    // Promise 기반 확인 모달
+    const confirmed = await confirmPreset(presetNames[presetType]);
+    if (!confirmed) {
         return;
     }
 
@@ -139,7 +144,7 @@ async function applyPreset(presetType) {
             currentConfig = result.data.config;
             populateForm(currentConfig);
             updateStatusDisplay();
-            showToast('success', result.message || `${presetNames[presetType]} 설정이 적용되었습니다.`);
+            showAdvancedToast('success', '프리셋 적용', result.message || `${presetNames[presetType]} 설정이 적용되었습니다.`);
             console.log(`✅ ${presetType} 프리셋 적용 완료`);
         } else {
             throw new Error(result.error || '프리셋 적용에 실패했습니다.');
@@ -147,7 +152,7 @@ async function applyPreset(presetType) {
         
     } catch (error) {
         console.error(`❌ ${presetType} 프리셋 적용 실패:`, error);
-        showToast('error', '프리셋 적용 실패: ' + error.message);
+        showAdvancedToast('error', '프리셋 실패', '프리셋 적용 실패: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -303,7 +308,7 @@ function validateForm() {
     }
 
     if (errors.length > 0) {
-        showToast('error', errors.join('<br>'));
+        showAdvancedToast('error', '유효성 검사 실패', errors.join('<br>'), 5000);
         return false;
     }
 
@@ -387,6 +392,7 @@ function importSettings() {
     uploadJSON(function(settings) {
         populateForm(settings);
         markAsChanged();
+        showAdvancedToast('info', '설정 가져오기', '설정을 가져왔습니다. 저장 버튼을 눌러 적용하세요.');
     });
 }
 

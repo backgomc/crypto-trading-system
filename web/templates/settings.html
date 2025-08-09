@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/settings.html -->
-<!-- 코드명: 설정 페이지 템플릿 (압축 + JS 분리) -->
+<!-- 코드명: 설정 페이지 템플릿 (토스트 컨테이너 추가) -->
 
 {% extends "base.html" %}
 
@@ -11,8 +11,11 @@
 
 {% block content %}
 <div class="container-fluid">
+    <!-- 토스트 컨테이너 -->
+    <div id="toastContainer"></div>
+    
     <!-- 페이지 헤더 -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 page-header">
         <h2 class="mb-0"><i class="bi bi-gear me-2"></i>설정</h2>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-secondary" onclick="resetSettings()" id="resetBtn">
@@ -38,8 +41,8 @@
         <!-- 좌측: 설정 폼들 -->
         <div class="col-lg-8">
             <!-- 기본 매매 설정 -->
-            <div class="card bg-dark border-secondary shadow-sm mb-4">
-                <div class="card-header bg-secondary">
+            <div class="card main-card">
+                <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>기본 매매 설정</h5>
                 </div>
                 <div class="card-body">
@@ -130,8 +133,8 @@
             </div>
 
             <!-- AI 설정 -->
-            <div class="card bg-dark border-secondary shadow-sm mb-4">
-                <div class="card-header bg-secondary">
+            <div class="card main-card">
+                <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-brain me-2"></i>AI 설정</h5>
                 </div>
                 <div class="card-body">
@@ -178,8 +181,8 @@
             </div>
 
             <!-- 리스크 관리 설정 -->
-            <div class="card bg-dark border-secondary shadow-sm mb-4">
-                <div class="card-header bg-secondary">
+            <div class="card main-card">
+                <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>리스크 관리 설정</h5>
                 </div>
                 <div class="card-body">
@@ -242,7 +245,7 @@
             </div>
 
             <!-- 알림 설정 -->
-            <div class="card notification-card shadow-sm">
+            <div class="card main-card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-bell me-2"></i>알림 설정</h5>
                 </div>
@@ -289,8 +292,8 @@
         <!-- 우측: 상태 및 정보 -->
         <div class="col-lg-4">
             <!-- 현재 상태 -->
-            <div class="card bg-dark border-secondary shadow-sm mb-4">
-                <div class="card-header bg-secondary">
+            <div class="card main-card">
+                <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>현재 상태</h5>
                 </div>
                 <div class="card-body">
@@ -323,7 +326,7 @@
             </div>
 
             <!-- 설정 도움말 -->
-            <div class="card help-card shadow-sm">
+            <div class="card main-card">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>설정 도움말</h5>
                 </div>
