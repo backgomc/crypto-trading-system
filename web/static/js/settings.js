@@ -38,7 +38,6 @@ async function loadConfig() {
             
             populateForm(currentConfig);
             updateStatusDisplay();
-            showAdvancedToast('success', '설정 로드', '설정을 성공적으로 불러왔습니다.');
         } else {
             throw new Error('설정 데이터 형식이 올바르지 않습니다.');
         }
