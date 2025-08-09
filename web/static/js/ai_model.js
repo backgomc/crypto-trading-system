@@ -427,6 +427,11 @@ async function cleanupModels() {
 // 학습 관리
 // ============================================================================
 
+// 파일 경로: web/static/js/ai_model.js
+// 코드명: startTraining 함수 수정 부분
+
+// startTraining 함수를 찾아서 다음으로 교체:
+
 async function startTraining() {
     if (isTraining) {
         showAdvancedToast('warning', '경고', '이미 학습이 진행 중입니다');
@@ -459,15 +464,10 @@ async function startTraining() {
         return;
     }
     
-    // 선택된 지표 정보 생성
-    const selectedIndicatorNames = Object.entries(selectedIndicators)
-        .filter(([key, value]) => value)
-        .map(([key, value]) => indicatorInfo[key]?.name || key)
-        .join(', ');
-    
+    // 모달 메시지 수정 (줄바꿈 처리 + 지표 이름 제거)
     showConfirm(
         'AI 학습 시작',
-        `학습을 시작하시겠습니까?\n\n선택된 지표: ${selectedCount}개\n(${selectedIndicatorNames})\n\n에폭: ${trainingParams.epochs}\n학습 기간: ${trainingParams.training_days}일`,
+        `학습을 시작하시겠습니까?\n\n선택된 지표: ${selectedCount}개\n에폭: ${trainingParams.epochs}\n학습 기간: ${trainingParams.training_days}일`,
         async (confirmed) => {
             if (!confirmed) return;
             

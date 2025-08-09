@@ -182,7 +182,10 @@ function showConfirm(title, message, callback) {
     }
     
     document.getElementById('confirmModalTitle').textContent = title;
-    document.getElementById('confirmModalBody').textContent = message;
+    
+    // 줄바꿈을 <br>로 변환하여 HTML로 삽입
+    const modalBody = document.getElementById('confirmModalBody');
+    modalBody.innerHTML = message.replace(/\n/g, '<br>');
     
     const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
     const okBtn = document.getElementById('confirmModalOk');
