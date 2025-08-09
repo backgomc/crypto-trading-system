@@ -609,9 +609,7 @@ function updateTrainingStatus(status) {
                 day: '2-digit',
                 hour: '2-digit',
                 minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-                timeZone: 'Asia/Seoul'
+                second: '2-digit'
             });
             document.getElementById('startTime').textContent = kstString;
         }
@@ -619,7 +617,7 @@ function updateTrainingStatus(status) {
         // ✅ 경과 시간 (직접 계산)
         if (status.start_time) {
             const startTime = new Date(status.start_time);
-            const now = new Date();
+            const now = new Date();  // 현재 시간 (updateCurrentTime과 동일)
             const elapsedMs = now - startTime;
             
             if (elapsedMs > 0) {
@@ -628,9 +626,7 @@ function updateTrainingStatus(status) {
                 const seconds = Math.floor((elapsedMs % 60000) / 1000);
                 
                 document.getElementById('elapsedTime').textContent = 
-                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            } else {
-                document.getElementById('elapsedTime').textContent = '00:00:00';
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             }
         }
         
