@@ -459,6 +459,9 @@ def get_system_stats():
         log_admin_event('ERROR', 'ADMIN', f'시스템 통계 조회 실패: {e}')
         return error_response('시스템 통계 조회 중 오류가 발생했습니다.', 'DATABASE_ERROR', 500)
 
+# 파일 경로: web/routes/admin_api.py
+# get_recent_logs 함수 수정
+
 @admin_api_bp.route('/api/admin/logs/recent', methods=['GET'])
 @admin_required
 @handle_api_errors
@@ -475,7 +478,32 @@ def get_recent_logs():
         
         # 관리자 로그 제외 필터링
         if exclude_admin:
-            query = query.filter(~SystemLog.message.contains('nah3207'))
+            # ✅ 모든 관리자 계정 조회
+            admin_users = User.query.filter_by(is_admin=True).all()
+            admin_usernames = [user.username for user in admin_users]
+            
+            # ✅ 관리자 사용자명이 포함된 로그만 제외
+            # 예: "설정 조회: admin", "로그인 성공: admin" 등
+            for admin_username in admin_usernames:
+                query = query.filter(~SystemLog.message.contains(f': {admin_username}'))
+                query = query.filter(~SystemLog.message.contains(f'사용자 \'{admin_username}\''))
+                query = query.filter(~SystemLog.message.contains(f'({admin_username})'))
+            
+            # ✅ 관리자 전용 활동만 제외 (일반 사용자도 하는 활동은 제외하지 않음)
+            admin_only_patterns = [
+                '관리자 페이지 접속',
+                '사용자 목록 조회',
+                '사용자 생성',
+                '사용자 삭제',
+                '사용자 정보 수정',
+                '비밀번호 변경:',  # 관리자가 다른 사용자 비밀번호 변경
+                '통계 조회',
+                '최근 로그 조회',
+                '로그 삭제'
+            ]
+            
+            for pattern in admin_only_patterns:
+                query = query.filter(~SystemLog.message.contains(pattern))
         
         # 페이지네이션 적용
         pagination = query.order_by(SystemLog.timestamp.desc()).paginate(
@@ -513,7 +541,7 @@ def get_recent_logs():
                 'ip_address': log.ip_address
             })
 
-        # ✅ 여기에 추가: 자동 갱신이 아닌 경우에만 로그 남김
+        # 자동 갱신이 아닌 경우에만 로그 남김
         is_auto_refresh = request.headers.get('X-Auto-Refresh') == 'true'
         if not is_auto_refresh:
             log_admin_event('INFO', 'ADMIN', f'최근 로그 조회: {session.get("username")}')            
