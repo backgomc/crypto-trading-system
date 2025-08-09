@@ -600,18 +600,88 @@ function updateTrainingStatus(status) {
         document.getElementById('overallProgress').style.width = progress + '%';
         document.getElementById('progressText').textContent = `${status.current_epoch}/${status.total_epochs} 에폭`;
         
-        // 시간 정보
+        // ✅ 시작 시간 (한국시간으로 표시)
         if (status.start_time) {
-            document.getElementById('startTime').textContent = new Date(status.start_time).toLocaleString('ko-KR');
+            const startTime = new Date(status.start_time);
+            const kstString = startTime.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'Asia/Seoul'
+            });
+            document.getElementById('startTime').textContent = kstString;
         }
         
-        if (status.elapsed_formatted) {
-            document.getElementById('elapsedTime').textContent = status.elapsed_formatted;
+        // ✅ 경과 시간 (직접 계산)
+        if (status.start_time) {
+            const startTime = new Date(status.start_time);
+            const now = new Date();
+            const elapsedMs = now - startTime;
+            
+            if (elapsedMs > 0) {
+                const hours = Math.floor(elapsedMs / 3600000);
+                const minutes = Math.floor((elapsedMs % 3600000) / 60000);
+                const seconds = Math.floor((elapsedMs % 60000) / 1000);
+                
+                document.getElementById('elapsedTime').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                document.getElementById('elapsedTime').textContent = '00:00:00';
+            }
+        }
+        
+        // ✅ 예상 완료 시간 (새로 추가)
+        if (status.current_epoch > 0 && status.total_epochs > 0 && status.start_time) {
+            const startTime = new Date(status.start_time);
+            const now = new Date();
+            const elapsedMs = now - startTime;
+            
+            // 에폭당 평균 시간 계산
+            const msPerEpoch = elapsedMs / status.current_epoch;
+            const remainingEpochs = status.total_epochs - status.current_epoch;
+            const remainingMs = msPerEpoch * remainingEpochs;
+            
+            // 예상 완료 시간
+            const estimatedTime = new Date(now.getTime() + remainingMs);
+            
+            const estimatedString = estimatedTime.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+                timeZone: 'Asia/Seoul'
+            });
+            
+            document.getElementById('estimatedTime').textContent = estimatedString;
+            
+            // 남은 시간도 표시 (선택사항)
+            const remainingHours = Math.floor(remainingMs / 3600000);
+            const remainingMinutes = Math.floor((remainingMs % 3600000) / 60000);
+            
+            // estimatedTime 옆에 작게 표시하려면
+            const estimatedElement = document.getElementById('estimatedTime');
+            if (estimatedElement) {
+                estimatedElement.innerHTML = `${estimatedString} <small class="text-muted">(약 ${remainingHours}시간 ${remainingMinutes}분 남음)</small>`;
+            }
+        } else {
+            document.getElementById('estimatedTime').textContent = '계산 중...';
         }
         
         // 메트릭
-        if (status.accuracy) {
+        if (status.loss !== undefined) {
+            document.getElementById('currentLoss').textContent = status.loss.toFixed(4);
+        }
+        if (status.accuracy !== undefined) {
             document.getElementById('currentAccuracy').textContent = (status.accuracy * 100).toFixed(1) + '%';
+        }
+        if (status.val_loss !== undefined) {
+            document.getElementById('valLoss').textContent = status.val_loss.toFixed(4);
         }
     } else {
         document.getElementById('trainingProgress').style.display = 'none';
