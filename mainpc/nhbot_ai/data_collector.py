@@ -202,10 +202,28 @@ class DataCollector:
             # 6. 추가 지표들
             result = self._add_additional_indicators(result)
             
-            # NaN 값 처리
-            result = result.dropna()
+            # ✅ 개선된 NaN 처리
+            print(f"   NaN 처리 전: {len(result)}개 행")
+            
+            # 1. 앞쪽 NaN 행들만 제거 (지표 계산에 필요한 초기 기간)
+            # 예: 200일 이동평균은 처음 200개 행이 NaN
+            first_valid_index = result.apply(lambda x: x.first_valid_index()).max()
+            if first_valid_index:
+                result = result.loc[first_valid_index:]
+                print(f"   초기 NaN 제거 후: {len(result)}개 행")
+            
+            # 2. 남은 NaN을 forward fill (이전 값으로 채우기)
+            result = result.ffill()  # ✅ 더 간단한 방법
+            
+            # 3. 그래도 남은 NaN (첫 행)은 backward fill
+            result = result.bfill()
             
             print(f"✅ 기술적 지표 계산 완료: {len(result.columns)}개 컬럼, {len(result)}개 행")
+            
+            # 최종 확인
+            nan_count = result.isnull().sum().sum()
+            if nan_count > 0:
+                print(f"⚠️ 경고: 여전히 {nan_count}개의 NaN 값이 있습니다")
             
             return result
             
