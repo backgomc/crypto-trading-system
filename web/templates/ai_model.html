@@ -1,5 +1,5 @@
 <!-- 파일 경로: web/templates/ai_model.html -->
-<!-- 코드명: AI 모델 관리 페이지 템플릿 (새 지표 추가 버전) -->
+<!-- 코드명: AI 모델 관리 페이지 템플릿 (개선된 툴팁 버전) -->
 
 {% extends "base.html" %}
 
@@ -47,7 +47,7 @@
                         </p>
                         <div class="essential-indicators-grid">
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="📊 가격 데이터 (Price Data)&#10;&#10;용도: 모든 기술적 분석의 기초 데이터&#10;&#10;포함 내용:&#10;• 종가: 해당 캔들의 마감 가격&#10;• 가격 변화율: 이전 대비 % 변화&#10;• 고저 범위: 고가-저가 차이&#10;&#10;왜 중요한가?&#10;가격의 움직임 자체가 가장 순수한 시장 신호입니다. 다른 모든 지표들은 이 가격 데이터를 가공한 것입니다.">
+                                 title="📊 가격 데이터 (OHLCV)&#10;&#10;용도: 모든 분석의 기초 데이터&#10;계산: 종가, 변화율%, 고저범위&#10;활용: 가격 움직임 자체가 가장 순수한 시장 신호">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_price" checked class="form-check-input indicator-checkbox" data-indicator="price">
                                     <label class="indicator-name" for="indicator_price">가격 데이터</label>
@@ -56,7 +56,7 @@
                                 <small class="indicator-desc">종가, 변화율, 고저범위</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="📈 MACD (이동평균 수렴확산)&#10;&#10;용도: 추세 전환점을 포착하는 핵심 지표&#10;&#10;계산 방법:&#10;• MACD선 = 12일 EMA - 26일 EMA&#10;• 시그널선 = MACD의 9일 EMA&#10;• 히스토그램 = MACD - 시그널&#10;&#10;매매 신호:&#10;• MACD가 시그널선을 상향 돌파 → 매수 신호&#10;• MACD가 시그널선을 하향 돌파 → 매도 신호&#10;&#10;NHBot에서의 역할:&#10;리밸런싱 타이밍을 결정하는 가장 중요한 지표입니다. 15분봉 MACD 전환이 매매의 핵심 트리거입니다.">
+                                 title="📈 MACD&#10;&#10;용도: 추세 전환점 포착&#10;계산: 12일-26일 이평선 차이&#10;신호: 시그널선 상향돌파=매수, 하향돌파=매도&#10;⭐ NHBot 핵심: 리밸런싱 타이밍 결정">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_macd" checked class="form-check-input indicator-checkbox" data-indicator="macd">
                                     <label class="indicator-name" for="indicator_macd">MACD</label>
@@ -65,7 +65,7 @@
                                 <small class="indicator-desc">MACD, 시그널, 히스토그램</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="🔥 RSI (상대강도지수)&#10;&#10;용도: 과매수/과매도 구간을 판단하는 모멘텀 지표&#10;&#10;해석 방법:&#10;• RSI > 70: 과매수 구간 (하락 전환 가능성)&#10;• RSI < 30: 과매도 구간 (상승 전환 가능성)&#10;• 50 기준: 상승/하락 추세 판단&#10;&#10;실전 활용:&#10;극단적인 RSI 값(80 이상, 20 이하)은 강한 추세를 의미하기도 합니다. 다이버전스(가격과 RSI의 반대 움직임)는 추세 전환의 조기 신호입니다.&#10;&#10;NHBot 활용:&#10;과열된 시장 상황을 감지하여 리밸런싱 크기를 조절합니다.">
+                                 title="🔥 RSI (상대강도지수)&#10;&#10;용도: 과매수/과매도 판단&#10;계산: 14일간 상승/하락 비율&#10;신호: 70이상=과매수(하락가능), 30이하=과매도(상승가능)&#10;활용: 극단값(80↑,20↓)은 강한 추세 의미">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_rsi" checked class="form-check-input indicator-checkbox" data-indicator="rsi">
                                     <label class="indicator-name" for="indicator_rsi">RSI</label>
@@ -74,7 +74,7 @@
                                 <small class="indicator-desc">14일 RSI</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="표준편차를 이용한 변동성 채널. 밴드 상단/하단 터치 시 반전 가능성이 높습니다.">
+                                 title="📊 볼린저밴드&#10;&#10;용도: 변동성 채널 분석&#10;계산: 20일 이평 ± 2×표준편차&#10;신호: 상단터치=과매수, 하단터치=과매도&#10;활용: 밴드폭 좁음=변동성↓, 넓음=변동성↑">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_bb" checked class="form-check-input indicator-checkbox" data-indicator="bb">
                                     <label class="indicator-name" for="indicator_bb">볼린저밴드</label>
@@ -83,7 +83,7 @@
                                 <small class="indicator-desc">위치, 폭</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="평균 실제 범위. 시장의 변동성을 측정하는 지표로, 손절/익절 레벨 설정에 활용됩니다.">
+                                 title="📏 ATR (평균 실제 범위)&#10;&#10;용도: 시장 변동성 측정&#10;계산: 14일 평균 가격 범위&#10;활용: ATR↑=변동성 큼, ATR↓=변동성 작음&#10;손절/익절 설정 기준으로 사용">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_atr" checked class="form-check-input indicator-checkbox" data-indicator="atr">
                                     <label class="indicator-name" for="indicator_atr">ATR</label>
@@ -92,7 +92,7 @@
                                 <small class="indicator-desc">평균 실제 범위</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="거래량 분석 지표. 거래량 비율, 누적 거래량 델타(CVD)로 매수/매도 압력을 파악합니다.">
+                                 title="📊 거래량 분석&#10;&#10;용도: 매수/매도 압력 파악&#10;측정: 거래량 비율, CVD(누적델타)&#10;신호: 거래량↑+가격↑=강세, 거래량↓+가격↑=약세&#10;CVD상승=매수우세, CVD하락=매도우세">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_volume" checked class="form-check-input indicator-checkbox" data-indicator="volume">
                                     <label class="indicator-name" for="indicator_volume">거래량</label>
@@ -101,7 +101,7 @@
                                 <small class="indicator-desc">비율, CVD, CVD 기울기</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="평균 방향성 지수. 25 이상이면 추세가 강함을 의미합니다. 추세의 강도를 측정합니다.">
+                                 title="🎯 ADX (평균 방향성 지수)&#10;&#10;용도: 추세 강도 측정&#10;계산: 방향성 움직임의 평균&#10;해석: 25이상=추세강함, 25이하=횡보&#10;주의: 방향X, 강도만 표시">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_adx" checked class="form-check-input indicator-checkbox" data-indicator="adx">
                                     <label class="indicator-name" for="indicator_adx">ADX</label>
@@ -110,7 +110,7 @@
                                 <small class="indicator-desc">추세강도, 기울기</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="아룬 오실레이터. 새로운 추세의 시작을 조기에 감지하는 지표입니다.">
+                                 title="🔄 Aroon 오실레이터&#10;&#10;용도: 추세 시작 조기 감지&#10;계산: 최고/최저가 경과 시간&#10;신호: 상승선>하락선=상승추세, 반대=하락추세&#10;활용: 교차점=추세 전환 신호">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_aroon" checked class="form-check-input indicator-checkbox" data-indicator="aroon">
                                     <label class="indicator-name" for="indicator_aroon">Aroon</label>
@@ -119,7 +119,7 @@
                                 <small class="indicator-desc">추세 전환 타이밍</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="연속 상승/하락 횟수 카운터. 한 방향으로 몇 번 연속 움직였는지 추적합니다.">
+                                 title="🔢 연속 카운터&#10;&#10;용도: 한 방향 연속 움직임 추적&#10;측정: 연속 상승/하락 횟수&#10;신호: 5회이상 연속=강한 추세&#10;활용: 원웨이 장 감지 기초 데이터">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_consecutive" checked class="form-check-input indicator-checkbox" data-indicator="consecutive">
                                     <label class="indicator-name" for="indicator_consecutive">연속 카운터</label>
@@ -128,7 +128,7 @@
                                 <small class="indicator-desc">연속 상승/하락</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="1시간봉, 4시간봉 등 다중 시간대 추세 분석. 시간대별 추세 일치도를 확인합니다.">
+                                 title="⏰ 다중 시간대 분석&#10;&#10;용도: 시간대별 추세 일치도 확인&#10;측정: 1시간/4시간봉 추세&#10;신호: 모든 시간대 일치=강한 신호&#10;활용: 단기/장기 추세 동시 파악">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_trend" checked class="form-check-input indicator-checkbox" data-indicator="trend">
                                     <label class="indicator-name" for="indicator_trend">다중 시간대</label>
@@ -138,7 +138,7 @@
                             </div>
                             <!-- 🆕 핵심 지표로 이동된 중요 지표들 -->
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="⭐ HH/LL 카운터 (Higher Highs/Lower Lows)&#10;&#10;🎯 원웨이 장 감지의 핵심!&#10;&#10;용도: 추세의 지속성을 판단하는 가장 명확한 지표&#10;&#10;측정 내용:&#10;• HH(Higher High): 이전 고점보다 높은 고점 형성 횟수&#10;• LL(Lower Low): 이전 저점보다 낮은 저점 형성 횟수&#10;• 추세 점수: 연속 HH/LL 발생 빈도&#10;&#10;원웨이 장 신호:&#10;• 연속 5회 이상 HH → 강력한 상승 원웨이&#10;• 연속 5회 이상 LL → 강력한 하락 원웨이&#10;&#10;NHBot 핵심 전략:&#10;이 지표가 높은 값을 보일 때 AI는 '지금은 리밸런싱하면 안 된다'고 판단합니다. 원웨이 장에서의 손실을 방지하는 가장 중요한 안전장치입니다.">
+                                 title="⭐ HH/LL 카운터&#10;&#10;용도: 고점/저점 갱신 추적&#10;측정: Higher High, Lower Low 횟수&#10;신호: 연속 5회 HH=강한 상승, 5회 LL=강한 하락&#10;🔥 원웨이 장 핵심 지표">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_hhll" checked class="form-check-input indicator-checkbox" data-indicator="hhll">
                                     <label class="indicator-name" for="indicator_hhll">HH/LL 카운터 ⭐</label>
@@ -147,7 +147,7 @@
                                 <small class="indicator-desc">고점/저점 갱신 추적</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="⭐ Z-score (표준점수)&#10;&#10;용도: 현재 가격이 평균에서 얼마나 벗어났는지 측정&#10;&#10;계산 방법:&#10;Z = (현재가격 - 평균) ÷ 표준편차&#10;&#10;해석:&#10;• Z > +2: 평균보다 2 표준편차 위 (매우 과매수)&#10;• Z < -2: 평균보다 2 표준편차 아래 (매우 과매도)&#10;• -1 ~ +1: 정상 범위 (68% 확률)&#10;&#10;평균 회귀 전략:&#10;극단적인 Z-score는 평균으로 돌아올 가능성이 높습니다. +3 또는 -3을 넘으면 99.7% 확률로 평균 회귀가 발생합니다.&#10;&#10;NHBot 활용:&#10;극단적 상황에서 리밸런싱 크기를 늘려 수익을 극대화합니다.">
+                                 title="⭐ Z-score&#10;&#10;용도: 평균 대비 현재 위치&#10;계산: (현재가-평균)÷표준편차&#10;신호: ±2이상=극단값(평균회귀 예상)&#10;활용: ±3이상=99.7% 확률로 반전">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_zscore" checked class="form-check-input indicator-checkbox" data-indicator="zscore">
                                     <label class="indicator-name" for="indicator_zscore">Z-score ⭐</label>
@@ -156,7 +156,7 @@
                                 <small class="indicator-desc">평균 회귀 지표</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="⭐ Market Structure Break (시장 구조 돌파)&#10;&#10;용도: 주요 지지/저항선 돌파를 감지하여 추세 전환 확인&#10;&#10;감지 내용:&#10;• 주요 고점 돌파 → 상승 추세 확정&#10;• 주요 저점 돌파 → 하락 추세 확정&#10;• 돌파 강도: 거래량과 함께 측정&#10;&#10;중요성:&#10;단순한 가격 돌파가 아닌 '구조적 변화'를 감지합니다. 가짜 돌파(훼이크)를 필터링하여 진짜 추세 전환만 포착합니다.&#10;&#10;NHBot 전략:&#10;시장 구조가 깨질 때 포지션 조정을 일시 중단하고, 새로운 추세가 확립될 때까지 대기합니다.">
+                                 title="⭐ Market Structure&#10;&#10;용도: 시장 구조 돌파 감지&#10;측정: 주요 고점/저점 돌파&#10;신호: 구조 돌파=추세 전환&#10;활용: 가짜 돌파 필터링">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_market_structure" checked class="form-check-input indicator-checkbox" data-indicator="market_structure">
                                     <label class="indicator-name" for="indicator_market_structure">Market Structure ⭐</label>
@@ -165,7 +165,7 @@
                                 <small class="indicator-desc">시장 구조 돌파</small>
                             </div>
                             <div class="indicator-card essential" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="⭐ 추세 강도 종합 점수&#10;&#10;용도: 여러 지표를 종합하여 추세 강도를 점수화&#10;&#10;계산 요소:&#10;• ADX 값 (추세 강도)&#10;• 연속 상승/하락 횟수&#10;• 거래량 증가율&#10;• 다중 시간대 일치도&#10;&#10;점수 해석:&#10;• +80 이상: 매우 강한 상승 추세&#10;• +50 ~ +80: 상승 추세&#10;• -50 ~ +50: 횡보/불확실&#10;• -80 이하: 매우 강한 하락 추세&#10;&#10;NHBot 핵심:&#10;점수가 ±80을 넘으면 원웨이 장으로 판단하고 리밸런싱을 최소화합니다. 이 점수가 AI의 최종 의사결정에 가장 큰 영향을 미칩니다.">
+                                 title="⭐ 추세 강도 점수&#10;&#10;용도: 종합 추세 강도 점수화&#10;계산: ADX+연속카운터+거래량 종합&#10;점수: ±80이상=매우 강한 추세, ±50~80=추세, -50~+50=횡보&#10;🔥 AI 최종 의사결정 핵심">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_trend_strength" checked class="form-check-input indicator-checkbox" data-indicator="trend_strength">
                                     <label class="indicator-name" for="indicator_trend_strength">추세 강도 점수 ⭐</label>
@@ -189,7 +189,7 @@
                         </p>
                         <div class="optional-indicators-grid">
                             <div class="indicator-card optional" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="단순이동평균. 지정 기간의 종가를 단순 평균한 값입니다. 가격의 전반적인 방향성을 파악합니다.">
+                                 title="📈 SMA (단순이동평균)&#10;&#10;용도: 추세 방향 파악&#10;계산: N일간 종가 평균&#10;활용: 가격>SMA=상승추세, 가격<SMA=하락추세">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_sma" class="form-check-input indicator-checkbox" data-indicator="sma">
                                     <label class="indicator-name" for="indicator_sma">SMA</label>
@@ -198,7 +198,7 @@
                                 <small class="indicator-desc">단순이동평균</small>
                             </div>
                             <div class="indicator-card optional" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="지수이동평균. 최근 가격에 더 큰 가중치를 두는 이동평균입니다. SMA보다 빠르게 반응합니다.">
+                                 title="📈 EMA (지수이동평균)&#10;&#10;용도: 빠른 추세 반응&#10;계산: 최근 가격에 가중치&#10;활용: SMA보다 빠른 신호, 단기 추세 포착">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_ema" class="form-check-input indicator-checkbox" data-indicator="ema">
                                     <label class="indicator-name" for="indicator_ema">EMA</label>
@@ -207,7 +207,7 @@
                                 <small class="indicator-desc">지수이동평균</small>
                             </div>
                             <div class="indicator-card optional" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="스토캐스틱 오실레이터. 현재 가격이 일정 기간 고저 범위의 어디에 위치하는지 측정합니다.">
+                                 title="📊 스토캐스틱&#10;&#10;용도: 과매수/과매도 판단&#10;계산: 현재가의 고저 범위 위치&#10;신호: 80이상=과매수, 20이하=과매도&#10;K선과 D선 교차=매매신호">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_stoch" class="form-check-input indicator-checkbox" data-indicator="stoch">
                                     <label class="indicator-name" for="indicator_stoch">스토캐스틱</label>
@@ -216,7 +216,7 @@
                                 <small class="indicator-desc">K%, D%</small>
                             </div>
                             <div class="indicator-card optional" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="윌리엄스 %R. 스토캐스틱과 유사하지만 반대로 표시됩니다. -20 이상이면 과매수, -80 이하면 과매도입니다.">
+                                 title="📊 Williams %R&#10;&#10;용도: 모멘텀 측정&#10;계산: 스토캐스틱의 반대&#10;신호: -20이상=과매수, -80이하=과매도&#10;활용: 빠른 전환점 감지">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_williams" class="form-check-input indicator-checkbox" data-indicator="williams">
                                     <label class="indicator-name" for="indicator_williams">Williams %R</label>
@@ -225,7 +225,7 @@
                                 <small class="indicator-desc">모멘텀 지표</small>
                             </div>
                             <div class="indicator-card optional" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="자금흐름지표. RSI에 거래량을 가중한 지표입니다. 80 이상이면 과매수, 20 이하면 과매도입니다.">
+                                 title="💰 MFI (자금흐름지표)&#10;&#10;용도: 거래량 포함 RSI&#10;계산: 가격×거래량 기반&#10;신호: 80이상=과매수, 20이하=과매도&#10;활용: RSI보다 정확한 신호">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_mfi" class="form-check-input indicator-checkbox" data-indicator="mfi">
                                     <label class="indicator-name" for="indicator_mfi">MFI</label>
@@ -234,7 +234,7 @@
                                 <small class="indicator-desc">자금흐름지표</small>
                             </div>
                             <div class="indicator-card optional" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="거래량 가중 평균 가격. 실제 거래가 이루어진 평균 가격을 나타냅니다. 기관의 평균 매수가로 해석됩니다.">
+                                 title="⚖️ VWAP&#10;&#10;용도: 기관 평균 매수가&#10;계산: 거래량 가중 평균가&#10;활용: 가격>VWAP=강세, 가격<VWAP=약세&#10;데이트레이딩 기준선">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_vwap" class="form-check-input indicator-checkbox" data-indicator="vwap">
                                     <label class="indicator-name" for="indicator_vwap">VWAP</label>
@@ -243,7 +243,7 @@
                                 <small class="indicator-desc">거래량가중평균</small>
                             </div>
                             <div class="indicator-card optional" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="20일 변동성. 가격의 표준편차로 시장의 불안정성을 측정합니다. 높을수록 가격 변동이 큽니다.">
+                                 title="📉 변동성&#10;&#10;용도: 시장 불안정성 측정&#10;계산: 20일 표준편차&#10;활용: 높음=큰 가격변동, 낮음=안정적&#10;포지션 크기 조절 기준">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_volatility" class="form-check-input indicator-checkbox" data-indicator="volatility">
                                     <label class="indicator-name" for="indicator_volatility">변동성</label>
@@ -268,7 +268,7 @@
                         <div class="advanced-indicators-grid">
                             <!-- 채널 지표 -->
                             <div class="indicator-card advanced" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="켈트너 채널. ATR 기반 동적 채널로 볼린저밴드보다 안정적입니다. 브레이크아웃 전략에 효과적입니다.">
+                                 title="🔴 Keltner Channel&#10;&#10;용도: ATR 기반 동적 채널&#10;계산: EMA ± (ATR×배수)&#10;활용: 볼린저밴드보다 안정적&#10;브레이크아웃 시 강한 추세 신호">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_keltner" class="form-check-input indicator-checkbox" data-indicator="keltner">
                                     <label class="indicator-name" for="indicator_keltner">Keltner Channel</label>
@@ -277,7 +277,7 @@
                                 <small class="indicator-desc">볼린저밴드 대안</small>
                             </div>
                             <div class="indicator-card advanced" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="돈치안 채널. N일간 최고가/최저가로 형성되는 채널입니다. 터틀 트레이딩 시스템의 핵심 지표입니다.">
+                                 title="🔴 Donchian Channel&#10;&#10;용도: N일 최고/최저가 채널&#10;계산: 20일 고점/저점 연결&#10;활용: 터틀 트레이딩 핵심&#10;돌파 시 추세 추종 진입">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_donchian" class="form-check-input indicator-checkbox" data-indicator="donchian">
                                     <label class="indicator-name" for="indicator_donchian">Donchian Channel</label>
@@ -288,7 +288,7 @@
                             
                             <!-- 거래량 고급 지표 -->
                             <div class="indicator-card advanced" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="Volume Point of Control. 가장 많은 거래량이 발생한 가격대입니다. 강력한 지지/저항선으로 작용합니다.">
+                                 title="🔴 VPOC (Volume Point of Control)&#10;&#10;용도: 최대 거래량 가격대&#10;측정: 가격별 거래량 누적&#10;활용: 강력한 지지/저항선&#10;이탈 시 큰 움직임 예상">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_vpoc" class="form-check-input indicator-checkbox" data-indicator="vpoc">
                                     <label class="indicator-name" for="indicator_vpoc">VPOC</label>
@@ -297,7 +297,7 @@
                                 <small class="indicator-desc">가격대별 거래량</small>
                             </div>
                             <div class="indicator-card advanced" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="주문 플로우 불균형. 매수/매도 주문량 차이를 분석하여 단기 방향성을 예측합니다.">
+                                 title="🔴 Order Flow Imbalance&#10;&#10;용도: 매수/매도 불균형&#10;측정: 주문량 차이 분석&#10;신호: 큰 불균형=방향성 힌트&#10;단기 스캘핑에 유용">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_order_flow" class="form-check-input indicator-checkbox" data-indicator="order_flow">
                                     <label class="indicator-name" for="indicator_order_flow">Order Flow</label>
@@ -308,7 +308,7 @@
                             
                             <!-- 가격 구조 지표 -->
                             <div class="indicator-card advanced" data-bs-toggle="tooltip" data-bs-placement="top" 
-                                 title="피봇 포인트. 전일 고가/저가/종가로 계산하는 지지/저항선입니다. 데이트레이딩의 기본 레벨입니다.">
+                                 title="🔴 Pivot Points&#10;&#10;용도: 지지/저항 레벨&#10;계산: (전일 고+저+종)/3&#10;레벨: R1,R2,S1,S2 등&#10;데이트레이딩 필수 지표">
                                 <div class="indicator-header">
                                     <input type="checkbox" id="indicator_pivot" class="form-check-input indicator-checkbox" data-indicator="pivot">
                                     <label class="indicator-name" for="indicator_pivot">Pivot Points</label>

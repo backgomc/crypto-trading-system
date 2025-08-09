@@ -635,6 +635,7 @@
 .indicator-card {
    cursor: pointer;
    user-select: none;
+   transition: all 0.2s ease;
 }
 
 /* 🆕 체크박스 금지 표시 제거 */
@@ -667,7 +668,16 @@
    color: #667eea;
 }
 
-/* 🆕 Bootstrap 툴팁 다크테마 커스터마이징 */
+/* 🆕 Bootstrap 툴팁 다크테마 커스터마이징 및 애니메이션 */
+.tooltip {
+   opacity: 0;
+   transition: opacity 0.1s ease-in-out !important;
+}
+
+.tooltip.show {
+   opacity: 0.95;
+}
+
 .tooltip-inner {
    background-color: #333333 !important;
    color: #ffffff !important;
@@ -677,6 +687,8 @@
    font-size: 0.9rem;
    line-height: 1.5;
    border: 1px solid #555555;
+   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+   white-space: pre-line; /* 줄바꿈 유지 */
 }
 
 .tooltip.bs-tooltip-top .tooltip-arrow::before {
@@ -693,6 +705,82 @@
 
 .tooltip.bs-tooltip-end .tooltip-arrow::before {
    border-right-color: #333333 !important;
+}
+
+/* 🆕 툴팁 fade 애니메이션 개선 */
+.tooltip.fade {
+   transition: opacity 0.1s linear !important;
+}
+
+/* 🆕 지표 카드 호버 시 즉각 반응 */
+.indicator-card {
+   transition: all 0.15s ease !important;
+}
+
+.indicator-card:hover {
+   transition-delay: 0s !important;
+}
+
+/* 🆕 체크박스 스타일 개선 (클릭 영역 확대) */
+.indicator-card .form-check-input {
+   margin-right: 8px;
+   transition: all 0.15s ease;
+}
+
+.indicator-card .form-check-input:hover {
+   transform: scale(1.1);
+   box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+}
+
+/* 🆕 지표 이름 라벨 스타일 */
+.indicator-name {
+   display: inline-block;
+   padding: 2px 4px;
+   transition: color 0.15s ease;
+}
+
+.indicator-card:hover .indicator-name {
+   color: #667eea !important;
+}
+
+/* 🆕 토스트 컨테이너 */
+#toastContainer {
+   position: fixed;
+   top: 20px;
+   right: 20px;
+   z-index: 9999;
+}
+
+/* 🆕 토스트 애니메이션 */
+.toast {
+   animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+   from {
+       transform: translateX(100%);
+       opacity: 0;
+   }
+   to {
+       transform: translateX(0);
+       opacity: 1;
+   }
+}
+
+/* 🆕 선택된 지표 카드 강조 */
+.indicator-card:has(.form-check-input:checked) {
+   background-color: rgba(102, 126, 234, 0.1);
+   border-color: #667eea;
+}
+
+/* 🆕 지표 배지 애니메이션 */
+.indicator-badge {
+   transition: all 0.2s ease;
+}
+
+.indicator-card:hover .indicator-badge {
+   transform: scale(1.1);
+   background-color: #764ba2;
 }
 
 /* 모바일 반응형 */

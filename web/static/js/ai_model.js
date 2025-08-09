@@ -1,5 +1,5 @@
 // 파일 경로: web/static/js/ai_model.js
-// 코드명: AI 모델 관리 페이지 JavaScript (새 지표 추가 버전)
+// 코드명: AI 모델 관리 페이지 JavaScript (개선된 버전)
 
 // 전역 변수
 let isTraining = false;
@@ -49,12 +49,13 @@ const indicatorInfo = {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 AI 모델 관리 페이지 초기화');
     
-    // Bootstrap 툴팁 초기화 (trigger: hover로 설정)
+    // Bootstrap 툴팁 초기화 (개선된 설정)
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl, {
             trigger: 'hover',  // 마우스 호버시에만 표시
-            delay: { show: 500, hide: 100 }  // 0.5초 후 표시, 0.1초 후 숨김
+            delay: { show: 100, hide: 100 },  // 0.1초 딜레이
+            html: true  // HTML 허용
         });
     });
     
@@ -113,23 +114,20 @@ function initEventListeners() {
         cleanupBtn.addEventListener('click', cleanupModels);
     }
     
-    // 지표 카드 전체 클릭 이벤트
+    // 지표 카드 전체 클릭 이벤트 (개선된 버전)
     document.querySelectorAll('.indicator-card').forEach(card => {
         card.addEventListener('click', function(e) {
             // 체크박스 직접 클릭은 제외
-            if (e.target.type !== 'checkbox') {
+            if (e.target.type !== 'checkbox' && !e.target.classList.contains('form-check-input')) {
+                e.preventDefault();
+                e.stopPropagation();
+                
                 const checkbox = this.querySelector('.indicator-checkbox');
                 if (checkbox) {
                     checkbox.checked = !checkbox.checked;
                     const indicator = checkbox.dataset.indicator;
                     selectedIndicators[indicator] = checkbox.checked;
                     updateSelectedCounts();
-                    
-                    // 툴팁 숨기기
-                    const tooltip = bootstrap.Tooltip.getInstance(this);
-                    if (tooltip) {
-                        tooltip.hide();
-                    }
                 }
             }
         });
@@ -141,13 +139,6 @@ function initEventListeners() {
             const indicator = this.dataset.indicator;
             selectedIndicators[indicator] = this.checked;
             updateSelectedCounts();
-            
-            // 툴팁 숨기기
-            const card = this.closest('.indicator-card');
-            const tooltip = bootstrap.Tooltip.getInstance(card);
-            if (tooltip) {
-                tooltip.hide();
-            }
         });
     });
 }
@@ -209,16 +200,36 @@ function updateSelectedCounts() {
     const essentialElement = document.getElementById('essentialIndicatorCount');
     if (essentialElement) {
         essentialElement.textContent = `${essentialCount}개 선택`;
+        // 색상 변경
+        if (essentialCount === 0) {
+            essentialElement.className = 'badge bg-secondary float-end';
+        } else if (essentialCount < 10) {
+            essentialElement.className = 'badge bg-warning float-end';
+        } else {
+            essentialElement.className = 'badge bg-info float-end';
+        }
     }
     
     const optionalElement = document.getElementById('optionalIndicatorCount');
     if (optionalElement) {
         optionalElement.textContent = `${optionalCount}개 선택`;
+        // 색상 변경
+        if (optionalCount === 0) {
+            optionalElement.className = 'badge bg-secondary float-end';
+        } else {
+            optionalElement.className = 'badge bg-info float-end';
+        }
     }
     
     const advancedElement = document.getElementById('advancedIndicatorCount');
     if (advancedElement) {
         advancedElement.textContent = `${advancedCount}개 선택`;
+        // 색상 변경
+        if (advancedCount === 0) {
+            advancedElement.className = 'badge bg-secondary float-end';
+        } else {
+            advancedElement.className = 'badge bg-info float-end';
+        }
     }
     
     const totalElement = document.getElementById('totalSelectedCount');
