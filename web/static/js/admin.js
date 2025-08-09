@@ -9,6 +9,7 @@ let currentLogPage = 1;
 let logsPerPage = 20;
 let hasMoreLogs = false;
 let isLoadingLogs = false;
+let isViewingExtendedLogs = false;  // 확장 로그 보기 상태
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
@@ -142,7 +143,12 @@ async function apiCallAuto(url, method = 'GET', data = null) {
 
 // 최근 로그 로드 (자동 갱신 구분)
 async function loadRecentLogs(isFirstLoad = false, isAutoRefresh = false) {
-   if (isLoadingLogs && !isAutoRefresh) return;  // 자동 갱신은 로딩 중에도 허용
+   // 자동 갱신인데 확장 보기 중이면 스킵
+   if (isAutoRefresh && isViewingExtendedLogs) {
+       return;  // 자동 갱신 무시
+   }
+   
+   if (isLoadingLogs && !isAutoRefresh) return;
    
    if (!isAutoRefresh) {
        isLoadingLogs = true;
@@ -159,7 +165,6 @@ async function loadRecentLogs(isFirstLoad = false, isAutoRefresh = false) {
            exclude_admin: excludeAdmin
        });
        
-       // 자동 갱신이면 자동 갱신용 API 사용
        const result = isAutoRefresh 
            ? await apiCallAuto(`/api/admin/logs/recent?${params}`)
            : await apiCall(`/api/admin/logs/recent?${params}`);
@@ -170,6 +175,7 @@ async function loadRecentLogs(isFirstLoad = false, isAutoRefresh = false) {
            if (isFirstLoad || isAutoRefresh) {
                currentLogPage = 1;
                displayRecentLogs(logs, true);
+               isViewingExtendedLogs = false;  // 첫 로드나 수동 새로고침 시 리셋
            } else {
                displayRecentLogs(logs, false);
            }
@@ -178,7 +184,7 @@ async function loadRecentLogs(isFirstLoad = false, isAutoRefresh = false) {
            updateLogCount(result.meta ? result.meta.total : logs.length);
        }
    } catch (error) {
-       if (!isAutoRefresh) {  // 자동 갱신 에러는 조용히 처리
+       if (!isAutoRefresh) {
            console.error('로그 로드 실패:', error);
            showToast('error', '로그 로드에 실패했습니다.');
        }
@@ -670,11 +676,9 @@ async function createUser() {
 // 관리자 로그 필터링 (수정: 서버에서 필터링)
 function filterLogs() {
     const excludeAdmin = document.getElementById('excludeAdminLogs').checked;
-    
-    // 체크박스 상태 저장
     localStorage.setItem('excludeAdminLogs', excludeAdmin);
     
-    // 서버에서 필터링된 로그 다시 로드
+    isViewingExtendedLogs = false;  // 확장 보기 상태 OFF
     currentLogPage = 1;
     loadRecentLogs(true);
 }
@@ -683,6 +687,7 @@ function filterLogs() {
 async function loadMoreLogs() {
     if (isLoadingLogs || !hasMoreLogs) return;
     
+    isViewingExtendedLogs = true;  // 확장 보기 상태 ON
     currentLogPage++;
     await loadRecentLogs(false);
 }
@@ -690,14 +695,15 @@ async function loadMoreLogs() {
 // 로그 새로고침 (수정: 확인창 제거)
 async function refreshLogs() {
     try {
+        isViewingExtendedLogs = false;  // 확장 보기 상태 OFF
         currentLogPage = 1;
         await loadRecentLogs(true, false);
-        // 확인창 제거 - 조용히 새로고침
     } catch (error) {
         console.error('로그 새로고침 실패:', error);
         showToast('error', '로그 새로고침에 실패했습니다.');
     }
 }
+
 
 // 사용자 편집
 function editUser(userId) {
