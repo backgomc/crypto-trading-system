@@ -35,10 +35,9 @@
    transition: all 0.3s ease;
 }
 
-/* .main-card:hover {
-   transform: translateY(-2px);
+.main-card:hover {
    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-} */
+}
 
 .main-card .card-header {
    background-color: #2a2a2a;
