@@ -739,10 +739,6 @@
    transition: color 0.15s ease;
 }
 
-.indicator-card:hover .indicator-name {
-   color: #667eea !important;
-}
-
 /* 🆕 토스트 컨테이너 */
 #toastContainer {
    position: fixed;
