@@ -492,7 +492,7 @@ async function startTraining() {
                     document.getElementById('stopTrainingBtn').disabled = false;
                     document.getElementById('trainingStatus').textContent = '학습 중';
                     document.getElementById('trainingStatus').className = 'badge bg-primary';
-                    document.getElementById('trainingProgress').style.display = 'block';
+                    showTrainingProgress();
                     
                     // 상태 모니터링 시작
                     startStatusMonitoring();
@@ -538,6 +538,7 @@ async function stopTraining() {
                     
                     // 상태 모니터링 중지
                     stopStatusMonitoring();
+                    hideTrainingProgress();
                     
                 } else {
                     showAdvancedToast('error', '중지 실패', data.error || '학습 중지 실패');
@@ -564,63 +565,68 @@ async function loadTrainingStatus() {
 }
 
 function updateTrainingStatus(status) {
-    if (!status) return;
-    
-    // 학습 중 여부
-    isTraining = status.is_training || false;
-    
-    // 버튼 상태
-    document.getElementById('startTrainingBtn').disabled = isTraining;
-    document.getElementById('stopTrainingBtn').disabled = !isTraining;
-    
-    // 상태 배지
-    const statusBadge = document.getElementById('trainingStatus');
-    if (statusBadge) {
-        if (status.status === 'running') {
-            statusBadge.textContent = '학습 중';
-            statusBadge.className = 'badge bg-primary';
-        } else if (status.status === 'completed') {
-            statusBadge.textContent = '완료';
-            statusBadge.className = 'badge bg-success';
-        } else if (status.status === 'failed') {
-            statusBadge.textContent = '실패';
-            statusBadge.className = 'badge bg-danger';
-        } else {
-            statusBadge.textContent = '대기 중';
-            statusBadge.className = 'badge bg-secondary';
-        }
-    }
-    
-    // 진행률 표시
-    if (isTraining && status.total_epochs > 0) {
-        document.getElementById('trainingProgress').style.display = 'block';
-        
-        // 전체 진행률
-        const progress = (status.current_epoch / status.total_epochs) * 100;
-        document.getElementById('overallProgress').style.width = progress + '%';
-        document.getElementById('progressText').textContent = `${status.current_epoch}/${status.total_epochs} 에폭`;
-        
-        // 시간 정보
-        if (status.start_time) {
-            document.getElementById('startTime').textContent = new Date(status.start_time).toLocaleString('ko-KR');
-        }
-        
-        if (status.elapsed_formatted) {
-            document.getElementById('elapsedTime').textContent = status.elapsed_formatted;
-        }
-        
-        // 메트릭
-        if (status.accuracy) {
-            document.getElementById('currentAccuracy').textContent = (status.accuracy * 100).toFixed(1) + '%';
-        }
+  if (!status) return;
+
+  // 학습 중 여부
+  isTraining = status.is_training || false;
+
+  // 버튼 상태
+  document.getElementById('startTrainingBtn').disabled = isTraining;
+  document.getElementById('stopTrainingBtn').disabled = !isTraining;
+
+  // 상태 배지
+  const statusBadge = document.getElementById('trainingStatus');
+  if (statusBadge) {
+    if (status.status === 'running') {
+      statusBadge.textContent = '학습 중';
+      statusBadge.className = 'badge bg-primary';
+    } else if (status.status === 'completed') {
+      statusBadge.textContent = '완료';
+      statusBadge.className = 'badge bg-success';
+    } else if (status.status === 'failed') {
+      statusBadge.textContent = '실패';
+      statusBadge.className = 'badge bg-danger';
     } else {
-        document.getElementById('trainingProgress').style.display = 'none';
+      statusBadge.textContent = '대기 중';
+      statusBadge.className = 'badge bg-secondary';
     }
-    
-    // 학습 중이면 모니터링 시작
-    if (isTraining && !statusInterval) {
-        startStatusMonitoring();
+  }
+
+  // 진행률 표시
+  if (isTraining && status.total_epochs > 0) {
+    showTrainingProgress();
+
+    // 전체 진행률
+    const progress = (status.current_epoch / status.total_epochs) * 100;
+    const overallProgress = document.getElementById('overallProgress');
+    if (overallProgress) overallProgress.style.width = progress + '%';
+
+    const progressText = document.getElementById('progressText');
+    if (progressText) progressText.textContent = `${status.current_epoch}/${status.total_epochs} 에폭`;
+
+    // 시간 정보
+    if (status.start_time) {
+      const startTime = document.getElementById('startTime');
+      if (startTime) startTime.textContent = new Date(status.start_time).toLocaleString('ko-KR');
     }
+    if (status.elapsed_formatted) {
+      const elapsedTime = document.getElementById('elapsedTime');
+      if (elapsedTime) elapsedTime.textContent = status.elapsed_formatted;
+    }
+
+    // 메트릭
+    if (status.accuracy) {
+      const currentAccuracy = document.getElementById('currentAccuracy');
+      if (currentAccuracy) currentAccuracy.textContent = (status.accuracy * 100).toFixed(1) + '%';
+    }
+  } else {
+    hideTrainingProgress();
+  }
+
+  // 학습 중이면 모니터링 유지/시작
+  if (isTraining && !statusInterval) {
+    startStatusMonitoring();
+  }
 }
 
 function startStatusMonitoring() {
@@ -691,6 +697,32 @@ function resetParameters() {
             showAdvancedToast('info', '초기화 완료', '파라미터가 기본값으로 복원되었습니다');
         }
     );
+}
+
+// ============================================================================
+// 접근성 헬퍼 (추가)
+// ============================================================================
+function showTrainingProgress() {
+  const el = document.getElementById('trainingProgress');
+  if (!el) return;
+  el.style.display = 'block';
+  el.setAttribute('aria-hidden', 'false');
+}
+
+function hideTrainingProgress() {
+  const el = document.getElementById('trainingProgress');
+  if (!el) return;
+
+  // 숨길 때 안쪽에 포커스가 남아 있으면 바깥으로 이동/해제
+  if (el.contains(document.activeElement)) {
+    // 트리거 버튼으로 포커스 반환하거나, 없으면 blur
+    const fallback = document.getElementById('startTrainingBtn') || document.body;
+    fallback.focus?.();
+    document.activeElement?.blur?.();
+  }
+
+  el.style.display = 'none';
+  el.setAttribute('aria-hidden', 'true');
 }
 
 // ============================================================================
