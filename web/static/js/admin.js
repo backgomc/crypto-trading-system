@@ -192,8 +192,10 @@ async function loadRecentLogs(isFirstLoad = false, isAutoRefresh = false) {
    } finally {
        if (!isAutoRefresh) {
            isLoadingLogs = false;
-           updateLoadMoreButton();
        }
+       
+       // ✅ 항상 더보기 버튼 업데이트 (자동 갱신 포함)
+       updateLoadMoreButton();
    }
 }
 
