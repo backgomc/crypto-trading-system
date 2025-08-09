@@ -1,5 +1,5 @@
 // 파일 경로: web/static/js/ai_model.js
-// 코드명: AI 모델 관리 페이지 JavaScript (개선된 버전)
+// 코드명: AI 모델 관리 페이지 JavaScript (고급 토스트 적용)
 
 // 전역 변수
 let isTraining = false;
@@ -260,11 +260,11 @@ async function loadModels() {
             updateActiveModel(data.data.active_model);
             updateStorageInfo(data.data.storage_info);
         } else {
-            showToast('모델 목록 로드 실패', 'error');
+            showAdvancedToast('error', '로드 실패', '모델 목록 로드 실패');
         }
     } catch (error) {
         console.error('모델 로드 오류:', error);
-        showToast('모델 목록 로드 중 오류 발생', 'error');
+        showAdvancedToast('error', '오류 발생', '모델 목록 로드 중 오류 발생');
     }
 }
 
@@ -336,79 +336,91 @@ function updateStorageInfo(info) {
 }
 
 async function activateModel(modelName) {
-    if (!confirm(`${modelName} 모델을 활성화하시겠습니까?`)) {
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/ai/models/activate', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({model_name: modelName})
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showToast('모델이 활성화되었습니다', 'success');
-            loadModels();
-        } else {
-            showToast(data.error || '모델 활성화 실패', 'error');
+    showConfirm(
+        '모델 활성화',
+        `${modelName} 모델을 활성화하시겠습니까?`,
+        async (confirmed) => {
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch('/api/ai/models/activate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({model_name: modelName})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAdvancedToast('success', '활성화 완료', '모델이 활성화되었습니다');
+                    loadModels();
+                } else {
+                    showAdvancedToast('error', '활성화 실패', data.error || '모델 활성화 실패');
+                }
+            } catch (error) {
+                console.error('모델 활성화 오류:', error);
+                showAdvancedToast('error', '오류 발생', '모델 활성화 중 오류 발생');
+            }
         }
-    } catch (error) {
-        console.error('모델 활성화 오류:', error);
-        showToast('모델 활성화 중 오류 발생', 'error');
-    }
+    );
 }
 
 async function deleteModel(modelName) {
-    if (!confirm(`${modelName} 모델을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/ai/models/${modelName}`, {
-            method: 'DELETE'
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showToast('모델이 삭제되었습니다', 'success');
-            loadModels();
-        } else {
-            showToast(data.error || '모델 삭제 실패', 'error');
+    showConfirm(
+        '모델 삭제',
+        `${modelName} 모델을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`,
+        async (confirmed) => {
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch(`/api/ai/models/${modelName}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAdvancedToast('success', '삭제 완료', '모델이 삭제되었습니다');
+                    loadModels();
+                } else {
+                    showAdvancedToast('error', '삭제 실패', data.error || '모델 삭제 실패');
+                }
+            } catch (error) {
+                console.error('모델 삭제 오류:', error);
+                showAdvancedToast('error', '오류 발생', '모델 삭제 중 오류 발생');
+            }
         }
-    } catch (error) {
-        console.error('모델 삭제 오류:', error);
-        showToast('모델 삭제 중 오류 발생', 'error');
-    }
+    );
 }
 
 async function cleanupModels() {
-    if (!confirm('오래된 모델들을 정리하시겠습니까?\n최근 5개 모델만 보관됩니다.')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/ai/models/cleanup', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({keep_count: 5})
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            showToast(`${data.data.deleted_count}개 모델이 정리되었습니다`, 'success');
-            loadModels();
-        } else {
-            showToast(data.error || '모델 정리 실패', 'error');
+    showConfirm(
+        '모델 정리',
+        '오래된 모델들을 정리하시겠습니까?\n최근 5개 모델만 보관됩니다.',
+        async (confirmed) => {
+            if (!confirmed) return;
+            
+            try {
+                const response = await fetch('/api/ai/models/cleanup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({keep_count: 5})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAdvancedToast('success', '정리 완료', `${data.data.deleted_count}개 모델이 정리되었습니다`);
+                    loadModels();
+                } else {
+                    showAdvancedToast('error', '정리 실패', data.error || '모델 정리 실패');
+                }
+            } catch (error) {
+                console.error('모델 정리 오류:', error);
+                showAdvancedToast('error', '오류 발생', '모델 정리 중 오류 발생');
+            }
         }
-    } catch (error) {
-        console.error('모델 정리 오류:', error);
-        showToast('모델 정리 중 오류 발생', 'error');
-    }
+    );
 }
 
 // ============================================================================
@@ -417,7 +429,7 @@ async function cleanupModels() {
 
 async function startTraining() {
     if (isTraining) {
-        showToast('이미 학습이 진행 중입니다', 'warning');
+        showAdvancedToast('warning', '경고', '이미 학습이 진행 중입니다');
         return;
     }
     
@@ -436,14 +448,14 @@ async function startTraining() {
     // 파라미터 유효성 검사
     const errors = validateTrainingParams(trainingParams);
     if (errors.length > 0) {
-        showToast(errors.join('\n'), 'error');
+        showAdvancedToast('error', '유효성 검사 실패', errors.join('<br>'), 5000);
         return;
     }
     
     // 선택된 지표 확인
     const selectedCount = Object.values(selectedIndicators).filter(v => v).length;
     if (selectedCount === 0) {
-        showToast('최소 하나 이상의 지표를 선택해주세요', 'error');
+        showAdvancedToast('error', '지표 선택 필요', '최소 하나 이상의 지표를 선택해주세요');
         return;
     }
     
@@ -453,43 +465,47 @@ async function startTraining() {
         .map(([key, value]) => indicatorInfo[key]?.name || key)
         .join(', ');
     
-    if (!confirm(`학습을 시작하시겠습니까?\n\n선택된 지표: ${selectedCount}개\n(${selectedIndicatorNames})\n\n에폭: ${trainingParams.epochs}\n학습 기간: ${trainingParams.training_days}일`)) {
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/ai/training/start', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                indicators: selectedIndicators,
-                ...trainingParams
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            isTraining = true;
-            showToast('AI 모델 학습을 시작했습니다', 'success');
+    showConfirm(
+        'AI 학습 시작',
+        `학습을 시작하시겠습니까?\n\n선택된 지표: ${selectedCount}개\n(${selectedIndicatorNames})\n\n에폭: ${trainingParams.epochs}\n학습 기간: ${trainingParams.training_days}일`,
+        async (confirmed) => {
+            if (!confirmed) return;
             
-            // UI 업데이트
-            document.getElementById('startTrainingBtn').disabled = true;
-            document.getElementById('stopTrainingBtn').disabled = false;
-            document.getElementById('trainingStatus').textContent = '학습 중';
-            document.getElementById('trainingStatus').className = 'badge bg-primary';
-            document.getElementById('trainingProgress').style.display = 'block';
-            
-            // 상태 모니터링 시작
-            startStatusMonitoring();
-            
-        } else {
-            showToast(data.error || '학습 시작 실패', 'error');
+            try {
+                const response = await fetch('/api/ai/training/start', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        indicators: selectedIndicators,
+                        ...trainingParams
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    isTraining = true;
+                    showAdvancedToast('success', '학습 시작', 'AI 모델 학습을 시작했습니다');
+                    
+                    // UI 업데이트
+                    document.getElementById('startTrainingBtn').disabled = true;
+                    document.getElementById('stopTrainingBtn').disabled = false;
+                    document.getElementById('trainingStatus').textContent = '학습 중';
+                    document.getElementById('trainingStatus').className = 'badge bg-primary';
+                    document.getElementById('trainingProgress').style.display = 'block';
+                    
+                    // 상태 모니터링 시작
+                    startStatusMonitoring();
+                    
+                } else {
+                    showAdvancedToast('error', '학습 시작 실패', data.error || '학습 시작 실패');
+                }
+            } catch (error) {
+                console.error('학습 시작 오류:', error);
+                showAdvancedToast('error', '오류 발생', '학습 시작 중 오류 발생');
+            }
         }
-    } catch (error) {
-        console.error('학습 시작 오류:', error);
-        showToast('학습 시작 중 오류 발생', 'error');
-    }
+    );
 }
 
 async function stopTraining() {
@@ -497,37 +513,41 @@ async function stopTraining() {
         return;
     }
     
-    if (!confirm('학습을 중지하시겠습니까?')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/ai/training/stop', {
-            method: 'POST'
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            isTraining = false;
-            showToast('AI 모델 학습을 중지했습니다', 'info');
+    showConfirm(
+        '학습 중지',
+        '학습을 중지하시겠습니까?',
+        async (confirmed) => {
+            if (!confirmed) return;
             
-            // UI 업데이트
-            document.getElementById('startTrainingBtn').disabled = false;
-            document.getElementById('stopTrainingBtn').disabled = true;
-            document.getElementById('trainingStatus').textContent = '중지됨';
-            document.getElementById('trainingStatus').className = 'badge bg-warning';
-            
-            // 상태 모니터링 중지
-            stopStatusMonitoring();
-            
-        } else {
-            showToast(data.error || '학습 중지 실패', 'error');
+            try {
+                const response = await fetch('/api/ai/training/stop', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    isTraining = false;
+                    showAdvancedToast('info', '학습 중지', 'AI 모델 학습을 중지했습니다');
+                    
+                    // UI 업데이트
+                    document.getElementById('startTrainingBtn').disabled = false;
+                    document.getElementById('stopTrainingBtn').disabled = true;
+                    document.getElementById('trainingStatus').textContent = '중지됨';
+                    document.getElementById('trainingStatus').className = 'badge bg-warning';
+                    
+                    // 상태 모니터링 중지
+                    stopStatusMonitoring();
+                    
+                } else {
+                    showAdvancedToast('error', '중지 실패', data.error || '학습 중지 실패');
+                }
+            } catch (error) {
+                console.error('학습 중지 오류:', error);
+                showAdvancedToast('error', '오류 발생', '학습 중지 중 오류 발생');
+            }
         }
-    } catch (error) {
-        console.error('학습 중지 오류:', error);
-        showToast('학습 중지 중 오류 발생', 'error');
-    }
+    );
 }
 
 async function loadTrainingStatus() {
@@ -614,6 +634,13 @@ function startStatusMonitoring() {
         if (statusBadge && (statusBadge.textContent === '완료' || statusBadge.textContent === '실패')) {
             stopStatusMonitoring();
             loadModels(); // 모델 목록 새로고침
+            
+            // 완료/실패 알림
+            if (statusBadge.textContent === '완료') {
+                showAdvancedToast('success', '학습 완료', 'AI 모델 학습이 완료되었습니다!', 5000);
+            } else {
+                showAdvancedToast('error', '학습 실패', 'AI 모델 학습이 실패했습니다.', 5000);
+            }
         }
     }, 5000); // 5초마다 확인
 }
@@ -648,16 +675,22 @@ function validateTrainingParams(params) {
 }
 
 function resetParameters() {
-    if (confirm('모든 파라미터를 기본값으로 복원하시겠습니까?')) {
-        document.getElementById('trainingDays').value = 365;
-        document.getElementById('epochs').value = 100;
-        document.getElementById('batchSize').value = 32;
-        document.getElementById('learningRate').value = 0.001;
-        document.getElementById('sequenceLength').value = 60;
-        document.getElementById('validationSplit').value = 20;
-        
-        showToast('파라미터가 기본값으로 복원되었습니다', 'info');
-    }
+    showConfirm(
+        '파라미터 초기화',
+        '모든 파라미터를 기본값으로 복원하시겠습니까?',
+        (confirmed) => {
+            if (!confirmed) return;
+            
+            document.getElementById('trainingDays').value = 365;
+            document.getElementById('epochs').value = 100;
+            document.getElementById('batchSize').value = 32;
+            document.getElementById('learningRate').value = 0.001;
+            document.getElementById('sequenceLength').value = 60;
+            document.getElementById('validationSplit').value = 20;
+            
+            showAdvancedToast('info', '초기화 완료', '파라미터가 기본값으로 복원되었습니다');
+        }
+    );
 }
 
 // ============================================================================
@@ -713,7 +746,7 @@ async function updateScheduleSettings() {
         const data = await response.json();
         
         if (data.success) {
-            showToast('스케줄 설정이 업데이트되었습니다', 'success');
+            showAdvancedToast('success', '설정 업데이트', '스케줄 설정이 업데이트되었습니다');
             
             // 다음 학습 시간 업데이트
             if (data.data.next_training) {
@@ -721,11 +754,11 @@ async function updateScheduleSettings() {
                 document.getElementById('nextTraining').textContent = nextTime.toLocaleString('ko-KR');
             }
         } else {
-            showToast(data.error || '스케줄 설정 업데이트 실패', 'error');
+            showAdvancedToast('error', '업데이트 실패', data.error || '스케줄 설정 업데이트 실패');
         }
     } catch (error) {
         console.error('스케줄 설정 업데이트 오류:', error);
-        showToast('스케줄 설정 업데이트 중 오류 발생', 'error');
+        showAdvancedToast('error', '오류 발생', '스케줄 설정 업데이트 중 오류 발생');
     }
 }
 
@@ -748,48 +781,6 @@ function updateCurrentTime() {
     if (currentTime) {
         currentTime.textContent = timeString;
     }
-}
-
-function showToast(message, type = 'info') {
-    // Bootstrap 토스트 또는 커스텀 알림 표시
-    const toastContainer = document.getElementById('toastContainer');
-    if (!toastContainer) {
-        // 토스트 컨테이너 생성
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.style.position = 'fixed';
-        container.style.top = '20px';
-        container.style.right = '20px';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
-    }
-    
-    const toastId = 'toast_' + Date.now();
-    const bgClass = type === 'error' ? 'bg-danger' : 
-                   type === 'success' ? 'bg-success' : 
-                   type === 'warning' ? 'bg-warning' : 'bg-info';
-    
-    const toastHtml = `
-        <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0 mb-2" role="alert">
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('toastContainer').insertAdjacentHTML('beforeend', toastHtml);
-    
-    const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement, {autohide: true, delay: 3000});
-    toast.show();
-    
-    // 토스트 제거
-    toastElement.addEventListener('hidden.bs.toast', () => {
-        toastElement.remove();
-    });
 }
 
 // ============================================================================
