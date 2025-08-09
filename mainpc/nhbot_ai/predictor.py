@@ -1,9 +1,9 @@
 # 파일 경로: mainpc/nhbot_ai/predictor.py
 # 코드명: AI 예측기 클래스 (메인 PC 독립 실행 버전)
 
+import tensorflow as tf
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 import pickle
 import json
 from typing import Dict, List, Optional, Tuple
