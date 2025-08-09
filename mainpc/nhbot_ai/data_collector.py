@@ -24,7 +24,7 @@ class DataCollector:
         
         # 데이터베이스 경로 설정
         self.config_path = config_path or Path(__file__).parent.parent / 'config' / 'data_config.db'
-        self.conn = sqlite3.connect(str(self.config_path))
+        self.conn = sqlite3.connect(str(self.config_path), check_same_thread=False)
         self._create_tables()
         
         # GPU 지원 여부 확인
