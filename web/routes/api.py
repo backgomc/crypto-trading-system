@@ -245,9 +245,11 @@ def get_config():
     """사용자 설정 조회"""
     try:
         user_id = session.get('user_id')
+        username = session.get('username')  # ✅ username 가져오기
         config = load_user_config(user_id)
         
-        log_system_event('INFO', 'API', f'설정 조회: 사용자 {user_id}')
+        # ✅ user_id 대신 username으로 로그 저장
+        log_system_event('INFO', 'API', f'설정 조회: {username}')
         
         return api_success(
             data={'config': config},
