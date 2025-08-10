@@ -1,12 +1,12 @@
 # 파일 경로: mainpc/nhbot_ai/data_collector.py
-# 코드명: 메인 PC용 데이터 수집 및 기술적 지표 계산 (GPU 최적화 + 추가 지표)
+# 코드명: 메인 PC용 데이터 수집 및 기술적 지표 계산 (SQLite 제거 버전)
 
 import os
 import numpy as np
 import pandas as pd
 import cupy as cp
 import requests
-import sqlite3
+# ❌ sqlite3 import 제거
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
@@ -17,15 +17,15 @@ class DataCollector:
     def __init__(
         self, 
         symbol: str = "BTCUSDT", 
-        config_path: str = None
+        config_path: str = None  # 매개변수는 유지 (하위 호환성)
     ):
         self.symbol = symbol
         self.base_url = "https://api.bybit.com/v5/market/kline"
         
-        # 데이터베이스 경로 설정
-        self.config_path = config_path or Path(__file__).parent.parent / 'config' / 'data_config.db'
-        self.conn = sqlite3.connect(str(self.config_path), check_same_thread=False)
-        self._create_tables()
+        # ❌ SQLite 관련 코드 모두 제거 (3줄)
+        # self.config_path = config_path or Path(__file__).parent.parent / 'config' / 'data_config.db'
+        # self.conn = sqlite3.connect(str(self.config_path), check_same_thread=False)
+        # self._create_tables()
         
         # GPU 지원 여부 확인
         self.gpu_available = self._check_gpu_availability()
@@ -49,35 +49,12 @@ class DataCollector:
         except:
             return False
     
-    def _create_tables(self):
-        """데이터 수집 설정 테이블 생성"""
-        cursor = self.conn.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS data_collection_config (
-                symbol TEXT PRIMARY KEY,
-                interval TEXT,
-                days INTEGER,
-                last_collected DATETIME,
-                total_bars INTEGER
-            )
-        ''')
-        self.conn.commit()
+    # ❌ SQLite 관련 메서드 완전 제거
+    # def _create_tables(self):
+    #     제거됨
     
-    def _save_collection_config(self, interval: str, days: int):
-        """데이터 수집 설정 저장"""
-        cursor = self.conn.cursor()
-        cursor.execute('''
-            INSERT OR REPLACE INTO data_collection_config 
-            (symbol, interval, days, last_collected, total_bars) 
-            VALUES (?, ?, ?, ?, ?)
-        ''', (
-            self.symbol, 
-            interval, 
-            days, 
-            datetime.now().isoformat(),
-            days * (24 * 60 // int(interval))
-        ))
-        self.conn.commit()
+    # def _save_collection_config(self, interval: str, days: int):
+    #     제거됨
     
     def collect_historical_data(
         self, 
@@ -86,8 +63,13 @@ class DataCollector:
     ) -> Optional[pd.DataFrame]:
         """과거 데이터 수집"""
         try:
-            # 수집 설정 저장
-            self._save_collection_config(interval, days)
+            # ✅ SQLite 저장 대신 단순 로그 출력
+            print(f"📊 데이터 수집 설정:")
+            print(f"   심볼: {self.symbol}")
+            print(f"   간격: {interval}분봉")
+            print(f"   기간: {days}일")
+            print(f"   시작 시간: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"   예상 데이터: 약 {days * 24 * 60 // int(interval):,}개 봉")
             
             print(f"📊 {self.symbol} {self.intervals.get(interval, interval)} 데이터 수집 시작...")
             print(f"   기간: {days}일 (약 {days * 24 * 60 // int(interval):,}개 봉)")
@@ -202,20 +184,19 @@ class DataCollector:
             # 6. 추가 지표들
             result = self._add_additional_indicators(result)
             
-            # ✅ 개선된 NaN 처리
+            # ✅ 개선된 NaN 처리 (이미 수정되어 있음)
             print(f"   NaN 처리 전: {len(result)}개 행")
             
             # 1. 앞쪽 NaN 행들만 제거 (지표 계산에 필요한 초기 기간)
-            # 예: 200일 이동평균은 처음 200개 행이 NaN
             first_valid_index = result.apply(lambda x: x.first_valid_index()).max()
             if first_valid_index:
                 result = result.loc[first_valid_index:]
                 print(f"   초기 NaN 제거 후: {len(result)}개 행")
             
-            # 2. 남은 NaN을 forward fill (이전 값으로 채우기)
-            result = result.ffill()  # ✅ 더 간단한 방법
+            # 2. 남은 NaN을 forward fill
+            result = result.ffill()
             
-            # 3. 그래도 남은 NaN (첫 행)은 backward fill
+            # 3. 그래도 남은 NaN은 backward fill
             result = result.bfill()
             
             print(f"✅ 기술적 지표 계산 완료: {len(result.columns)}개 컬럼, {len(result)}개 행")
@@ -387,14 +368,14 @@ class DataCollector:
         df['volatility_10'] = df['close'].rolling(window=10).std()
         df['volatility_20'] = df['close'].rolling(window=20).std()
         
-        # 🆕 Keltner Channel 추가
+        # Keltner Channel
         kc_upper, kc_middle, kc_lower = self._calculate_keltner_channel(df)
         df['kc_upper'] = kc_upper
         df['kc_middle'] = kc_middle
         df['kc_lower'] = kc_lower
         df['kc_position'] = (df['close'] - kc_lower) / (kc_upper - kc_lower)
         
-        # 🆕 Donchian Channel 추가
+        # Donchian Channel
         dc_upper, dc_middle, dc_lower = self._calculate_donchian_channel(df)
         df['dc_upper'] = dc_upper
         df['dc_middle'] = dc_middle
@@ -420,7 +401,7 @@ class DataCollector:
         return true_range.rolling(window=period).mean()
     
     def _calculate_keltner_channel(self, df: pd.DataFrame, period: int = 20, multiplier: float = 2.0) -> Tuple[pd.Series, pd.Series, pd.Series]:
-        """🆕 Keltner Channel 계산 (ATR 기반)"""
+        """Keltner Channel 계산 (ATR 기반)"""
         middle = df['close'].ewm(span=period).mean()
         atr = self._calculate_atr(df, period)
         upper = middle + (atr * multiplier)
@@ -428,7 +409,7 @@ class DataCollector:
         return upper, middle, lower
     
     def _calculate_donchian_channel(self, df: pd.DataFrame, period: int = 20) -> Tuple[pd.Series, pd.Series, pd.Series]:
-        """🆕 Donchian Channel 계산 (고점/저점 돌파)"""
+        """Donchian Channel 계산 (고점/저점 돌파)"""
         upper = df['high'].rolling(window=period).max()
         lower = df['low'].rolling(window=period).min()
         middle = (upper + lower) / 2
@@ -457,11 +438,11 @@ class DataCollector:
         # MFI (Money Flow Index)
         df['mfi'] = self._calculate_mfi(df, period=14)
         
-        # 🆕 VPOC (Volume Point of Control) 추가
+        # VPOC (Volume Point of Control)
         df['vpoc'] = self._calculate_vpoc(df, window=50)
         df['vpoc_distance'] = (df['close'] - df['vpoc']) / df['close'] * 100
         
-        # 🆕 Order Flow Imbalance 추가
+        # Order Flow Imbalance
         df['order_flow_imbalance'] = self._calculate_order_flow_imbalance(df)
         
         return df
@@ -509,7 +490,7 @@ class DataCollector:
         return mfi
     
     def _calculate_vpoc(self, df: pd.DataFrame, window: int = 50) -> pd.Series:
-        """🆕 VPOC (Volume Point of Control) 계산 - 가격대별 거래량 집중도"""
+        """VPOC (Volume Point of Control) 계산"""
         vpoc = pd.Series(index=df.index, dtype=float)
         
         for i in range(window, len(df)):
@@ -535,7 +516,7 @@ class DataCollector:
         return vpoc
     
     def _calculate_order_flow_imbalance(self, df: pd.DataFrame, window: int = 10) -> pd.Series:
-        """🆕 Order Flow Imbalance 계산 - 매수/매도 압력 불균형"""
+        """Order Flow Imbalance 계산"""
         # 상승 봉의 거래량 vs 하락 봉의 거래량
         buy_volume = pd.Series(
             np.where(df['close'] > df['open'], df['volume'], 0),
@@ -585,15 +566,15 @@ class DataCollector:
         df['lower_lows'] = self._count_lower_lows(df, window=10)
         df['trend_strength'] = df['higher_highs'] - df['lower_lows']
         
-        # 🆕 Z-score 추가 (평균 회귀)
+        # Z-score (평균 회귀)
         df['zscore_20'] = self._calculate_zscore(df['close'], window=20)
         df['zscore_50'] = self._calculate_zscore(df['close'], window=50)
         
-        # 🆕 Pivot Points 추가 (지지/저항)
+        # Pivot Points (지지/저항)
         df['pivot'], df['resistance1'], df['support1'], df['resistance2'], df['support2'] = self._calculate_pivot_points(df)
         df['pivot_position'] = (df['close'] - df['pivot']) / df['close'] * 100
         
-        # 🆕 Market Structure Break 추가 (시장 구조 변화)
+        # Market Structure Break (시장 구조 변화)
         df['market_structure_break'] = self._calculate_market_structure_break(df)
         df['ms_break_strength'] = df['market_structure_break'].rolling(10).sum()
         
@@ -656,14 +637,14 @@ class DataCollector:
         return result
     
     def _calculate_zscore(self, prices: pd.Series, window: int = 20) -> pd.Series:
-        """🆕 Z-score 계산 - 평균 회귀 측정"""
+        """Z-score 계산"""
         mean = prices.rolling(window=window).mean()
         std = prices.rolling(window=window).std()
         zscore = (prices - mean) / std
         return zscore
     
     def _calculate_pivot_points(self, df: pd.DataFrame) -> Tuple[pd.Series, pd.Series, pd.Series, pd.Series, pd.Series]:
-        """🆕 Pivot Points 계산 - 지지/저항선"""
+        """Pivot Points 계산"""
         # 전일 고가, 저가, 종가 기준
         pivot = (df['high'].shift(1) + df['low'].shift(1) + df['close'].shift(1)) / 3
         
@@ -678,7 +659,7 @@ class DataCollector:
         return pivot, resistance1, support1, resistance2, support2
     
     def _calculate_market_structure_break(self, df: pd.DataFrame, window: int = 20) -> pd.Series:
-        """🆕 Market Structure Break 계산 - 시장 구조 변화 감지"""
+        """Market Structure Break 계산"""
         result = pd.Series(0, index=df.index)
         
         for i in range(window, len(df)):
@@ -821,7 +802,7 @@ class DataCollector:
 
 if __name__ == "__main__":
     print("🚀 DataCollector 테스트 시작")
-    print("📊 모든 지표 포함 버전")
+    print("📊 SQLite 제거 버전")
     
     # 데이터 수집기 생성
     collector = DataCollector("BTCUSDT")
@@ -858,14 +839,8 @@ if __name__ == "__main__":
         print(f"   가격: ${summary.get('price', {}).get('close', 0):,.2f}")
         print(f"   RSI: {summary.get('momentum', {}).get('rsi_14', 0):.1f}")
         print(f"   MACD: {summary.get('trend', {}).get('macd', 0):.4f}")
-        print(f"   ADX: {summary.get('trend', {}).get('adx', 0):.1f}")
-        print(f"   Trend Strength: {summary.get('trend', {}).get('trend_strength', 0):.1f}")
-        print(f"   Z-score(20): {summary.get('advanced', {}).get('zscore_20', 0):.2f}")
-        print(f"   VPOC Distance: {summary.get('volume', {}).get('vpoc_distance', 0):.2f}%")
-        print(f"   Order Flow Imbalance: {summary.get('volume', {}).get('order_flow_imbalance', 0):.1f}")
-        print(f"   Market Structure: {summary.get('advanced', {}).get('market_structure_break', 0):.0f}")
         
         # 데이터 저장 테스트
-        collector.save_data(df, "test_data_complete.csv")
+        collector.save_data(df, "test_data_no_sqlite.csv")
         
-    print("\n✅ DataCollector 테스트 완료 - 모든 지표 추가됨!")
+    print("\n✅ DataCollector 테스트 완료 - SQLite 완전 제거!")
