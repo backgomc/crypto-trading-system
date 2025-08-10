@@ -1,5 +1,5 @@
 # 파일 경로: mainpc/nhbot_ai/model_trainer.py
-# 코드명: AI 모델 학습 클래스 (사용자 선택 지표 기반, ModelManager 제거)
+# 코드명: AI 모델 학습 클래스 (스레드 안전 버전)
 
 import tensorflow as tf
 import numpy as np
@@ -18,14 +18,14 @@ from pathlib import Path
 import threading
 import time
 from typing import Dict, List, Optional, Tuple, Callable
-from .data_collector import DataCollector
 
 class ModelTrainer:
    """AI 모델 학습 클래스 (사용자 커스터마이징 지원)"""
    
    def __init__(self, symbol: str = "BTCUSDT"):
        self.symbol = symbol
-       self.data_collector = DataCollector(symbol)
+       # ❌ DataCollector를 여기서 생성하지 않음 (스레드 문제 방지)
+       # self.data_collector = DataCollector(symbol)
        
        # 학습 상태 관리
        self.is_training = False
@@ -147,11 +147,16 @@ class ModelTrainer:
            print("📊 데이터 수집 시작...")
            self._update_progress_callback("데이터 수집 중...")
            
+           # ✅ 스레드 내부에서 DataCollector 생성 (SQLite 스레드 문제 해결)
+           from .data_collector import DataCollector
+           data_collector = DataCollector(self.symbol)
+           
            # 1. 데이터 수집
            training_days = training_params.get("training_days", 365)
            interval = training_params.get("interval", "15")
            
-           df = self.data_collector.collect_historical_data(interval=interval, days=training_days)
+           # ✅ data_collector 사용 (self.data_collector가 아님)
+           df = data_collector.collect_historical_data(interval=interval, days=training_days)
            if df is None or len(df) < 1000:
                raise Exception("충분한 학습 데이터를 수집할 수 없습니다.")
            
