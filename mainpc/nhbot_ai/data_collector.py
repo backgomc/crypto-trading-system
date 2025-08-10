@@ -162,54 +162,64 @@ class DataCollector:
         """기술적 지표 계산"""
         try:
             print("🔧 기술적 지표 계산 중...")
+            print(f"   입력 데이터: {len(df)}개 행, {len(df.columns)}개 컬럼")
             
             # 복사본 생성
             result = df.copy()
             
             # 1. 기본 가격 지표
+            print("   1. 가격 지표 계산 중...")
             result = self._add_price_indicators(result)
+            print(f"      → {len(result)}개 행")
             
             # 2. 이동평균
+            print("   2. 이동평균 계산 중...")
             result = self._add_moving_averages(result)
+            print(f"      → {len(result)}개 행")
             
             # 3. 모멘텀 지표
+            print("   3. 모멘텀 지표 계산 중...")
             result = self._add_momentum_indicators(result)
+            print(f"      → {len(result)}개 행")
             
             # 4. 변동성 지표
+            print("   4. 변동성 지표 계산 중...")
             result = self._add_volatility_indicators(result)
+            print(f"      → {len(result)}개 행")
             
             # 5. 거래량 지표
+            print("   5. 거래량 지표 계산 중...")
             result = self._add_volume_indicators(result)
+            print(f"      → {len(result)}개 행")
             
             # 6. 추가 지표들
+            print("   6. 추가 지표 계산 중...")
             result = self._add_additional_indicators(result)
+            print(f"      → {len(result)}개 행")
             
-            # ✅ 개선된 NaN 처리 (이미 수정되어 있음)
+            # NaN 처리
             print(f"   NaN 처리 전: {len(result)}개 행")
             
-            # 1. 앞쪽 NaN 행들만 제거 (지표 계산에 필요한 초기 기간)
-            first_valid_index = result.apply(lambda x: x.first_valid_index()).max()
-            if first_valid_index:
-                result = result.loc[first_valid_index:]
-                print(f"   초기 NaN 제거 후: {len(result)}개 행")
+            # 처음 200개 행만 제거
+            if len(result) > 200:
+                result = result.iloc[200:]
+                print(f"   초기 200개 행 제거 후: {len(result)}개 행")
             
-            # 2. 남은 NaN을 forward fill
-            result = result.ffill()
-            
-            # 3. 그래도 남은 NaN은 backward fill
-            result = result.bfill()
+            # Forward/Backward fill
+            result = result.ffill().bfill().fillna(0)
             
             print(f"✅ 기술적 지표 계산 완료: {len(result.columns)}개 컬럼, {len(result)}개 행")
             
-            # 최종 확인
-            nan_count = result.isnull().sum().sum()
-            if nan_count > 0:
-                print(f"⚠️ 경고: 여전히 {nan_count}개의 NaN 값이 있습니다")
+            if len(result) == 0:
+                print("❌ 결과가 비어있음! 원본 데이터 확인 필요")
+                return df
             
             return result
             
         except Exception as e:
-            print(f"❌ 기술적 지표 계산 중 오류: {e}")
+            print(f"❌ 기술적 지표 계산 중 예외 발생: {e}")
+            import traceback
+            traceback.print_exc()
             return df
     
     def _add_price_indicators(self, df: pd.DataFrame) -> pd.DataFrame:

@@ -1,7 +1,7 @@
 {
   "status": "failed",
-  "start_time": "2025-08-09T16:45:33.406070",
-  "end_time": "2025-08-09T16:45:38.412108",
+  "start_time": "2025-08-10T02:26:52.181508",
+  "end_time": "2025-08-10T02:28:44.702086",
   "current_epoch": 0,
   "total_epochs": 100,
   "accuracy": 0.0,
@@ -9,17 +9,17 @@
   "error": "\ud559\uc2b5 \uc2e4\ud328: failed",
   "logs": [
     {
-      "timestamp": "2025-08-09T16:45:33.409002",
+      "timestamp": "2025-08-10T02:26:52.185013",
       "level": "INFO",
       "message": "\ud559\uc2b5 \uc2dc\uc791"
     },
     {
-      "timestamp": "2025-08-09T16:45:33.409339",
+      "timestamp": "2025-08-10T02:26:52.186350",
       "level": "INFO",
       "message": "\ub370\uc774\ud130 \uc218\uc9d1 \uc911..."
     },
     {
-      "timestamp": "2025-08-09T16:45:33.409407",
+      "timestamp": "2025-08-10T02:28:40.485722",
       "level": "INFO",
       "message": "\ud559\uc2b5 \uc2e4\ud328: \ucda9\ubd84\ud55c \ud559\uc2b5 \ub370\uc774\ud130\ub97c \uc218\uc9d1\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4."
     }
