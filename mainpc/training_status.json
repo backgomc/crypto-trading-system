@@ -1,27 +1,112 @@
 {
-  "status": "failed",
-  "start_time": "2025-08-10T02:34:06.513094",
-  "end_time": "2025-08-10T02:34:11.519079",
-  "current_epoch": 0,
+  "status": "completed",
+  "start_time": "2025-08-10T07:59:03.466268",
+  "end_time": "2025-08-10T08:06:30.189085",
+  "current_epoch": 15,
   "total_epochs": 100,
-  "accuracy": 0.0,
-  "model_name": null,
-  "error": "\ud559\uc2b5 \uc2e4\ud328: failed",
+  "accuracy": 0.9980448533640023,
+  "model_name": "model_20250810_080627",
+  "error": null,
   "logs": [
     {
-      "timestamp": "2025-08-10T02:34:06.515499",
+      "timestamp": "2025-08-10T07:59:03.469325",
       "level": "INFO",
       "message": "\ud559\uc2b5 \uc2dc\uc791"
     },
     {
-      "timestamp": "2025-08-10T02:34:06.515977",
+      "timestamp": "2025-08-10T07:59:03.469594",
       "level": "INFO",
       "message": "\ub370\uc774\ud130 \uc218\uc9d1 \uc911..."
     },
     {
-      "timestamp": "2025-08-10T02:34:06.516446",
+      "timestamp": "2025-08-10T08:00:51.271997",
       "level": "INFO",
-      "message": "\ud559\uc2b5 \uc2e4\ud328: \ucda9\ubd84\ud55c \ud559\uc2b5 \ub370\uc774\ud130\ub97c \uc218\uc9d1\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4."
+      "message": "\uc120\ud0dd\ub41c \uc9c0\ud45c \ucd94\ucd9c \uc911..."
+    },
+    {
+      "timestamp": "2025-08-10T08:00:55.205579",
+      "level": "INFO",
+      "message": "\ubaa8\ub378 \ud559\uc2b5 \uc911..."
+    },
+    {
+      "timestamp": "2025-08-10T08:00:56.132165",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 1/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:01:23.423977",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 2/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:01:43.896616",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 3/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:02:05.303608",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 4/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:02:27.232809",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 5/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:02:48.701771",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 6/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:03:09.813170",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 7/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:03:30.210797",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 8/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:03:51.787547",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 9/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:04:12.549523",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 10/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:04:33.074775",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 11/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:04:54.691007",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 12/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:05:15.661679",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 13/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:05:37.331267",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 14/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:05:58.426930",
+      "level": "INFO",
+      "message": "\uc5d0\ud3ed 15/100"
+    },
+    {
+      "timestamp": "2025-08-10T08:06:27.950068",
+      "level": "INFO",
+      "message": "\ud559\uc2b5 \uc644\ub8cc! \uc815\ud655\ub3c4: 99.8%"
     }
   ]
 }
