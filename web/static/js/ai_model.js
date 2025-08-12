@@ -721,8 +721,8 @@ function stopStatusMonitoring() {
 function validateTrainingParams(params) {
     const errors = [];
     
-    if (params.training_days < 30 || params.training_days > 1095) {
-        errors.push('학습 기간은 30~1095일 사이여야 합니다');
+    if (params.training_days < 30 || params.training_days > 1825) {
+        errors.push('학습 기간은 30~1825일 사이여야 합니다');
     }
     
     if (params.epochs < 10 || params.epochs > 1000) {
