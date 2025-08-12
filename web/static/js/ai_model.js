@@ -440,7 +440,7 @@ async function startTraining() {
     
     // 파라미터 수집
     trainingParams = {
-        training_days: parseInt(document.getElementById('trainingDays')?.value || 365),
+        training_days: parseInt(document.getElementById('trainingDays')?.value || 1825),
         epochs: parseInt(document.getElementById('epochs')?.value || 100),
         batch_size: parseInt(document.getElementById('batchSize')?.value || 32),
         learning_rate: parseFloat(document.getElementById('learningRate')?.value || 0.001),
