@@ -774,7 +774,7 @@ if __name__ == "__main__":
     
     # 학습 파라미터
     training_params = {
-        "training_days": 365,  # 1년 데이터
+        "training_days": 1095,  # 1년 데이터
         "epochs": 100,
         "batch_size": 32,
         "learning_rate": 0.001,
