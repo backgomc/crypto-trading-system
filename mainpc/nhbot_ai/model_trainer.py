@@ -161,7 +161,7 @@ class ModelTrainer:
             data_collector = DataCollector(self.symbol)
             
             # 1. 데이터 수집
-            training_days = training_params.get("training_days", 365)
+            training_days = training_params.get("training_days", 1825)
             interval = training_params.get("interval", "15")
             
             df = data_collector.collect_historical_data(interval=interval, days=training_days)

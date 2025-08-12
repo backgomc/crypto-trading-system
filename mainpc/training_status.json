@@ -1,322 +1,57 @@
 {
-  "status": "completed",
-  "start_time": "2025-08-12T08:59:48.287230",
-  "end_time": "2025-08-12T09:21:51.265327",
-  "current_epoch": 57,
+  "status": "stopped",
+  "start_time": "2025-08-12T13:30:51.213082",
+  "end_time": "2025-08-12T13:34:13.400451",
+  "current_epoch": 4,
   "total_epochs": 100,
-  "accuracy": 0.558539390454284,
-  "model_name": "model_3class_20250812_092150",
-  "error": null,
+  "accuracy": 0.25549450516700745,
+  "model_name": null,
+  "error": "\ud559\uc2b5 \uc2e4\ud328: stopped",
   "logs": [
     {
-      "timestamp": "2025-08-12T08:59:48.297852",
+      "timestamp": "2025-08-12T13:30:51.223848",
       "level": "INFO",
       "message": "\ud559\uc2b5 \uc2dc\uc791"
     },
     {
-      "timestamp": "2025-08-12T08:59:48.302146",
+      "timestamp": "2025-08-12T13:30:51.225882",
       "level": "INFO",
       "message": "\ub370\uc774\ud130 \uc218\uc9d1 \uc911..."
     },
     {
-      "timestamp": "2025-08-12T09:01:37.500763",
+      "timestamp": "2025-08-12T13:32:52.052401",
       "level": "INFO",
       "message": "\uc120\ud0dd\ub41c \uc9c0\ud45c \ucd94\ucd9c \uc911..."
     },
     {
-      "timestamp": "2025-08-12T09:01:38.243493",
+      "timestamp": "2025-08-12T13:32:52.793359",
       "level": "INFO",
       "message": "\ubaa8\ub378 \ud559\uc2b5 \uc911..."
     },
     {
-      "timestamp": "2025-08-12T09:01:39.333391",
+      "timestamp": "2025-08-12T13:32:53.979601",
       "level": "INFO",
       "message": "\uc5d0\ud3ed 1/100"
     },
     {
-      "timestamp": "2025-08-12T09:02:03.234711",
+      "timestamp": "2025-08-12T13:33:20.145022",
       "level": "INFO",
       "message": "\uc5d0\ud3ed 2/100"
     },
     {
-      "timestamp": "2025-08-12T09:02:24.152088",
+      "timestamp": "2025-08-12T13:33:41.698429",
       "level": "INFO",
       "message": "\uc5d0\ud3ed 3/100"
     },
     {
-      "timestamp": "2025-08-12T09:02:44.271450",
+      "timestamp": "2025-08-12T13:34:03.833151",
       "level": "INFO",
       "message": "\uc5d0\ud3ed 4/100"
     },
     {
-      "timestamp": "2025-08-12T09:03:04.106681",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 5/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:03:23.533528",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 6/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:03:43.442178",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 7/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:04:04.639177",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 8/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:04:25.996200",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 9/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:04:47.659184",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 10/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:05:09.199018",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 11/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:05:30.786656",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 12/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:05:51.648130",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 13/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:06:12.525876",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 14/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:06:33.705502",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 15/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:06:54.951181",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 16/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:07:16.634918",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 17/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:07:38.147261",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 18/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:08:00.086244",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 19/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:08:21.891251",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 20/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:08:42.786592",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 21/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:09:04.375351",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 22/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:09:25.729271",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 23/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:09:45.174047",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 24/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:10:05.323797",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 25/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:10:26.407266",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 26/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:10:47.632110",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 27/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:11:09.256814",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 28/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:11:30.696759",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 29/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:11:52.022855",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 30/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:12:13.040391",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 31/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:12:33.998664",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 32/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:12:55.277282",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 33/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:13:16.814749",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 34/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:13:38.628675",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 35/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:13:59.615331",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 36/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:14:20.435508",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 37/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:14:41.447211",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 38/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:15:03.228463",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 39/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:15:24.399453",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 40/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:15:45.239909",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 41/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:16:06.206536",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 42/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:16:27.832438",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 43/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:16:49.281699",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 44/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:17:10.403505",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 45/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:17:31.298881",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 46/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:17:51.674428",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 47/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:18:12.604384",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 48/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:18:33.634395",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 49/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:18:55.226061",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 50/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:19:15.911935",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 51/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:19:36.901493",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 52/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:19:57.750840",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 53/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:20:18.633378",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 54/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:20:39.980568",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 55/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:21:00.878125",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 56/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:21:21.333117",
-      "level": "INFO",
-      "message": "\uc5d0\ud3ed 57/100"
-    },
-    {
-      "timestamp": "2025-08-12T09:21:50.833483",
-      "level": "INFO",
-      "message": "\ud559\uc2b5 \uc644\ub8cc! \uc815\ud655\ub3c4: 55.9%"
+      "timestamp": "2025-08-12T13:34:09.724743",
+      "level": "ERROR",
+      "message": "\ud559\uc2b5 \uc2e4\ud328: \ud559\uc2b5 \uc2e4\ud328: stopped"
     }
   ]
 }
