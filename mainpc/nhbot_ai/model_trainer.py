@@ -291,106 +291,232 @@ class ModelTrainer:
         
         return df[feature_columns].dropna()
     
-    def _create_labels_3class(self, df: pd.DataFrame) -> pd.Series:
-        """🆕 3-클래스 라벨링 (0: none, 1: long, 2: short)"""
-        
-        labels = pd.Series(0, index=df.index)  # 기본값: none
-        
-        # 가격 기반 추세 전환 감지
-        price_change_1h = df['close'].pct_change(periods=4)  # 1시간 변화율 (15분봉 4개)
-        price_change_30m = df['close'].pct_change(periods=2)  # 30분 변화율
-        
-        # RSI 기반 신호
-        rsi = df['rsi_14'] if 'rsi_14' in df.columns else pd.Series(50, index=df.index)
-        
-        # ADX 기반 추세 강도
-        adx = df['adx'] if 'adx' in df.columns else pd.Series(25, index=df.index)
-        
-        # Aroon 기반 추세 전환
-        aroon_osc = df['aroon_oscillator'] if 'aroon_oscillator' in df.columns else pd.Series(0, index=df.index)
-        
-        # 볼린저 밴드 위치
-        bb_pos = df['bb_position'] if 'bb_position' in df.columns else pd.Series(0.5, index=df.index)
-        
-        # 연속 상승/하락
-        consec_up = df['consecutive_up'] if 'consecutive_up' in df.columns else pd.Series(0, index=df.index)
-        consec_down = df['consecutive_down'] if 'consecutive_down' in df.columns else pd.Series(0, index=df.index)
-        
-        # 🔴 상승 전환 신호 (하락→상승) - 클래스 1: long
-        long_signals = (
-            # 조건 1: 가격 반전 (하락 후 상승)
-            ((price_change_30m.shift(1) < -0.001) & (price_change_30m > 0.001)) |
+def _create_labels_3class(self, df: pd.DataFrame) -> pd.Series:
+    """🆕 진짜 추세 전환 라벨링 (지속성 확인)"""
+    
+    labels = pd.Series(0, index=df.index)  # 기본값: none
+    
+    # ============================================================================
+    # 1. 기본 지표들 추출
+    # ============================================================================
+    
+    rsi = df['rsi_14'] if 'rsi_14' in df.columns else pd.Series(50, index=df.index)
+    adx = df['adx'] if 'adx' in df.columns else pd.Series(25, index=df.index)  
+    bb_pos = df['bb_position'] if 'bb_position' in df.columns else pd.Series(0.5, index=df.index)
+    aroon_osc = df['aroon_oscillator'] if 'aroon_oscillator' in df.columns else pd.Series(0, index=df.index)
+    atr = df['atr'] if 'atr' in df.columns else df['close'].rolling(14).std()
+    volume_ratio = df['volume_ratio'] if 'volume_ratio' in df.columns else pd.Series(1, index=df.index)
+    consec_up = df['consecutive_up'] if 'consecutive_up' in df.columns else pd.Series(0, index=df.index)
+    consec_down = df['consecutive_down'] if 'consecutive_down' in df.columns else pd.Series(0, index=df.index)
+    
+    # ============================================================================
+    # 2. 추세 전환 지속성 확인 (핵심 개선!)
+    # ============================================================================
+    
+    current_close = df['close']
+    transaction_cost = 0.0011  # 0.11%
+    
+    # 🎯 추세 전환 성공 조건: "지속성" 확인
+    def check_trend_reversal_success(current_idx, direction):
+        """
+        추세 전환 성공 여부 확인
+        - direction: 1 (상승), -1 (하락)
+        - 최소 3개 봉(45분) 동안 지속되어야 함
+        """
+        if current_idx >= len(current_close) - 4:  # 데이터 부족
+            return False
             
-            # 조건 2: RSI 과매도 탈출
-            ((rsi.shift(1) < 35) & (rsi > 35) & (rsi < 50)) |
+        entry_price = current_close.iloc[current_idx]
+        
+        # 📊 지속성 확인 기준
+        min_duration = 3  # 최소 3개 봉 (45분)
+        min_profit_threshold = transaction_cost * 2  # 수수료의 2배 (0.22%)
+        max_drawdown = transaction_cost  # 최대 낙폭 = 수수료만큼 (0.11%)
+        
+        success_conditions = []
+        
+        for i in range(1, min_duration + 1):
+            if current_idx + i >= len(current_close):
+                return False
+                
+            future_price = current_close.iloc[current_idx + i]
+            future_return = (future_price - entry_price) / entry_price
             
-            # 조건 3: 볼린저 밴드 하단 반등
-            ((bb_pos.shift(1) < 0.1) & (bb_pos > 0.15)) |
+            if direction == 1:  # 상승 전환 체크
+                # 조건 1: 최소 수익률 달성
+                profit_achieved = future_return > min_profit_threshold
+                
+                # 조건 2: 중간에 손절선 안 터짐 (entry_price 기준 -0.11% 이하로 안떨어짐)
+                max_loss_ok = True
+                for j in range(1, i + 1):
+                    temp_price = current_close.iloc[current_idx + j]
+                    temp_return = (temp_price - entry_price) / entry_price
+                    if temp_return < -max_drawdown:
+                        max_loss_ok = False
+                        break
+                
+                success_conditions.append(profit_achieved and max_loss_ok)
+                
+            else:  # 하락 전환 체크 (direction == -1)
+                # 조건 1: 최소 수익률 달성 (Short이므로 반대)
+                profit_achieved = future_return < -min_profit_threshold
+                
+                # 조건 2: 중간에 손절선 안 터짐 (entry_price 기준 +0.11% 이상으로 안올라감)
+                max_loss_ok = True
+                for j in range(1, i + 1):
+                    temp_price = current_close.iloc[current_idx + j]
+                    temp_return = (temp_price - entry_price) / entry_price
+                    if temp_return > max_drawdown:
+                        max_loss_ok = False
+                        break
+                
+                success_conditions.append(profit_achieved and max_loss_ok)
+        
+        # 🏆 성공 조건: 3개 봉 중 최소 2개 이상 성공
+        return sum(success_conditions) >= 2
+    
+    # ============================================================================
+    # 3. AI 진입 조건 (기존과 동일하지만 조금 더 엄격하게)
+    # ============================================================================
+    
+    # Long 진입 신호 조건
+    long_entry_conditions = (
+        # 조건 1: RSI 과매도 탈출 (더 엄격)
+        ((rsi > 30) & (rsi < 50)) &
+        
+        # 조건 2: 볼린저 밴드 위치 (더 엄격)
+        ((bb_pos > 0.2) & (bb_pos < 0.4)) &
+        
+        # 조건 3: Aroon 상승 모멘텀
+        (aroon_osc > -20) &
+        
+        # 조건 4: 연속 하락 후 안정화 (더 엄격)
+        ((consec_down >= 2) & (consec_down <= 6))
+    )
+    
+    # Short 진입 신호 조건  
+    short_entry_conditions = (
+        # 조건 1: RSI 과매수 하락 (더 엄격)
+        ((rsi > 50) & (rsi < 70)) &
+        
+        # 조건 2: 볼린저 밴드 위치 (더 엄격)
+        ((bb_pos > 0.6) & (bb_pos < 0.8)) &
+        
+        # 조건 3: Aroon 하락 모멘텀
+        (aroon_osc < 20) &
+        
+        # 조건 4: 연속 상승 후 안정화 (더 엄격)
+        ((consec_up >= 2) & (consec_up <= 6))
+    )
+    
+    # ============================================================================
+    # 4. 시장 환경 필터링 (기존과 동일)
+    # ============================================================================
+    
+    extreme_trend = (
+        (adx > 45) |
+        (consec_up > 8) |
+        (consec_down > 8) |
+        (volume_ratio < 0.4)
+    )
+    
+    low_volatility = atr < (df['close'] * 0.003)  # 0.3%로 조금 올림
+    
+    # ============================================================================
+    # 5. 라벨 할당 (지속성 확인)
+    # ============================================================================
+    
+    print("🔍 추세 전환 지속성 확인 중...")
+    
+    for i in range(len(df) - 4):  # 마지막 4개는 미래 데이터 부족으로 제외
+        
+        # Long 신호 체크
+        if (long_entry_conditions.iloc[i] and 
+            not extreme_trend.iloc[i] and 
+            not low_volatility.iloc[i]):
             
-            # 조건 4: Aroon 상승 전환
-            ((aroon_osc.shift(1) < -30) & (aroon_osc > -10)) |
+            if check_trend_reversal_success(i, direction=1):
+                labels.iloc[i] = 1  # Long 성공
+        
+        # Short 신호 체크
+        if (short_entry_conditions.iloc[i] and 
+            not extreme_trend.iloc[i] and 
+            not low_volatility.iloc[i]):
             
-            # 조건 5: 연속 하락 후 반전
-            ((consec_down > 5) & (price_change_30m > 0.001))
-        )
+            if check_trend_reversal_success(i, direction=-1):
+                labels.iloc[i] = 2  # Short 성공
+    
+    # ============================================================================
+    # 6. 통계 및 검증
+    # ============================================================================
+    
+    valid_count = len(labels) - 4
+    none_count = (labels == 0).sum()
+    long_count = (labels == 1).sum()
+    short_count = (labels == 2).sum()
+    
+    print(f"🎯 지속성 기반 라벨 분포:")
+    print(f"   - None (클래스 0): {none_count:,}개 ({none_count/valid_count*100:.1f}%)")
+    print(f"   - Long (클래스 1): {long_count:,}개 ({long_count/valid_count*100:.1f}%)")
+    print(f"   - Short (클래스 2): {short_count:,}개 ({short_count/valid_count*100:.1f}%)")
+    
+    # ============================================================================
+    # 7. 라벨 품질 검증 (실제 성과 확인)
+    # ============================================================================
+    
+    if long_count > 0:
+        # Long 라벨의 3봉 후 평균 수익률
+        long_3candle_returns = []
+        for i in range(len(labels)):
+            if labels.iloc[i] == 1 and i + 3 < len(df):
+                entry_price = current_close.iloc[i]
+                exit_price = current_close.iloc[i + 3]
+                return_rate = (exit_price - entry_price) / entry_price
+                long_3candle_returns.append(return_rate)
         
-        # 🔵 하락 전환 신호 (상승→하락) - 클래스 2: short
-        short_signals = (
-            # 조건 1: 가격 반전 (상승 후 하락)
-            ((price_change_30m.shift(1) > 0.001) & (price_change_30m < -0.001)) |
+        if long_3candle_returns:
+            avg_return = sum(long_3candle_returns) / len(long_3candle_returns)
+            success_rate = sum(1 for r in long_3candle_returns if r > transaction_cost) / len(long_3candle_returns)
             
-            # 조건 2: RSI 과매수 탈출
-            ((rsi.shift(1) > 65) & (rsi < 65) & (rsi > 50)) |
+            print(f"📈 Long 라벨 검증 (3봉 후):")
+            print(f"   - 성공률: {success_rate*100:.1f}%")
+            print(f"   - 평균 수익률: {avg_return*100:.2f}%")
+            print(f"   - 예상 순수익: {(avg_return - transaction_cost)*100:.2f}%")
+    
+    if short_count > 0:
+        # Short 라벨의 3봉 후 평균 수익률
+        short_3candle_returns = []
+        for i in range(len(labels)):
+            if labels.iloc[i] == 2 and i + 3 < len(df):
+                entry_price = current_close.iloc[i]
+                exit_price = current_close.iloc[i + 3]
+                return_rate = (entry_price - exit_price) / entry_price  # Short는 반대
+                short_3candle_returns.append(return_rate)
+        
+        if short_3candle_returns:
+            avg_return = sum(short_3candle_returns) / len(short_3candle_returns)
+            success_rate = sum(1 for r in short_3candle_returns if r > transaction_cost) / len(short_3candle_returns)
             
-            # 조건 3: 볼린저 밴드 상단 반락
-            ((bb_pos.shift(1) > 0.9) & (bb_pos < 0.85)) |
-            
-            # 조건 4: Aroon 하락 전환
-            ((aroon_osc.shift(1) > 30) & (aroon_osc < 10)) |
-            
-            # 조건 5: 연속 상승 후 반전
-            ((consec_up > 5) & (price_change_30m < -0.001))
-        )
-        
-        # 원웨이 장 필터 (너무 강한 추세는 제외)
-        extreme_trend = (adx > 50) | (consec_up > 10) | (consec_down > 10)
-        
-        # 최소 거래량 필터
-        if 'volume_ratio' in df.columns:
-            sufficient_volume = df['volume_ratio'] > 0.5
-        else:
-            sufficient_volume = True
-        
-        # 라벨 할당
-        labels[long_signals & ~extreme_trend & sufficient_volume] = 1  # long
-        labels[short_signals & ~extreme_trend & sufficient_volume] = 2  # short
-        
-        # 중복 신호 처리 (동시에 long과 short가 나오면 none으로)
-        conflicting = long_signals & short_signals
-        labels[conflicting] = 0
-        
-        # 통계 출력
-        none_count = (labels == 0).sum()
-        long_count = (labels == 1).sum()
-        short_count = (labels == 2).sum()
-        total_count = len(labels)
-        
-        print(f"🏷️ 3-클래스 라벨 분포:")
-        print(f"   - None (클래스 0): {none_count:,}개 ({none_count/total_count*100:.1f}%)")
-        print(f"   - Long (클래스 1): {long_count:,}개 ({long_count/total_count*100:.1f}%)")
-        print(f"   - Short (클래스 2): {short_count:,}개 ({short_count/total_count*100:.1f}%)")
-        print(f"   - 총 추세 전환: {long_count + short_count:,}개 ({(long_count + short_count)/total_count*100:.1f}%)")
-        
-        # 목표: 전체의 3~5% 정도가 추세 전환 신호
-        signal_ratio = (long_count + short_count) / total_count
-        if signal_ratio < 0.02:
-            print("⚠️ 추세 전환 신호가 너무 적습니다 (2% 미만)")
-        elif signal_ratio > 0.10:
-            print("⚠️ 추세 전환 신호가 너무 많습니다 (10% 초과)")
-        else:
-            print("✅ 적절한 신호 비율입니다")
-        
-        return labels
+            print(f"📉 Short 라벨 검증 (3봉 후):")
+            print(f"   - 성공률: {success_rate*100:.1f}%")
+            print(f"   - 평균 수익률: {avg_return*100:.2f}%")
+            print(f"   - 예상 순수익: {(avg_return - transaction_cost)*100:.2f}%")
+    
+    # 신호 품질 평가
+    total_signals = long_count + short_count
+    signal_ratio = total_signals / valid_count
+    
+    if signal_ratio < 0.002:  # 0.2% 미만
+        print("⚠️ 진짜 추세 전환이 너무 적습니다 - 조건을 완화하세요")
+    elif signal_ratio > 0.01:  # 1% 초과  
+        print("⚠️ 신호가 여전히 많습니다 - 조건을 더 강화하세요")
+    else:
+        print("✅ 적절한 진짜 추세 전환 비율입니다")
+    
+    print(f"\n🔥 진짜 추세 전환 포착률: {signal_ratio*100:.3f}%")
+    print(f"   (전체 {valid_count:,}개 중 {total_signals:,}개)")
+    
+    return labels
     
     def _prepare_training_data(self, feature_data: pd.DataFrame, labels: pd.Series, 
                               training_params: Dict) -> Tuple[np.ndarray, np.ndarray, MinMaxScaler]:
